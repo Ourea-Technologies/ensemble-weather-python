@@ -1,0 +1,56 @@
+site_name: ensemble-weather (Python)
+site_description: Official Python SDK for the Ourea probabilistic weather API.
+site_url: https://ensemble-weather.readthedocs.io/
+repo_url: https://github.com/Ourea-Technologies/ensemble-weather-python
+repo_name: Ourea-Technologies/ensemble-weather-python
+copyright: Copyright &copy; 2026 Ourea Technologies. BSD-2-Clause.
+
+theme:
+  name: material
+  features:
+    - content.code.copy
+    - navigation.sections
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/weather-night
+        name: Dark mode
+    - scheme: slate
+      toggle:
+        icon: material/weather-sunny
+        name: Light mode
+
+nav:
+  - Overview: index.md
+  - Probabilities: probabilities.md
+  - Errors, retries and caching: errors.md
+  - API reference:
+      - Clients: reference/clients.md
+      - Probabilities: reference/probabilities.md
+      - Models: reference/models.md
+      - Enumerations: reference/enums.md
+      - Errors: reference/errors.md
+      - Cache: reference/cache.md
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: google
+            show_source: false
+            show_root_heading: true
+            members_order: source
+            separate_signature: true
+            show_signature_annotations: true
+            filters: ["!^_"]
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - toc:
+      permalink: true
+
