@@ -1,0 +1,46 @@
+{
+  "name": "prob/temperature-fahrenheit-on-metric",
+  "description": "32 degF on a metric request is sent as 0.0 (degC); a window not starting at 0 is A-Bh; a non-default aggregation is kept.",
+  "client": {},
+  "call": {
+    "operation": "getLocationForecast",
+    "args": {
+      "state": "or",
+      "name": "mt-hood-meadows",
+      "prob": [
+        {
+          "variable": "temperature",
+          "op": "le",
+          "threshold": {
+            "value": 32,
+            "unit": "degF"
+          },
+          "window": {
+            "start_hours": 6,
+            "end_hours": 18
+          },
+          "aggregation": "all"
+        }
+      ]
+    }
+  },
+  "expect_request": {
+    "method": "GET",
+    "path": "/api/v1/locations/or/mt-hood-meadows",
+    "query_string": "prob=temperature:le:0.0:6-18h:all"
+  },
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/forecast-metric.json"
+    }
+  ],
+  "expect": {
+    "result": {
+      "location.slug": "mt-hood-meadows"
+    }
+  }
+}

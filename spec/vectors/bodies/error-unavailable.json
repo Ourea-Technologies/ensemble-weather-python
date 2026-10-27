@@ -1,0 +1,4 @@
+{
+  "error": "FORECAST_UNAVAILABLE",
+  "message": "No forecast is available for this location yet."
+}

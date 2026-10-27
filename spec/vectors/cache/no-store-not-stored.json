@@ -1,0 +1,56 @@
+{
+  "name": "cache/no-store-not-stored",
+  "description": "A no-store response is never cached, so the next call sends no If-None-Match.",
+  "client": {},
+  "calls": [
+    {
+      "operation": "getLocationForecast",
+      "args": {
+        "state": "or",
+        "name": "mt-hood-meadows"
+      }
+    },
+    {
+      "operation": "getLocationForecast",
+      "args": {
+        "state": "or",
+        "name": "mt-hood-meadows"
+      }
+    }
+  ],
+  "expect_requests": [
+    {
+      "method": "GET",
+      "headers_absent": [
+        "If-None-Match"
+      ]
+    },
+    {
+      "method": "GET",
+      "headers_absent": [
+        "If-None-Match"
+      ]
+    }
+  ],
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "ETag": "\"v1-abc\"",
+        "Cache-Control": "no-store"
+      },
+      "body_file": "bodies/forecast-metric.json"
+    },
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/forecast-metric.json"
+    }
+  ],
+  "expect": {
+    "requests": 2
+  }
+}

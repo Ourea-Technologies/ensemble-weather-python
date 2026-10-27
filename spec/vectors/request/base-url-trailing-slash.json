@@ -1,0 +1,33 @@
+{
+  "name": "request/base-url-trailing-slash",
+  "description": "A base URL with a trailing slash and a path prefix joins without a double slash.",
+  "client": {
+    "base_url": "https://proxy.example.test/ourea/"
+  },
+  "call": {
+    "operation": "getLocationForecast",
+    "args": {
+      "state": "or",
+      "name": "mt-hood-meadows"
+    }
+  },
+  "expect_request": {
+    "method": "GET",
+    "url_prefix": "https://proxy.example.test/ourea/api/v1/",
+    "path": "/ourea/api/v1/locations/or/mt-hood-meadows"
+  },
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/forecast-metric.json"
+    }
+  ],
+  "expect": {
+    "result": {
+      "location.slug": "mt-hood-meadows"
+    }
+  }
+}

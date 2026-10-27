@@ -1,0 +1,40 @@
+{
+  "name": "retry/503-then-ok",
+  "description": "503 without Retry-After is retried with full-jitter backoff (jitter seeded to its upper bound: 0.5 s).",
+  "client": {},
+  "call": {
+    "operation": "getLocationForecast",
+    "args": {
+      "state": "or",
+      "name": "mt-hood-meadows"
+    }
+  },
+  "expect_request": {
+    "method": "GET"
+  },
+  "responses": [
+    {
+      "status": 503,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/error-unavailable.json"
+    },
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/forecast-metric.json"
+    }
+  ],
+  "expect": {
+    "result": {
+      "location.slug": "mt-hood-meadows"
+    },
+    "requests": 2,
+    "delays_s": [
+      0.5
+    ]
+  }
+}

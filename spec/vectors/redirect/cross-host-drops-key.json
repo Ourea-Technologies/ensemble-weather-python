@@ -1,0 +1,51 @@
+{
+  "name": "redirect/cross-host-drops-key",
+  "description": "A redirect to another host is followed without the API key.",
+  "client": {
+    "api_key": "ow_secret"
+  },
+  "call": {
+    "operation": "getLocationForecast",
+    "args": {
+      "state": "or",
+      "name": "mt-hood-meadows"
+    }
+  },
+  "expect_requests": [
+    {
+      "method": "GET",
+      "path": "/api/v1/locations/or/mt-hood-meadows",
+      "headers": {
+        "X-API-Key": "ow_secret"
+      }
+    },
+    {
+      "method": "GET",
+      "url_prefix": "https://elsewhere.example.test/",
+      "headers_absent": [
+        "X-API-Key"
+      ]
+    }
+  ],
+  "responses": [
+    {
+      "status": 302,
+      "headers": {
+        "Location": "https://elsewhere.example.test/api/v1/locations/or/mt-hood-meadows"
+      }
+    },
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/forecast-metric.json"
+    }
+  ],
+  "expect": {
+    "result": {
+      "location.slug": "mt-hood-meadows"
+    },
+    "requests": 2
+  }
+}

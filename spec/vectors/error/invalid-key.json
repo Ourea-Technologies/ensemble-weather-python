@@ -1,0 +1,32 @@
+{
+  "name": "error/invalid-key",
+  "description": "INVALID_API_KEY is an authentication error, not retried.",
+  "client": {},
+  "call": {
+    "operation": "getLocationForecast",
+    "args": {
+      "state": "or",
+      "name": "mt-hood-meadows"
+    }
+  },
+  "expect_request": {
+    "method": "GET"
+  },
+  "responses": [
+    {
+      "status": 401,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/error-invalid-key.json"
+    }
+  ],
+  "expect": {
+    "error": {
+      "category": "authentication",
+      "code": "INVALID_API_KEY",
+      "status": 401
+    },
+    "requests": 1
+  }
+}

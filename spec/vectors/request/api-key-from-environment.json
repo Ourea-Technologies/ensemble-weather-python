@@ -1,0 +1,37 @@
+{
+  "name": "request/api-key-from-environment",
+  "description": "With no key passed, OUREA_API_KEY from the environment is used.",
+  "client": {
+    "env": {
+      "OUREA_API_KEY": "ow_env_key"
+    }
+  },
+  "call": {
+    "operation": "getLocationForecast",
+    "args": {
+      "state": "or",
+      "name": "mt-hood-meadows"
+    }
+  },
+  "expect_request": {
+    "method": "GET",
+    "path": "/api/v1/locations/or/mt-hood-meadows",
+    "headers": {
+      "X-API-Key": "ow_env_key"
+    }
+  },
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/forecast-metric.json"
+    }
+  ],
+  "expect": {
+    "result": {
+      "location.slug": "mt-hood-meadows"
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "name": "prob/invalid-aggregation",
+  "description": "'any' on a precipitation term is refused before any request is sent.",
+  "client": {},
+  "call": {
+    "operation": "getLocationForecast",
+    "args": {
+      "state": "or",
+      "name": "mt-hood-meadows",
+      "prob": [
+        {
+          "variable": "precipitation",
+          "op": "ge",
+          "threshold": {
+            "value": 10,
+            "unit": "mm"
+          },
+          "aggregation": "any"
+        }
+      ]
+    }
+  },
+  "expect_request": null,
+  "responses": [],
+  "expect": {
+    "error": {
+      "category": "usage"
+    },
+    "requests": 0
+  }
+}

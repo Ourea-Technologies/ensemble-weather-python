@@ -1,0 +1,31 @@
+{
+  "name": "request/path-segments-encoded",
+  "description": "State and slug are separate, percent-encoded path segments; a combined 'state/slug' string is split on its one slash.",
+  "client": {},
+  "call": {
+    "operation": "getLocationForecast",
+    "args": {
+      "location": "or/a b&c"
+    }
+  },
+  "expect_request": {
+    "method": "GET",
+    "path": "/api/v1/locations/or/a%20b%26c"
+  },
+  "responses": [
+    {
+      "status": 404,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/error-not-found.json"
+    }
+  ],
+  "expect": {
+    "error": {
+      "category": "not_found",
+      "code": "LOCATION_NOT_FOUND",
+      "status": 404
+    }
+  }
+}

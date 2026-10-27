@@ -1,0 +1,73 @@
+{
+  "name": "canonical/threshold-rounding",
+  "description": "Rounding is round-half-away-from-zero on (v * 10^d) in doubles: 0.0625 in -> 0.063 (banker's rounding would give 0.062), and 1.005 mm -> 1.00 (1.005 * 100 = 100.4999...).",
+  "client": {},
+  "calls": [
+    {
+      "operation": "getLocationForecast",
+      "args": {
+        "state": "or",
+        "name": "mt-hood-meadows",
+        "units": "imperial",
+        "prob": [
+          {
+            "variable": "precipitation",
+            "op": "ge",
+            "threshold": {
+              "value": 0.0625,
+              "unit": "in"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "operation": "getLocationForecast",
+      "args": {
+        "state": "or",
+        "name": "mt-hood-meadows",
+        "prob": [
+          {
+            "variable": "precipitation",
+            "op": "ge",
+            "threshold": {
+              "value": 1.005,
+              "unit": "mm"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "expect_requests": [
+    {
+      "method": "GET",
+      "path": "/api/v1/locations/or/mt-hood-meadows",
+      "query_string": "prob=precipitation:ge:0.063:24h&units=imperial"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/locations/or/mt-hood-meadows",
+      "query_string": "prob=precipitation:ge:1.00:24h"
+    }
+  ],
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/forecast-imperial.json"
+    },
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/forecast-metric.json"
+    }
+  ],
+  "expect": {
+    "requests": 2
+  }
+}

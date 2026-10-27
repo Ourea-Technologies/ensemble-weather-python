@@ -1,0 +1,32 @@
+{
+  "name": "error/outside-coverage",
+  "description": "OUTSIDE_COVERAGE maps by code, not status.",
+  "client": {},
+  "call": {
+    "operation": "getPointForecast",
+    "args": {
+      "lat": 45.0,
+      "lon": 10.0
+    }
+  },
+  "expect_request": {
+    "method": "GET"
+  },
+  "responses": [
+    {
+      "status": 400,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/error-outside-coverage.json"
+    }
+  ],
+  "expect": {
+    "error": {
+      "category": "outside_coverage",
+      "code": "OUTSIDE_COVERAGE",
+      "status": 400
+    },
+    "requests": 1
+  }
+}

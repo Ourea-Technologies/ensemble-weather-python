@@ -1,0 +1,35 @@
+{
+  "name": "request/point-forecast",
+  "description": "Coordinates and elevation go in the query; the key is required server-side (Pro).",
+  "client": {
+    "api_key": "ow_pro"
+  },
+  "call": {
+    "operation": "getPointForecast",
+    "args": {
+      "lat": 45.3311,
+      "lon": -121.6649,
+      "elevation_m": 1661,
+      "max_hours": 48
+    }
+  },
+  "expect_request": {
+    "method": "GET",
+    "path": "/api/v1/forecast",
+    "query_string": "elevation_m=1661&lat=45.3311&lon=-121.6649&max_hours=48"
+  },
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/forecast-metric.json"
+    }
+  ],
+  "expect": {
+    "result": {
+      "location.slug": "mt-hood-meadows"
+    }
+  }
+}

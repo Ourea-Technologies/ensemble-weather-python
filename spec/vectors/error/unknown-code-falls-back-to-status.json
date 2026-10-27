@@ -1,0 +1,32 @@
+{
+  "name": "error/unknown-code-falls-back-to-status",
+  "description": "An unknown code keeps its string and maps by status.",
+  "client": {},
+  "call": {
+    "operation": "getLocationForecast",
+    "args": {
+      "state": "or",
+      "name": "mt-hood-meadows"
+    }
+  },
+  "expect_request": {
+    "method": "GET"
+  },
+  "responses": [
+    {
+      "status": 404,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/error-unknown-code.json"
+    }
+  ],
+  "expect": {
+    "error": {
+      "category": "not_found",
+      "code": "A_CODE_ADDED_LATER",
+      "status": 404
+    },
+    "requests": 1
+  }
+}

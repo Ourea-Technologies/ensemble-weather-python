@@ -1,0 +1,75 @@
+{
+  "name": "prob/three-terms-imperial",
+  "description": "Terms are sent in canonical order (sorted; default aggregation omitted; imperial amounts at 3 decimals, temperature at 1) with literal ':' and ','. The server answers in the order sent; results come back in the CALLER's order with their reference class. A null probability stays absent, never 0.",
+  "client": {},
+  "call": {
+    "operation": "getLocationForecast",
+    "args": {
+      "state": "or",
+      "name": "mt-hood-meadows",
+      "units": "imperial",
+      "prob": [
+        {
+          "variable": "snowfall",
+          "op": "ge",
+          "threshold": {
+            "value": 6,
+            "unit": "in"
+          },
+          "window": {
+            "hours": 24
+          }
+        },
+        {
+          "variable": "temperature",
+          "op": "le",
+          "threshold": {
+            "value": 32,
+            "unit": "degF"
+          },
+          "window": {
+            "hours": 12
+          },
+          "aggregation": "any"
+        },
+        {
+          "variable": "snowfall",
+          "op": "ge",
+          "threshold": {
+            "value": 12,
+            "unit": "in"
+          },
+          "window": {
+            "hours": 240
+          }
+        }
+      ]
+    }
+  },
+  "expect_request": {
+    "method": "GET",
+    "path": "/api/v1/locations/or/mt-hood-meadows",
+    "query_string": "prob=snowfall:ge:6.000:24h,snowfall:ge:12.000:240h,temperature:le:32.0:12h&units=imperial"
+  },
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/forecast-prob-snow.json"
+    }
+  ],
+  "expect": {
+    "result": {
+      "probabilities[0].probability": 0.42,
+      "probabilities[0].variable": "snowfall",
+      "probabilities[0].op": "ge",
+      "probabilities[0].threshold": 6,
+      "probabilities[0].window_end_hours": 24,
+      "probabilities[0].members": 131,
+      "probabilities[1].probability": 0.97,
+      "probabilities[2].probability": null
+    }
+  }
+}

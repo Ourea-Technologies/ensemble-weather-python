@@ -1,0 +1,36 @@
+{
+  "name": "canonical/alphabetical-order",
+  "description": "Non-default parameters are sent in alphabetical order by name; booleans as true/false.",
+  "client": {},
+  "call": {
+    "operation": "getLocationForecast",
+    "args": {
+      "state": "or",
+      "name": "mt-hood-meadows",
+      "units": "imperial",
+      "members": true,
+      "max_hours": 72,
+      "nowcast": false,
+      "include_past": true
+    }
+  },
+  "expect_request": {
+    "method": "GET",
+    "path": "/api/v1/locations/or/mt-hood-meadows",
+    "query_string": "include_past=true&max_hours=72&members=true&nowcast=false&units=imperial"
+  },
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/forecast-imperial.json"
+    }
+  ],
+  "expect": {
+    "result": {
+      "units": "imperial"
+    }
+  }
+}

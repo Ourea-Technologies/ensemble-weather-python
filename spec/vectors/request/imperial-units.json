@@ -1,0 +1,33 @@
+{
+  "name": "request/imperial-units",
+  "description": "units=imperial is sent, and the result reports imperial.",
+  "client": {},
+  "call": {
+    "operation": "getLocationForecast",
+    "args": {
+      "state": "or",
+      "name": "mt-hood-meadows",
+      "units": "imperial"
+    }
+  },
+  "expect_request": {
+    "method": "GET",
+    "path": "/api/v1/locations/or/mt-hood-meadows",
+    "query_string": "units=imperial"
+  },
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/forecast-imperial.json"
+    }
+  ],
+  "expect": {
+    "result": {
+      "units": "imperial",
+      "forecast.timeseries[0].ensemble.temperature.p50": 28.4
+    }
+  }
+}

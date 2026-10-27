@@ -1,0 +1,15 @@
+{
+  "items": [
+    {
+      "slug": "mt-hood-meadows",
+      "state": "or",
+      "name": "Mt. Hood Meadows",
+      "lat": 45.3311,
+      "lon": -121.6649,
+      "elevation_m": 1661.0,
+      "type": "ski_area",
+      "timezone": "America/Los_Angeles"
+    }
+  ],
+  "next_cursor": "c2"
+}

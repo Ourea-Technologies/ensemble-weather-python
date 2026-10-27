@@ -1,0 +1,43 @@
+{
+  "name": "request/anonymous-location-forecast",
+  "description": "A client with no API key calls anonymously: no X-API-Key header, no query at all (every default omitted), User-Agent names the SDK.",
+  "client": {},
+  "call": {
+    "operation": "getLocationForecast",
+    "args": {
+      "state": "or",
+      "name": "mt-hood-meadows"
+    }
+  },
+  "expect_request": {
+    "method": "GET",
+    "path": "/api/v1/locations/or/mt-hood-meadows",
+    "query_string": "",
+    "headers_absent": [
+      "X-API-Key"
+    ],
+    "headers_match": {
+      "User-Agent": "^ensemble-weather-[a-z]+/\\d+\\.\\d+\\.\\d+(-[0-9A-Za-z.]+)? \\(.+\\)"
+    }
+  },
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "RateLimit-Limit": "60",
+        "RateLimit-Remaining": "59",
+        "RateLimit-Reset": "1",
+        "RateLimit-Policy": "60;w=60"
+      },
+      "body_file": "bodies/forecast-metric.json"
+    }
+  ],
+  "expect": {
+    "result": {
+      "location.slug": "mt-hood-meadows",
+      "units": "metric",
+      "forecast.timeseries[0].ensemble.temperature.p50": -2.0
+    }
+  }
+}

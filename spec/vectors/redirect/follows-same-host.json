@@ -1,0 +1,52 @@
+{
+  "name": "redirect/follows-same-host",
+  "description": "A 301 on the same host is followed, keeping the key.",
+  "client": {
+    "api_key": "ow_pro"
+  },
+  "call": {
+    "operation": "getLocationForecast",
+    "args": {
+      "state": "oregon",
+      "name": "mt-hood-meadows"
+    }
+  },
+  "expect_requests": [
+    {
+      "method": "GET",
+      "path": "/api/v1/locations/oregon/mt-hood-meadows",
+      "headers": {
+        "X-API-Key": "ow_pro"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/locations/or/mt-hood-meadows",
+      "headers": {
+        "X-API-Key": "ow_pro"
+      }
+    }
+  ],
+  "responses": [
+    {
+      "status": 301,
+      "headers": {
+        "Location": "/api/v1/locations/or/mt-hood-meadows",
+        "Cache-Control": "public, max-age=3600, s-maxage=3600"
+      }
+    },
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/forecast-metric.json"
+    }
+  ],
+  "expect": {
+    "result": {
+      "location.slug": "mt-hood-meadows"
+    },
+    "requests": 2
+  }
+}

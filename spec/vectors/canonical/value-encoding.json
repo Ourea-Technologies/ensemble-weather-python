@@ -1,0 +1,30 @@
+{
+  "name": "canonical/value-encoding",
+  "description": "Query values use RFC 3986 percent-encoding (space as %20, never +; uppercase hex); prob/totals keep ':' and ',' literal.",
+  "client": {},
+  "call": {
+    "operation": "searchLocations",
+    "args": {
+      "q": "Mt. Hood & co/ñ"
+    }
+  },
+  "expect_request": {
+    "method": "GET",
+    "path": "/api/v1/search/locations",
+    "query_string": "q=Mt.%20Hood%20%26%20co%2F%C3%B1"
+  },
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/search.json"
+    }
+  ],
+  "expect": {
+    "result": {
+      "count": 1
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "name": "prob/threshold-converted-to-request-units",
+  "description": "A 6 in threshold on a metric request is sent as 152.40 (mm, 2 decimals), using 1 in = 25.4 mm exactly; the window is sent even at its 24 h default.",
+  "client": {},
+  "call": {
+    "operation": "getLocationForecast",
+    "args": {
+      "state": "or",
+      "name": "mt-hood-meadows",
+      "prob": [
+        {
+          "variable": "snowfall",
+          "op": "ge",
+          "threshold": {
+            "value": 6,
+            "unit": "in"
+          }
+        }
+      ]
+    }
+  },
+  "expect_request": {
+    "method": "GET",
+    "path": "/api/v1/locations/or/mt-hood-meadows",
+    "query_string": "prob=snowfall:ge:152.40:24h"
+  },
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/forecast-metric.json"
+    }
+  ],
+  "expect": {
+    "result": {
+      "location.slug": "mt-hood-meadows"
+    }
+  }
+}

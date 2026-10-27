@@ -1,0 +1,65 @@
+{
+  "name": "cache/keys-never-mix",
+  "description": "An entry stored under one API key is never revalidated or served under another (or keyless).",
+  "client": {
+    "api_key": "ow_a"
+  },
+  "calls": [
+    {
+      "operation": "getLocationForecast",
+      "args": {
+        "state": "or",
+        "name": "mt-hood-meadows"
+      }
+    },
+    {
+      "operation": "getLocationForecast",
+      "args": {
+        "state": "or",
+        "name": "mt-hood-meadows"
+      },
+      "with_api_key": "ow_b"
+    }
+  ],
+  "expect_requests": [
+    {
+      "method": "GET",
+      "headers": {
+        "X-API-Key": "ow_a"
+      },
+      "headers_absent": [
+        "If-None-Match"
+      ]
+    },
+    {
+      "method": "GET",
+      "headers": {
+        "X-API-Key": "ow_b"
+      },
+      "headers_absent": [
+        "If-None-Match"
+      ]
+    }
+  ],
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "ETag": "\"v1-abc\""
+      },
+      "body_file": "bodies/forecast-metric.json"
+    },
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "ETag": "\"v1-abc\""
+      },
+      "body_file": "bodies/forecast-metric.json"
+    }
+  ],
+  "expect": {
+    "requests": 2
+  }
+}

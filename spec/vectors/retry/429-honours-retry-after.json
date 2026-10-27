@@ -1,0 +1,47 @@
+{
+  "name": "retry/429-honours-retry-after",
+  "description": "429 with Retry-After: 3 waits exactly 3 s.",
+  "client": {},
+  "call": {
+    "operation": "getLocationForecast",
+    "args": {
+      "state": "or",
+      "name": "mt-hood-meadows"
+    }
+  },
+  "expect_request": {
+    "method": "GET"
+  },
+  "responses": [
+    {
+      "status": 429,
+      "headers": {
+        "Content-Type": "application/json",
+        "Retry-After": "3"
+      },
+      "body_file": "bodies/error-rate-limited.json"
+    },
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "RateLimit-Limit": "60",
+        "RateLimit-Remaining": "59",
+        "RateLimit-Reset": "1",
+        "RateLimit-Policy": "60;w=60"
+      },
+      "body_file": "bodies/forecast-metric.json"
+    }
+  ],
+  "expect": {
+    "result": {
+      "location.slug": "mt-hood-meadows",
+      "rate_limit.remaining": 59,
+      "rate_limit.limit": 60
+    },
+    "requests": 2,
+    "delays_s": [
+      3
+    ]
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "name": "error/non-json-body",
+  "description": "A non-JSON 500 body still produces a typed error, by status, with no code.",
+  "client": {},
+  "call": {
+    "operation": "getLocationForecast",
+    "args": {
+      "state": "or",
+      "name": "mt-hood-meadows"
+    }
+  },
+  "expect_request": {
+    "method": "GET"
+  },
+  "responses": [
+    {
+      "status": 500,
+      "headers": {
+        "Content-Type": "text/plain"
+      },
+      "body": "upstream connect error"
+    }
+  ],
+  "expect": {
+    "error": {
+      "category": "unavailable",
+      "code": null,
+      "status": 500
+    },
+    "requests": 1
+  }
+}

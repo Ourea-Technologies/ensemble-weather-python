@@ -1,0 +1,134 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ensemble-weather"
+dynamic = ["version"]
+description = "Official Python SDK for the Ourea probabilistic weather API: ensemble forecasts, probabilities and window totals."
+readme = "README.md"
+license = "BSD-2-Clause"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+authors = [{ name = "Ourea Technologies" }]
+keywords = ["ourea", "weather", "forecast", "ensemble", "probabilistic", "snow", "api", "sdk"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering :: Atmospheric Science",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+dependencies = ["httpx>=0.27,<1"]
+
+[project.optional-dependencies]
+pandas = ["pandas>=2.0"]
+
+[project.urls]
+Homepage = "https://oureawx.com"
+Documentation = "https://docs.oureawx.com/python"
+"API reference" = "https://ensemble-weather.readthedocs.io"
+Source = "https://github.com/Ourea-Technologies/ensemble-weather-python"
+Changelog = "https://github.com/Ourea-Technologies/ensemble-weather-python/blob/main/CHANGELOG.md"
+Issues = "https://github.com/Ourea-Technologies/ensemble-weather-python/issues"
+
+[dependency-groups]
+dev = [
+    "mypy>=1.13",
+    "pandas>=2.0",
+    "pandas-stubs>=2.0",
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "pyyaml>=6.0",
+    "ruff>=0.8",
+    "types-pyyaml>=6.0",
+]
+docs = [
+    "mkdocs>=1.6",
+    "mkdocs-material>=9.5",
+    "mkdocstrings[python]>=0.27",
+]
+
+[tool.uv]
+default-groups = ["dev", "docs"]
+
+[tool.hatch.version]
+path = "src/ensemble_weather/_version.py"
+
+[tool.hatch.build.targets.sdist]
+include = ["src", "tests", "examples", "spec", "docs", "mkdocs.yml", "CHANGELOG.md", "README.md", "LICENSE"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ensemble_weather"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests", "examples", "scripts"]
+extend-exclude = ["spec", ".scratch"]
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "COM812", # conflicts with the formatter
+    "CPY001", # the licence lives in LICENSE; files carry no per-file header
+    "D203",   # one-blank-line-before-class: D211 wins
+    "D213",   # multi-line-summary-second-line: D212 wins
+    "ISC001", # conflicts with the formatter
+    "PLR0913", # the API's routes have many optional parameters, all keyword-only
+    "PLR2004", # HTTP status codes read better as numbers
+    "TRY003", # error messages carry context
+    "EM101",
+    "EM102",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"src/ensemble_weather/_decode.py" = ["ANN401"] # it decodes arbitrary JSON
+"tests/**" = ["S101", "ANN401", "D", "PLR0911", "PLR0912", "PLR0915", "C901", "SLF001", "INP001", "FBT", "A002", "T201", "PLR2004", "S105", "S106"]
+"examples/**" = ["T201", "INP001", "D100"]
+"scripts/**" = ["T201", "INP001", "S603", "S607", "S101"]
+"docs/**" = ["INP001"]
+
+[tool.ruff.lint.flake8-type-checking]
+# The models' annotations are read at runtime (typing.get_type_hints).
+runtime-evaluated-decorators = ["dataclasses.dataclass"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.mypy]
+strict = true
+python_version = "3.10"
+files = ["src", "tests", "scripts"]
+warn_unreachable = true
+
+[[tool.mypy.overrides]]
+module = ["yaml.*"]
+ignore_missing_imports = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["tests"]
+addopts = ["-ra", "--strict-markers", "--strict-config"]
+xfail_strict = true
+filterwarnings = ["error"]
+
+[tool.coverage.run]
+source = ["ensemble_weather"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true

@@ -1,0 +1,66 @@
+{
+  "name": "cache/etag-revalidates",
+  "description": "The cache is on by default: a repeated call sends If-None-Match and a 304 returns the cached body.",
+  "client": {},
+  "calls": [
+    {
+      "operation": "getLocationForecast",
+      "args": {
+        "state": "or",
+        "name": "mt-hood-meadows"
+      }
+    },
+    {
+      "operation": "getLocationForecast",
+      "args": {
+        "state": "or",
+        "name": "mt-hood-meadows"
+      }
+    }
+  ],
+  "expect_requests": [
+    {
+      "method": "GET",
+      "path": "/api/v1/locations/or/mt-hood-meadows",
+      "headers_absent": [
+        "If-None-Match"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/locations/or/mt-hood-meadows",
+      "headers": {
+        "If-None-Match": "\"v1-abc\""
+      }
+    }
+  ],
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "ETag": "\"v1-abc\"",
+        "Cache-Control": "private, max-age=0"
+      },
+      "body_file": "bodies/forecast-metric.json"
+    },
+    {
+      "status": 304,
+      "headers": {
+        "ETag": "\"v1-abc\""
+      }
+    }
+  ],
+  "expect": {
+    "results": [
+      {
+        "location.slug": "mt-hood-meadows"
+      },
+      {
+        "location.slug": "mt-hood-meadows",
+        "revalidated": true
+      }
+    ],
+    "requests": 2
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "name": "error/api-key-never-in-message",
+  "description": "The key does not appear in the error's message or string form.",
+  "client": {
+    "api_key": "ow_secret_do_not_print"
+  },
+  "call": {
+    "operation": "getLocationForecast",
+    "args": {
+      "state": "or",
+      "name": "mt-hood-meadows"
+    }
+  },
+  "expect_request": {
+    "method": "GET"
+  },
+  "responses": [
+    {
+      "status": 401,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/error-invalid-key.json"
+    }
+  ],
+  "expect": {
+    "error": {
+      "category": "authentication",
+      "code": "INVALID_API_KEY",
+      "status": 401,
+      "string_excludes": "ow_secret_do_not_print"
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "name": "deprecation/warns-once",
+  "description": "Deprecation/Sunset headers raise one warning per operation per process, with the Link URL.",
+  "client": {},
+  "calls": [
+    {
+      "operation": "getLocationForecast",
+      "args": {
+        "state": "or",
+        "name": "mt-hood-meadows"
+      }
+    },
+    {
+      "operation": "getLocationForecast",
+      "args": {
+        "state": "or",
+        "name": "mt-hood-meadows"
+      }
+    }
+  ],
+  "expect_requests": [
+    {
+      "method": "GET"
+    },
+    {
+      "method": "GET"
+    }
+  ],
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "Deprecation": "@1798761600",
+        "Sunset": "Wed, 01 Dec 2027 00:00:00 GMT",
+        "Link": "<https://docs.oureawx.com/changelog#v1-deprecations>; rel=\"deprecation\""
+      },
+      "body_file": "bodies/forecast-metric.json"
+    },
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "Deprecation": "@1798761600",
+        "Sunset": "Wed, 01 Dec 2027 00:00:00 GMT",
+        "Link": "<https://docs.oureawx.com/changelog#v1-deprecations>; rel=\"deprecation\""
+      },
+      "body_file": "bodies/forecast-metric.json"
+    }
+  ],
+  "expect": {
+    "warnings": [
+      {
+        "contains": "https://docs.oureawx.com/changelog#v1-deprecations"
+      }
+    ],
+    "requests": 2
+  }
+}

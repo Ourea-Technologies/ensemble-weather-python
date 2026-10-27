@@ -1,0 +1,58 @@
+{
+  "name": "cache/disabled",
+  "description": "With the cache disabled, a repeated call never sends If-None-Match.",
+  "client": {
+    "cache": false
+  },
+  "calls": [
+    {
+      "operation": "getLocationForecast",
+      "args": {
+        "state": "or",
+        "name": "mt-hood-meadows"
+      }
+    },
+    {
+      "operation": "getLocationForecast",
+      "args": {
+        "state": "or",
+        "name": "mt-hood-meadows"
+      }
+    }
+  ],
+  "expect_requests": [
+    {
+      "method": "GET",
+      "headers_absent": [
+        "If-None-Match"
+      ]
+    },
+    {
+      "method": "GET",
+      "headers_absent": [
+        "If-None-Match"
+      ]
+    }
+  ],
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "ETag": "\"v1-abc\""
+      },
+      "body_file": "bodies/forecast-metric.json"
+    },
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "ETag": "\"v1-abc\""
+      },
+      "body_file": "bodies/forecast-metric.json"
+    }
+  ],
+  "expect": {
+    "requests": 2
+  }
+}

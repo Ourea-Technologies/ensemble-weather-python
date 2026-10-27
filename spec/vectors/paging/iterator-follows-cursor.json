@@ -1,0 +1,50 @@
+{
+  "name": "paging/iterator-follows-cursor",
+  "description": "The lazy iterator follows next_cursor until it is null.",
+  "client": {},
+  "call": {
+    "operation": "listCatalogLocations",
+    "args": {
+      "iterate": true
+    }
+  },
+  "expect_requests": [
+    {
+      "method": "GET",
+      "path": "/api/v1/catalog/locations",
+      "query_absent": [
+        "cursor"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/catalog/locations",
+      "query": {
+        "cursor": "c2"
+      }
+    }
+  ],
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/catalog-page-1.json"
+    },
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/catalog-page-2.json"
+    }
+  ],
+  "expect": {
+    "items": [
+      "mt-hood-meadows",
+      "timberline-lodge"
+    ],
+    "requests": 2
+  }
+}

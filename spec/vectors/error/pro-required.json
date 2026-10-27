@@ -1,0 +1,32 @@
+{
+  "name": "error/pro-required",
+  "description": "PRO_REQUIRED is a permission error.",
+  "client": {},
+  "call": {
+    "operation": "getPointForecast",
+    "args": {
+      "lat": 45.3,
+      "lon": -121.7
+    }
+  },
+  "expect_request": {
+    "method": "GET"
+  },
+  "responses": [
+    {
+      "status": 403,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/error-pro-required.json"
+    }
+  ],
+  "expect": {
+    "error": {
+      "category": "permission",
+      "code": "PRO_REQUIRED",
+      "status": 403
+    },
+    "requests": 1
+  }
+}

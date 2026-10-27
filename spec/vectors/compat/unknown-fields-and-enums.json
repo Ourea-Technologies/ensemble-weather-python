@@ -1,0 +1,33 @@
+{
+  "name": "compat/unknown-fields-and-enums",
+  "description": "Unknown fields are ignored; an unknown enum value parses to the 'unknown' case and keeps its raw string.",
+  "client": {},
+  "call": {
+    "operation": "getLocationForecast",
+    "args": {
+      "state": "or",
+      "name": "mt-hood-meadows"
+    }
+  },
+  "expect_request": {
+    "method": "GET",
+    "path": "/api/v1/locations/or/mt-hood-meadows"
+  },
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/forecast-unknown-fields.json"
+    }
+  ],
+  "expect": {
+    "result": {
+      "location.slug": "mt-hood-meadows",
+      "location.type": {
+        "unknown": "a_location_type_added_later"
+      }
+    }
+  }
+}

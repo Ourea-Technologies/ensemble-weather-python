@@ -1,0 +1,3 @@
+#!/bin/sh
+# Copy ensemble-weather-spec into spec/ at the ref in spec/VERSION (see sync_spec.py).
+exec python3 "$(dirname "$0")/sync_spec.py" "$@"

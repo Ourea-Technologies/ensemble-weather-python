@@ -1,0 +1,39 @@
+{
+  "name": "request/api-key-header",
+  "description": "A configured key is sent as X-API-Key, and never anywhere else.",
+  "client": {
+    "api_key": "ow_test_0123456789abcdef"
+  },
+  "call": {
+    "operation": "getLocationForecast",
+    "args": {
+      "state": "or",
+      "name": "mt-hood-meadows"
+    }
+  },
+  "expect_request": {
+    "method": "GET",
+    "path": "/api/v1/locations/or/mt-hood-meadows",
+    "headers": {
+      "X-API-Key": "ow_test_0123456789abcdef"
+    },
+    "query_absent": [
+      "api_key",
+      "key"
+    ]
+  },
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/forecast-metric.json"
+    }
+  ],
+  "expect": {
+    "result": {
+      "location.slug": "mt-hood-meadows"
+    }
+  }
+}

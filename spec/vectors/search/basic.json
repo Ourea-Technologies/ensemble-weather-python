@@ -1,0 +1,34 @@
+{
+  "name": "search/basic",
+  "description": "search sends q and returns typed hits.",
+  "client": {},
+  "call": {
+    "operation": "searchLocations",
+    "args": {
+      "q": "hood meadows"
+    }
+  },
+  "expect_request": {
+    "method": "GET",
+    "path": "/api/v1/search/locations",
+    "query": {
+      "q": "hood meadows"
+    }
+  },
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/search.json"
+    }
+  ],
+  "expect": {
+    "result": {
+      "count": 1,
+      "items[0].slug": "mt-hood-meadows",
+      "items[0].county": "Hood River"
+    }
+  }
+}

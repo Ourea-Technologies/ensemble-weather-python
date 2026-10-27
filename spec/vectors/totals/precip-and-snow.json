@@ -1,0 +1,49 @@
+{
+  "name": "totals/precip-and-snow",
+  "description": "totals are sent sorted (precipitation before snowfall); results come back in the caller's order; an uncovered window has null quantiles, surfaced as absent.",
+  "client": {},
+  "call": {
+    "operation": "getLocationForecast",
+    "args": {
+      "state": "or",
+      "name": "mt-hood-meadows",
+      "totals": [
+        {
+          "variable": "snowfall",
+          "window": {
+            "hours": 240
+          }
+        },
+        {
+          "variable": "precipitation",
+          "window": {
+            "hours": 48
+          }
+        }
+      ]
+    }
+  },
+  "expect_request": {
+    "method": "GET",
+    "path": "/api/v1/locations/or/mt-hood-meadows",
+    "query_string": "totals=precipitation:48h,snowfall:240h"
+  },
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/forecast-totals.json"
+    }
+  ],
+  "expect": {
+    "result": {
+      "window_totals[0].variable": "snowfall",
+      "window_totals[0].quantiles": null,
+      "window_totals[1].quantiles.p10": 12.0,
+      "window_totals[1].quantiles.p90": 52.0,
+      "window_totals[1].members": 131
+    }
+  }
+}

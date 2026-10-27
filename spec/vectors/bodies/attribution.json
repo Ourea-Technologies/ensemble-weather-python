@@ -1,0 +1,22 @@
+{
+  "providers": [
+    {
+      "id": "ecmwf",
+      "name": "ECMWF",
+      "credit": "Contains modified ECMWF data.",
+      "licence": "CC-BY-4.0",
+      "licence_url": "https://creativecommons.org/licenses/by/4.0/",
+      "terms_url": "https://www.ecmwf.int/en/terms-use",
+      "modified": true,
+      "notices": [],
+      "sources": [
+        {
+          "id": "ecmwf-ifs-ens",
+          "name": "IFS ENS",
+          "kind": "model",
+          "provider": "ecmwf"
+        }
+      ]
+    }
+  ]
+}

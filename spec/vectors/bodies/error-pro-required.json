@@ -1,0 +1,4 @@
+{
+  "error": "PRO_REQUIRED",
+  "message": "Forecasts at arbitrary coordinates need a Pro API key."
+}

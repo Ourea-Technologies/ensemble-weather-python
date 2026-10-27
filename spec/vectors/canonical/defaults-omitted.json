@@ -1,0 +1,39 @@
+{
+  "name": "canonical/defaults-omitted",
+  "description": "Parameters set explicitly to their defaults are not sent; the state is lowercased.",
+  "client": {},
+  "call": {
+    "operation": "getLocationForecast",
+    "args": {
+      "state": "OR",
+      "name": "mt-hood-meadows",
+      "units": "metric",
+      "max_hours": 24,
+      "nowcast": true,
+      "daily": true,
+      "hourly": true,
+      "include_past": false,
+      "members": false,
+      "models": false
+    }
+  },
+  "expect_request": {
+    "method": "GET",
+    "path": "/api/v1/locations/or/mt-hood-meadows",
+    "query_string": ""
+  },
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/forecast-metric.json"
+    }
+  ],
+  "expect": {
+    "result": {
+      "location.slug": "mt-hood-meadows"
+    }
+  }
+}

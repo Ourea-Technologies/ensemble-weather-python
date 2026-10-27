@@ -1,0 +1,92 @@
+{
+  "name": "canonical/prob-dedup-sort-precision",
+  "description": "Duplicate terms are sent once; ge sorts before le; a window starting later sorts after; snow_level has 0 decimals, wind 1; negative thresholds keep their sign; results map back to the caller's order (duplicates share one result).",
+  "client": {},
+  "call": {
+    "operation": "getLocationForecast",
+    "args": {
+      "state": "or",
+      "name": "mt-hood-meadows",
+      "prob": [
+        {
+          "variable": "wind_speed",
+          "op": "ge",
+          "threshold": {
+            "value": 15,
+            "unit": "m/s"
+          },
+          "window": {
+            "start_hours": 12,
+            "end_hours": 36
+          }
+        },
+        {
+          "variable": "snow_level",
+          "op": "le",
+          "threshold": {
+            "value": 1524.4,
+            "unit": "m"
+          }
+        },
+        {
+          "variable": "wind_speed",
+          "op": "ge",
+          "threshold": {
+            "value": 15,
+            "unit": "m/s"
+          }
+        },
+        {
+          "variable": "temperature",
+          "op": "le",
+          "threshold": {
+            "value": -5,
+            "unit": "degC"
+          }
+        },
+        {
+          "variable": "temperature",
+          "op": "ge",
+          "threshold": {
+            "value": -5,
+            "unit": "degC"
+          }
+        },
+        {
+          "variable": "snow_level",
+          "op": "le",
+          "threshold": {
+            "value": 1524.4,
+            "unit": "m"
+          }
+        }
+      ]
+    }
+  },
+  "expect_request": {
+    "method": "GET",
+    "path": "/api/v1/locations/or/mt-hood-meadows",
+    "query_string": "prob=snow_level:le:1524:24h,temperature:ge:-5.0:24h,temperature:le:-5.0:24h,wind_speed:ge:15.0:24h,wind_speed:ge:15.0:12-36h"
+  },
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/forecast-prob-mixed.json"
+    }
+  ],
+  "expect": {
+    "result": {
+      "probabilities[0].probability": 0.11,
+      "probabilities[0].window_start_hours": 12,
+      "probabilities[1].probability": 0.8,
+      "probabilities[1].threshold": 1524,
+      "probabilities[2].probability": 0.05,
+      "probabilities[3].probability": 0.3,
+      "probabilities[4].probability": 0.7,
+      "probabilities[5].probability": 0.8
+    }
+  }
+}

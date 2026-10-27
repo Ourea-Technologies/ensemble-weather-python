@@ -1,0 +1,35 @@
+{
+  "name": "retry/disabled",
+  "description": "max_retries = 0 makes exactly one attempt.",
+  "client": {
+    "max_retries": 0
+  },
+  "call": {
+    "operation": "getLocationForecast",
+    "args": {
+      "state": "or",
+      "name": "mt-hood-meadows"
+    }
+  },
+  "expect_request": {
+    "method": "GET"
+  },
+  "responses": [
+    {
+      "status": 503,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/error-unavailable.json"
+    }
+  ],
+  "expect": {
+    "error": {
+      "category": "unavailable",
+      "code": "FORECAST_UNAVAILABLE",
+      "status": 503
+    },
+    "requests": 1,
+    "delays_s": []
+  }
+}

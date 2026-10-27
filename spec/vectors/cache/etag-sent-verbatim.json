@@ -1,0 +1,63 @@
+{
+  "name": "cache/etag-sent-verbatim",
+  "description": "A weak ETag (as Cloudflare sends after compressing) is sent back byte for byte, W/ included.",
+  "client": {},
+  "calls": [
+    {
+      "operation": "getLocationForecast",
+      "args": {
+        "state": "or",
+        "name": "mt-hood-meadows"
+      }
+    },
+    {
+      "operation": "getLocationForecast",
+      "args": {
+        "state": "or",
+        "name": "mt-hood-meadows"
+      }
+    }
+  ],
+  "expect_requests": [
+    {
+      "method": "GET",
+      "headers_absent": [
+        "If-None-Match"
+      ]
+    },
+    {
+      "method": "GET",
+      "headers": {
+        "If-None-Match": "W/\"v1-abc\""
+      }
+    }
+  ],
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json",
+        "ETag": "W/\"v1-abc\""
+      },
+      "body_file": "bodies/forecast-metric.json"
+    },
+    {
+      "status": 304,
+      "headers": {
+        "ETag": "W/\"v1-abc\""
+      }
+    }
+  ],
+  "expect": {
+    "results": [
+      {
+        "revalidated": false
+      },
+      {
+        "revalidated": true,
+        "location.slug": "mt-hood-meadows"
+      }
+    ],
+    "requests": 2
+  }
+}

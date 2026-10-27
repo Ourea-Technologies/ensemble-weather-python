@@ -1,0 +1,32 @@
+{
+  "name": "error/bad-request",
+  "description": "BAD_REQUEST is an invalid-request error.",
+  "client": {},
+  "call": {
+    "operation": "getLocationForecast",
+    "args": {
+      "state": "or",
+      "name": "mt-hood-meadows"
+    }
+  },
+  "expect_request": {
+    "method": "GET"
+  },
+  "responses": [
+    {
+      "status": 400,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/error-bad-request.json"
+    }
+  ],
+  "expect": {
+    "error": {
+      "category": "invalid_request",
+      "code": "BAD_REQUEST",
+      "status": 400
+    },
+    "requests": 1
+  }
+}
