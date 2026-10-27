@@ -111,7 +111,7 @@ docstring-code-format = true
 [tool.mypy]
 strict = true
 python_version = "3.10"
-files = ["src", "tests", "scripts"]
+files = ["src", "tests", "examples", "scripts"]
 warn_unreachable = true
 
 [[tool.mypy.overrides]]
