@@ -1,0 +1,15 @@
+name: Feature request
+description: Suggest an improvement to the Python SDK.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would help?
+      description: Probabilities and totals are computed by the server; a helper that needs client-side statistics is a request for a new API query.

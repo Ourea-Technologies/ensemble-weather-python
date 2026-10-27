@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://docs.oureawx.com/python
+    about: Guides and the API concepts.
+  - name: API reference
+    url: https://ensemble-weather.readthedocs.io
+    about: Every class and method of this SDK.
+  - name: Report a security issue
+    url: https://github.com/Ourea-Technologies/ensemble-weather-python/security/advisories/new
+    about: Privately, never as a public issue.
