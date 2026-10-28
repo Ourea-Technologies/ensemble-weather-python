@@ -8,6 +8,67 @@ contract v1.
 
 ## [Unreleased]
 
+Targets the v1 contract as deployed (ensemble-weather-spec 8b85fea, the
+server's public spec byte for byte). Breaking, as 0.x allows.
+
+### Changed
+
+- The location argument of `forecast`, `current`, `alerts` and `nearby` is
+  `slug` (was `name`), as the path parameter `{slug}`.
+- `precip_*` fields are `precipitation_*`: `DailyForecast`
+  `total_precipitation`, `total_precipitation_if_wet`,
+  `precipitation_probability`, `precipitation_occurrence_probability`,
+  `precipitation_type`, `precipitation_display`; `TimeSeriesPoint`
+  `precipitation_type`; `CurrentConditions.precipitation_probability`;
+  `SensorObservation.precipitation_rate`; `ProbabilityThresholds`
+  `daily_precipitation_probability` and
+  `daily_precipitation_occurrence_probability`.
+- `EnsembleStats.wind_direction` and `ModelStats.wind_direction` are
+  `CircularStats` (`mean`, `stddev`, `sector_50`, `sector_90`), not
+  `Quantiles`.
+- `ProbabilityResult.term` and `WindowTotal.term` are the server's
+  canonical term string, and results are matched to the caller's terms by
+  it; the caller's `Chance` / `Total` moved to `.request`.
+- One `ConditionIcon` enum replaces `HourlyConditionIcon` and
+  `DailyConditionIcon` (also on `CurrentConditions.condition_icon`).
+- Alert `severity` and `urgency` are the snake_case enums `AlertSeverity`
+  and `AlertUrgency`; catalog `network`, `station_status` and
+  `template.template_variant` / `location_type` are the snake_case enums
+  `StationNetwork`, `StationStatus`, `TemplateVariant` and `LocationType`.
+- `LocationRef.slug` and `.type` may be `None` (a coordinate forecast's
+  location).
+- Comma lists (`sources`, `include`, `network`, `capability`, ...) are sent
+  sorted, de-duplicated and joined by a literal `,`, the server's canonical
+  form; `capability` is one list, not a repeated parameter.
+- Error categories follow the 16 public error codes: `AUTH_UNAVAILABLE` is
+  unavailable; `FORBIDDEN`, `GONE`, `MODEL_RUN_NOT_FOUND`, `AMBIGUOUS`,
+  `INVALID_MAX_HOURS` and `FEELS_LIKE_UNAVAILABLE` are no longer special-cased
+  (an unknown code still maps by status). `OUTSIDE_COVERAGE` is a 404.
+- `Retry-After` is honoured on 504 as well as 429 and 503.
+
+### Added
+
+- `include=` on `forecast` / `forecast_at` (`skin_temperature`, `mslp`:
+  served only when asked for).
+- `ProbabilityResult.null_reason` and `WindowTotal.null_reason`
+  (`NullReason`), `WindowTotal.aggregation`.
+- `APIError.doc_url` and `.param`; `request_id` is read from the error
+  body first. `PermissionDeniedError.nearest_location` (`NearestLocation`):
+  the keyless named location near a refused coordinate.
+- `ActiveAlert.certainty`, `CurrentStation.station_id`.
+- `runs(cursor=...)` and `RunsResponse.next_cursor`.
+
+### Removed
+
+- `storm_reports` / `storm_report` and `StormReportCard` /
+  `StormReportsResponse`: storm reports are not in the public API.
+- `EnsembleStats.wind_direction_circular`, `.feels_like_utci`, `.ptype`;
+  `DailyForecast.feels_like_utci_high` / `_low`;
+  `ElevationForecast.default` and `.timeseries` (`LegacyHourlyPoint`); the
+  catalog `ads` fields and their models (`CatalogResolvedAdSlot`,
+  `CatalogHousePlacement`, `CatalogThirdPartyPlacement`,
+  `CmsAdCreativeContent`, `AdSlotKind`, `AdProvider`).
+
 ## [0.1.0] - 2026-10-26
 
 ### Added

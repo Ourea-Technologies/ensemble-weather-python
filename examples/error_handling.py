@@ -18,11 +18,22 @@ with Client() as client:
     except PermissionDeniedError as err:  # no Pro key: PRO_REQUIRED comes first
         print(f"needs Pro: {err.code}: {err.message}")
 
+    # A refused coordinate request may name a nearby location that needs no key.
+    try:
+        client.forecast_at(45.33, -121.67)
+    except PermissionDeniedError as err:
+        near = err.nearest_location
+        if near is not None:
+            print(f"try {near.url} ({near.slug}, {near.distance_km} km away) without a key")
+    except OutsideCoverageError:
+        pass
+
     # Any API error carries the status, the code (verbatim) and a request id.
     try:
         client.forecast("or/no-such-place")
     except NotFoundError as err:
         print(f"{err.status} {err.code}: {err.message} (request id {err.request_id})")
+        print(f"see {err.doc_url}")
     except RateLimitError as err:
         print(f"rate limited; retry after {err.retry_after} s")
     except APIError as err:

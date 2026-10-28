@@ -1,4 +1,6 @@
 {
   "error": "LOCATION_NOT_FOUND",
-  "message": "No location or/nowhere."
+  "message": "No location or/nowhere.",
+  "request_id": "01JBQ6ZK3V8M4T2N7XQH5R9W0C",
+  "doc_url": "https://docs.oureawx.com/features/errors/#location_not_found"
 }

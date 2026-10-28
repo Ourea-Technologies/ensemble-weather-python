@@ -9,14 +9,14 @@
       "operation": "getLocationForecast",
       "args": {
         "state": "or",
-        "name": "mt-hood-meadows"
+        "slug": "mt-hood-meadows"
       }
     },
     {
       "operation": "getLocationForecast",
       "args": {
         "state": "or",
-        "name": "mt-hood-meadows"
+        "slug": "mt-hood-meadows"
       }
     }
   ],

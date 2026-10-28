@@ -115,8 +115,6 @@ _METHODS = {
     "listCatalogStations": "list_catalog_stations",
     "getCatalogStation": "catalog_station",
     "getAvailableRuns": "runs",
-    "getStormReports": "storm_reports",
-    "getStormReport": "storm_report",
     "getAttribution": "attribution",
 }
 
@@ -126,7 +124,7 @@ _ITERATORS = {
     "list_catalog_stations": "iter_catalog_stations",
 }
 
-_POSITIONAL = ("location", "state", "name", "lat", "lon", "q", "slug", "id")
+_POSITIONAL = ("location", "state", "slug", "lat", "lon", "q")
 _RENAMED: dict[str, str] = {"type": "location_type", "capability": "capabilities"}
 
 

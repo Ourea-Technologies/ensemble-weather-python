@@ -31,12 +31,13 @@ from ._decode import DecodeError, decode_model
 from ._query import Query, encode_component
 from ._version import __version__
 from .cache import Cache, CacheEntry, MemoryCache
-from .enums import LocationType, UnitSystem
+from .enums import LocationType, StationStatus, TemplateVariant, UnitSystem
 from .errors import (
     APIConnectionError,
     APIError,
     OureaDeprecationWarning,
     OureaError,
+    PermissionDeniedError,
     ResponseTooLargeError,
     UnexpectedResponseError,
     UsageError,
@@ -50,6 +51,7 @@ from .models import (
     LocationsResponse,
     NearbyLocationsResponse,
     NearbyPointResponse,
+    NearestLocation,
     PublicCatalogLocationDetail,
     PublicCatalogLocationPage,
     PublicCatalogStationDetail,
@@ -59,10 +61,8 @@ from .models import (
     ResponseMeta,
     RunsResponse,
     SearchLocationsResponse,
-    StormReportCard,
-    StormReportsResponse,
 )
-from .probabilities import Chance, Total, prob_query, result_key, totals_query
+from .probabilities import Chance, Total, prob_query, totals_query
 
 if TYPE_CHECKING:
     import datetime as dt
@@ -82,7 +82,7 @@ BASE_URL_ENV = "OUREA_BASE_URL"
 
 _REDIRECTS = frozenset({301, 302, 307, 308})
 _RETRY_STATUSES = frozenset({429, 502, 503, 504})
-_RETRY_AFTER_STATUSES = frozenset({429, 503})
+_RETRY_AFTER_STATUSES = frozenset({429, 503, 504})
 
 R = TypeVar("R", bound=Response)
 
@@ -96,8 +96,8 @@ class HasStateSlug(Protocol):
         ...
 
     @property
-    def slug(self) -> str:
-        """The location slug."""
+    def slug(self) -> str | None:
+        """The location slug (``None`` for a coordinate forecast's location)."""
         ...
 
 
@@ -485,6 +485,7 @@ class Core:
     def _error(self, status: int, headers: httpx.Headers, body: bytes) -> APIError:
         code: str | None = None
         message = f"HTTP {status}"
+        fields: dict[str, Any] = {}
         try:
             data = json.loads(body)
         except ValueError:
@@ -493,19 +494,29 @@ class Core:
             code = data["error"]
             if isinstance(data.get("message"), str):
                 message = data["message"]
+            fields = {k: v for k, v in data.items() if isinstance(v, str)}
         elif body:
             snippet = body[:200].decode("utf-8", "replace").strip()
             if snippet:
                 message = f"HTTP {status}: {snippet}"
         cls = error_class(status, code)
-        return cls(
+        error = cls(
             self._scrub(message),
             status=status,
             code=code,
-            request_id=headers.get("x-request-id"),
+            request_id=fields.get("request_id") or headers.get("x-request-id"),
+            doc_url=fields.get("doc_url"),
+            param=fields.get("param"),
             retry_after=parse_retry_after(headers.get("retry-after"), self.clock()),
             rate_limit=RateLimit.from_headers(headers),
         )
+        nearest = data.get("nearest_location") if isinstance(data, dict) else None
+        if isinstance(error, PermissionDeniedError) and isinstance(nearest, dict):
+            try:
+                error.nearest_location = decode_model(NearestLocation, nearest)
+            except (ValueError, DecodeError):
+                error.nearest_location = None
+        return error
 
     def _scrub(self, text: str) -> str:
         if self._api_key:
@@ -538,6 +549,7 @@ class Core:
         exclude_sources: StrList | None,
         nowcast: bool | None,
         diagnostics: StrList | None,
+        include: StrList | None,
         feels_like: StrList | None,
         open_route: bool = False,
     ) -> Call[ForecastResponse]:
@@ -556,6 +568,7 @@ class Core:
         query.add_list("exclude_sources", exclude_sources)
         query.add("nowcast", nowcast, default=True)
         query.add_list("diagnostics", diagnostics)
+        query.add_list("include", include)
         if feels_like is not None and _as_list(feels_like) != ["nws"]:
             query.add_list("feels_like", feels_like)
         chances = list(prob or [])
@@ -566,36 +579,35 @@ class Core:
         for request in wanted:
             if not isinstance(request, Total):
                 raise UsageError(f"totals takes Total requests, got {request!r}")
-        prob_wire, chance_keys = prob_query(chances, system)
-        totals_wire, total_keys = totals_query(wanted)
+        prob_wire, chance_terms = prob_query(chances, system)
+        totals_wire, total_terms = totals_query(wanted)
         query.add_raw("prob", prob_wire)
         query.add_raw("totals", totals_wire)
 
         def finish(result: ForecastResponse) -> ForecastResponse:
+            # Results are matched to the caller's terms by the canonical `term`
+            # the server echoes, never by position (BEHAVIOR 4, 5). A response
+            # without answers leaves the list empty: nothing is invented.
             changes: dict[str, Any] = {}
-            # A response without answers leaves the list empty: nothing is invented.
             if chances and result.probabilities:
-                by_key = {result_key(r, system): r for r in result.probabilities}
+                by_term = {r.term: r for r in result.probabilities}
                 ordered = []
-                for chance, key in zip(chances, chance_keys, strict=True):
-                    if key not in by_key:
+                for chance, term in zip(chances, chance_terms, strict=True):
+                    if term not in by_term:
                         raise UnexpectedResponseError(
                             f"{operation}: the response has no answer for {chance!r}"
                         )
-                    ordered.append(dataclasses.replace(by_key[key], term=chance))
+                    ordered.append(dataclasses.replace(by_term[term], request=chance))
                 changes["probabilities"] = ordered
             if wanted and result.window_totals:
-                by_total = {
-                    (t.variable.value, t.window_start_hours, t.window_end_hours): t
-                    for t in result.window_totals
-                }
+                by_total = {t.term: t for t in result.window_totals}
                 answered = []
-                for total, tkey in zip(wanted, total_keys, strict=True):
-                    if tkey not in by_total:
+                for total, term in zip(wanted, total_terms, strict=True):
+                    if term not in by_total:
                         raise UnexpectedResponseError(
                             f"{operation}: the response has no answer for {total!r}"
                         )
-                    answered.append(dataclasses.replace(by_total[tkey], term=total))
+                    answered.append(dataclasses.replace(by_total[term], request=total))
                 changes["window_totals"] = answered
             return dataclasses.replace(result, **changes) if changes else result
 
@@ -611,7 +623,7 @@ class Core:
     def location_forecast(
         self,
         location: LocationArg,
-        name: str | None,
+        slug: str | None,
         elevations: StrList | None,
         **options: Any,  # noqa: ANN401
     ) -> Call[ForecastResponse]:
@@ -619,7 +631,7 @@ class Core:
         query = Query()
         query.add_list("elevations", elevations)
         return self.forecast_call(
-            _location_path(location, name), query, operation="getLocationForecast", **options
+            _location_path(location, slug), query, operation="getLocationForecast", **options
         )
 
     def point_forecast(
@@ -662,7 +674,7 @@ class Core:
     def nearby_location(
         self,
         location: LocationArg,
-        name: str | None,
+        slug: str | None,
         *,
         limit: int | None,
         radius_km: float | None,
@@ -673,7 +685,7 @@ class Core:
         query.add("limit", limit, 3)
         query.add("radius_km", radius_km, 50)
         query.add("units", self._units_for(units), UnitSystem.METRIC)
-        path = _location_path(location, name) + "/nearby"
+        path = _location_path(location, slug) + "/nearby"
         return Call("getNearbyLocations", path, query.render(), NearbyLocationsResponse)
 
     def nearby_point(
@@ -743,8 +755,8 @@ class Core:
         *,
         admin1: str | None,
         country: str | None,
-        location_type: str | None,
-        template: str | None,
+        location_type: LocationType | str | None,
+        template: TemplateVariant | str | None,
         limit: int | None,
         cursor: str | None,
     ) -> Call[PublicCatalogLocationPage]:
@@ -785,7 +797,7 @@ class Core:
         country: str | None,
         network: StrList | None,
         capabilities: StrList | None,
-        status: str | None,
+        status: StationStatus | str | None,
         limit: int | None,
         cursor: str | None,
     ) -> Call[PublicCatalogStationPage]:
@@ -794,7 +806,7 @@ class Core:
         query.add("admin1", admin1)
         query.add("country", country)
         query.add_list("network", network)
-        query.add_repeated("capability", capabilities)
+        query.add_list("capability", capabilities)
         query.add("status", status)
         query.add("limit", limit, 20)
         query.add("cursor", cursor)
@@ -820,25 +832,12 @@ class Core:
             open_route=True,
         )
 
-    def runs(self, *, limit: int | None) -> Call[RunsResponse]:
+    def runs(self, *, limit: int | None, cursor: str | None) -> Call[RunsResponse]:
         """``getAvailableRuns``."""
         query = Query()
         query.add("limit", limit, 10)
+        query.add("cursor", cursor)
         return Call("getAvailableRuns", "/api/v1/runs", query.render(), RunsResponse)
-
-    def storm_reports(self, *, limit: int | None) -> Call[StormReportsResponse]:
-        """``getStormReports``."""
-        query = Query()
-        query.add("limit", limit, 20)
-        return Call(
-            "getStormReports", "/api/v1/storm-reports", query.render(), StormReportsResponse
-        )
-
-    def storm_report(self, report_id: int) -> Call[StormReportCard]:
-        """``getStormReport``."""
-        if isinstance(report_id, bool) or not isinstance(report_id, int):
-            raise UsageError(f"a storm report id is an integer, got {report_id!r}")
-        return Call("getStormReport", f"/api/v1/storm-reports/{report_id}", "", StormReportCard)
 
     def attribution(self) -> Call[AttributionRegistry]:
         """``getAttribution`` (an open route)."""
@@ -876,11 +875,11 @@ def _state(state: str) -> str:
     return state.lower() if len(state) == 2 and state.isalpha() else state
 
 
-def _location_path(location: LocationArg, name: str | None) -> str:
-    if name is not None:
+def _location_path(location: LocationArg, slug: str | None) -> str:
+    if slug is not None:
         if not isinstance(location, str):
-            raise UsageError("with a separate name, the first argument is the state")
-        state, slug = location, name
+            raise UsageError("with a separate slug, the first argument is the state")
+        state = location
     elif isinstance(location, str):
         if location.count("/") != 1:
             raise UsageError(
@@ -888,7 +887,10 @@ def _location_path(location: LocationArg, name: str | None) -> str:
             )
         state, slug = location.split("/")
     else:
-        state, slug = location.state, location.slug
+        state = location.state
+        if location.slug is None:
+            raise UsageError("this location has no slug (a coordinate forecast's location)")
+        slug = location.slug
     return (
         "/api/v1/locations/"
         + encode_component(_state(state))

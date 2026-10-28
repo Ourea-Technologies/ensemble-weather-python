@@ -37,8 +37,6 @@ EXPOSED = {
     "listCatalogStations": "list_catalog_stations",
     "getCatalogStation": "catalog_station",
     "getAvailableRuns": "runs",
-    "getStormReports": "storm_reports",
-    "getStormReport": "storm_report",
     "getAttribution": "attribution",
 }
 
@@ -64,9 +62,13 @@ def test_every_schema_has_a_model() -> None:
     # ErrorResponse becomes the exceptions; UnitSystem is an enum; ModelMeans is
     # a list of ModelStats (each with its model id); the three FreezingLevel
     # variants are one FreezingLevel model discriminated by ``kind``.
+    # ConditionIcon and NullReason are enums; NextCursor is ``str | None``.
     elsewhere = {
         "ErrorResponse",
         "UnitSystem",
+        "ConditionIcon",
+        "NullReason",
+        "NextCursor",
         "ModelMeans",
         "FreezingLevelBelowSurface",
         "FreezingLevelHeight",
@@ -112,19 +114,7 @@ def _examples() -> list[Any]:
         if "example" in content:
             examples = {"example": {"value": content["example"]}}
         for name, example in examples.items():
-            marks = []
-            if op_id in {"getLocationForecast", "getPointForecast"}:
-                marks.append(
-                    pytest.mark.xfail(
-                        strict=True,
-                        reason=(
-                            "spec bug: this example does not match its own ForecastResponse "
-                            "schema (location has no slug/state/timezone, 'elevation' for "
-                            "'elevation_m', camelCase type, abridged forecast)"
-                        ),
-                    )
-                )
-            cases.append(pytest.param(schema, example["value"], id=f"{op_id}-{name}", marks=marks))
+            cases.append(pytest.param(schema, example["value"], id=f"{op_id}-{name}"))
     return cases
 
 
@@ -177,8 +167,21 @@ def test_wind_direction_is_left_circular() -> None:
     body = json_body("forecast-metric.json")
     forecast = models.ForecastResponse.from_dict(body)
     wind = forecast.forecast.timeseries[0].ensemble.wind_direction
-    assert wind.min == 350.0
-    assert wind.max == 20.0
+    assert isinstance(wind, models.CircularStats)
+    assert wind.sector_50.from_ == 355.0  # clockwise across north: from > to
+    assert wind.sector_50.to == 15.0
+    assert wind.sector_90.from_ == 340.0
+    assert wind.sector_90.to == 30.0
+
+
+def test_coordinate_location_has_no_slug() -> None:
+    body = json_body("forecast-metric.json")
+    body["location"] = {**body["location"], "slug": None, "type": None}
+    location = models.ForecastResponse.from_dict(body).location
+    assert location.slug is None
+    assert location.type is None
+    with pytest.raises(UsageError):
+        Client(api_key=None).forecast(location)
 
 
 def test_hourly_dataframe() -> None:

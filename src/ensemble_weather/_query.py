@@ -1,10 +1,12 @@
 """Canonical request URLs (BEHAVIOR 3.1): one request, one edge-cache entry.
 
 * a parameter the caller did not set, or set to its default, is omitted;
-* parameters are sorted by name and each appears once (a repeated-by-design
-  parameter such as ``capability`` is sorted and de-duplicated);
+* parameters are sorted by name and each appears once;
+* a comma list (``sources``, ``include``, ``network``, ``capability``, ...) is
+  sorted and de-duplicated, its items joined by a literal ``,``;
 * values are RFC 3986 percent-encoded (space as ``%20``, uppercase hex), except
-  that ``prob`` and ``totals`` keep ``:`` and ``,`` literal;
+  that ``prob`` and ``totals`` keep ``:`` and ``,`` literal and comma lists
+  keep their separating ``,``;
 * numbers are the shortest decimal that round-trips, never an exponent.
 """
 
@@ -83,20 +85,16 @@ class Query:
         self._params[name] = [format_value(value)]
 
     def add_list(self, name: str, values: Sequence[str] | str | None) -> None:
-        """Add a comma-separated list (kept in the caller's order)."""
-        if values is None:
-            return
-        items = [values] if isinstance(values, str) else list(values)
-        if items:
-            self._params[name] = [",".join(items)]
+        """Add a comma list, sorted, de-duplicated and joined by a literal ``,``.
 
-    def add_repeated(self, name: str, values: Sequence[str] | str | None) -> None:
-        """Add a parameter repeated once per value, sorted and de-duplicated."""
+        That is the server's canonical form; any other is a 301 (BEHAVIOR 3.1).
+        """
         if values is None:
             return
         items = [values] if isinstance(values, str) else list(values)
         if items:
-            self._params[name] = sorted(set(items))
+            self._params[name] = [",".join(encode_component(i) for i in sorted(set(items)))]
+            self._raw.add(name)
 
     def add_raw(self, name: str, value: str) -> None:
         """Add a pre-built value sent without percent-encoding (``prob``, ``totals``)."""

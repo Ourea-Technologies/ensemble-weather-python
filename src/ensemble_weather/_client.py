@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 
     from ._core import Prepared
     from .cache import Cache
-    from .enums import LocationType
+    from .enums import LocationType, StationStatus, TemplateVariant
     from .models import (
         AlertsResponse,
         AttributionRegistry,
@@ -51,8 +51,6 @@ if TYPE_CHECKING:
         Response,
         RunsResponse,
         SearchLocationsResponse,
-        StormReportCard,
-        StormReportsResponse,
     )
     from .probabilities import Chance, Total
 
@@ -200,7 +198,7 @@ class Client:
     def forecast(
         self,
         location: LocationArg,
-        name: str | None = None,
+        slug: str | None = None,
         *,
         prob: Sequence[Chance] | None = None,
         totals: Sequence[Total] | None = None,
@@ -218,15 +216,16 @@ class Client:
         exclude_sources: StrList | None = None,
         nowcast: bool | None = None,
         diagnostics: StrList | None = None,
+        include: StrList | None = None,
         feels_like: StrList | None = None,
     ) -> ForecastResponse:
         """The forecast for a named location (``getLocationForecast``). Anonymous OK.
 
         Args:
-            location: ``"or/mt-hood-meadows"``, a state code with ``name``, or
+            location: ``"or/mt-hood-meadows"``, a state code with ``slug``, or
                 any object with ``state`` and ``slug`` (a search hit, a
                 ``LocationRef``).
-            name: The location slug, when ``location`` is just the state.
+            slug: The location slug, when ``location`` is just the state.
             prob: Probability terms (:class:`~ensemble_weather.Chance`),
                 answered in :attr:`ForecastResponse.probabilities` in this order.
             totals: Window totals (:class:`~ensemble_weather.Total`), answered
@@ -244,8 +243,9 @@ class Client:
             sources: Observation sources the nowcast may use.
             exclude_sources: Observation sources the nowcast must not use.
             nowcast: Blend in the latest observations (default true).
-            diagnostics: Opt-in diagnostics: ``provenance``, ``ptype``.
-            feels_like: Feels-like indices (default ``nws``).
+            diagnostics: Opt-in diagnostics: ``provenance``.
+            include: Opt-in variables: ``skin_temperature``, ``mslp``.
+            feels_like: The feels-like index (``nws``, the default and only one).
 
         Raises:
             NotFoundError: The location does not exist.
@@ -253,7 +253,7 @@ class Client:
         """
         call = self._core.location_forecast(
             location,
-            name,
+            slug,
             elevations,
             units=units,
             prob=prob,
@@ -270,6 +270,7 @@ class Client:
             exclude_sources=exclude_sources,
             nowcast=nowcast,
             diagnostics=diagnostics,
+            include=include,
             feels_like=feels_like,
         )
         return self._run(call)
@@ -295,6 +296,7 @@ class Client:
         exclude_sources: StrList | None = None,
         nowcast: bool | None = None,
         diagnostics: StrList | None = None,
+        include: StrList | None = None,
         feels_like: StrList | None = None,
     ) -> ForecastResponse:
         """The forecast at coordinates (``getPointForecast``). Needs a Pro key.
@@ -326,6 +328,7 @@ class Client:
             exclude_sources=exclude_sources,
             nowcast=nowcast,
             diagnostics=diagnostics,
+            include=include,
             feels_like=feels_like,
         )
         return self._run(call)
@@ -335,7 +338,7 @@ class Client:
     def current(
         self,
         location: LocationArg,
-        name: str | None = None,
+        slug: str | None = None,
         *,
         units: UnitsArg | None = None,
         sources: StrList | None = None,
@@ -343,7 +346,7 @@ class Client:
         include_nowcast_hours: bool = False,
     ) -> CurrentResponse:
         """Current conditions at a named location (``getCurrentConditions``)."""
-        path = _location_path(location, name) + "/current"
+        path = _location_path(location, slug) + "/current"
         return self._run(
             self._core.current(
                 path,
@@ -382,9 +385,9 @@ class Client:
             )
         )
 
-    def alerts(self, location: LocationArg, name: str | None = None) -> AlertsResponse:
+    def alerts(self, location: LocationArg, slug: str | None = None) -> AlertsResponse:
         """Active alerts at a named location (``getLocationAlerts``)."""
-        path = _location_path(location, name) + "/alerts"
+        path = _location_path(location, slug) + "/alerts"
         return self._run(self._core.alerts(path, Query(), "getLocationAlerts"))
 
     def alerts_at(self, lat: float, lon: float) -> AlertsResponse:
@@ -397,7 +400,7 @@ class Client:
     def nearby(
         self,
         location: LocationArg,
-        name: str | None = None,
+        slug: str | None = None,
         *,
         limit: int | None = None,
         radius_km: float | None = None,
@@ -406,7 +409,7 @@ class Client:
         """Locations near a named location (``getNearbyLocations``)."""
         return self._run(
             self._core.nearby_location(
-                location, name, limit=limit, radius_km=radius_km, units=units
+                location, slug, limit=limit, radius_km=radius_km, units=units
             )
         )
 
@@ -486,8 +489,8 @@ class Client:
         *,
         admin1: str | None = None,
         country: str | None = None,
-        location_type: str | None = None,
-        template: str | None = None,
+        location_type: LocationType | str | None = None,
+        template: TemplateVariant | str | None = None,
         limit: int | None = None,
         cursor: str | None = None,
     ) -> PublicCatalogLocationPage:
@@ -508,8 +511,8 @@ class Client:
         *,
         admin1: str | None = None,
         country: str | None = None,
-        location_type: str | None = None,
-        template: str | None = None,
+        location_type: LocationType | str | None = None,
+        template: TemplateVariant | str | None = None,
         limit: int | None = None,
     ) -> Iterator[PublicCatalogLocation]:
         """Every catalog location, following ``next_cursor`` lazily."""
@@ -541,13 +544,16 @@ class Client:
         country: str | None = None,
         network: StrList | None = None,
         capabilities: StrList | None = None,
-        status: str | None = None,
+        status: StationStatus | str | None = None,
         limit: int | None = None,
         cursor: str | None = None,
     ) -> PublicCatalogStationPage:
         """One page of the station catalog (``listCatalogStations``).
 
-        ``capabilities`` are all required (sent as repeated ``capability``).
+        ``capabilities`` are all required (sent as one ``capability`` list).
+        ``network`` and ``status`` take the snake_case names
+        (:class:`~ensemble_weather.enums.StationNetwork`,
+        :class:`~ensemble_weather.enums.StationStatus`).
         """
         return self._run(
             self._core.catalog_stations(
@@ -568,7 +574,7 @@ class Client:
         country: str | None = None,
         network: StrList | None = None,
         capabilities: StrList | None = None,
-        status: str | None = None,
+        status: StationStatus | str | None = None,
         limit: int | None = None,
     ) -> Iterator[PublicCatalogStation]:
         """Every catalog station, following ``next_cursor`` lazily."""
@@ -594,19 +600,14 @@ class Client:
         """One catalog station (``getCatalogStation``). Sent without the key."""
         return self._run(self._core.catalog_station(slug, include=include, locale=locale))
 
-    # -- runs, storm reports, attribution -----------------------------------------------
+    # -- runs and attribution ---------------------------------------------------------
 
-    def runs(self, *, limit: int | None = None) -> RunsResponse:
-        """The served model run and recent runs (``getAvailableRuns``)."""
-        return self._run(self._core.runs(limit=limit))
+    def runs(self, *, limit: int | None = None, cursor: str | None = None) -> RunsResponse:
+        """The served model run and recent runs (``getAvailableRuns``).
 
-    def storm_reports(self, *, limit: int | None = None) -> StormReportsResponse:
-        """Recent verified storms (``getStormReports``)."""
-        return self._run(self._core.storm_reports(limit=limit))
-
-    def storm_report(self, report_id: int) -> StormReportCard:
-        """One verified storm (``getStormReport``)."""
-        return self._run(self._core.storm_report(report_id))
+        Pass the page's ``next_cursor`` back as ``cursor`` for the next page.
+        """
+        return self._run(self._core.runs(limit=limit, cursor=cursor))
 
     def attribution(self) -> AttributionRegistry:
         """Every data provider and its licence (``getAttribution``). Sent without the key."""

@@ -49,6 +49,7 @@ def _probabilities(spec: str) -> list[dict[str, Any]]:
         start, end = _window(window)
         out.append(
             {
+                "term": term,
                 "variable": variable,
                 "op": op,
                 "threshold": float(threshold),
@@ -59,6 +60,7 @@ def _probabilities(spec: str) -> list[dict[str, Any]]:
                 "to": _hours_after(end),
                 "probability": 0.42,
                 "members": 131,
+                "null_reason": None,
             }
         )
     return out
@@ -71,9 +73,11 @@ def _totals(spec: str) -> list[dict[str, Any]]:
         start, end = _window(window)
         out.append(
             {
+                "term": item,
                 "variable": variable,
                 "window_start_hours": start,
                 "window_end_hours": end,
+                "aggregation": "total",
                 "from": _hours_after(start),
                 "to": _hours_after(end),
                 "quantiles": {
@@ -83,8 +87,11 @@ def _totals(spec: str) -> list[dict[str, Any]]:
                     "p50": 29.0,
                     "p75": 40.0,
                     "p90": 52.0,
+                    "min": 4.0,
+                    "max": 88.0,
                 },
                 "members": 131,
+                "null_reason": None,
             }
         )
     return out
@@ -94,8 +101,9 @@ def _alert() -> dict[str, Any]:
     return {
         "id": "urn:oid:2.49.0.1.840.0.example",
         "event": "Winter Storm Warning",
-        "severity": "Severe",
-        "urgency": "Expected",
+        "severity": "severe",
+        "urgency": "expected",
+        "certainty": "likely",
         "headline": "Winter Storm Warning until Sunday 4 AM PST",
         "onset": START,
         "expires": "2026-11-16T12:00:00Z",
@@ -129,7 +137,12 @@ def _current(location: dict[str, Any]) -> dict[str, Any]:
 
 
 def _error(code: str, message: str) -> dict[str, Any]:
-    return {"error": code, "message": message}
+    return {
+        "error": code,
+        "message": message,
+        "request_id": "01JBQ6ZK3V8M4T2N7XQH5R9W0C",
+        "doc_url": f"https://docs.oureawx.com/features/errors/#{code.lower()}",
+    }
 
 
 def route(path: str, query: dict[str, str], keyed: bool) -> tuple[int, dict[str, Any]]:
@@ -155,7 +168,7 @@ def route(path: str, query: dict[str, str], keyed: bool) -> tuple[int, dict[str,
         if not keyed:
             return 403, _body("error-pro-required.json")
         if float(query["lon"]) > -60:
-            return 400, _body("error-outside-coverage.json")
+            return 404, _body("error-outside-coverage.json")
         return 200, _forecast(query)
     if parts == ["search", "locations"]:
         return 200, _body("search.json")

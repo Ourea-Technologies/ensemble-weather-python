@@ -9,7 +9,8 @@ model and error style follow each language's idiom (see
 two disagree, the vectors win and this document gets fixed.
 
 The contract is [`openapi/v1/openapi.yaml`](openapi/v1/openapi.yaml)
-(`info.version` 1.x).
+(`info.version` 1.x), a byte-for-byte copy of the Ourea server's public spec
+at the commit in `openapi/v1/SOURCE` (`scripts/sync_openapi.py`).
 
 ## 1. Principles
 
@@ -56,7 +57,7 @@ One SDK method (or idiomatic equivalent) per OpenAPI operation, except
 
 | operationId | Route | Notes |
 |---|---|---|
-| `getLocationForecast` | `GET /api/v1/locations/{state}/{name}` | named location. Anonymous OK. |
+| `getLocationForecast` | `GET /api/v1/locations/{state}/{slug}` | named location. Anonymous OK. |
 | `getPointForecast` | `GET /api/v1/forecast` | coordinates (+ optional `elevation_m`). Pro. |
 | `getCurrentConditions` / `getCurrentByCoordinates` | `.../current`, `/api/v1/current` | |
 | `getLocationAlerts` / `getAlertsByCoordinates` | `.../alerts`, `/api/v1/alerts` | |
@@ -66,7 +67,6 @@ One SDK method (or idiomatic equivalent) per OpenAPI operation, except
 | `listCatalogLocations` / `getCatalogLocation` | `/api/v1/catalog/locations[/{slug}]` | cursor paging |
 | `listCatalogStations` / `getCatalogStation` | `/api/v1/catalog/stations[/{slug}]` | cursor paging |
 | `getAvailableRuns` | `GET /api/v1/runs` | |
-| `getStormReports` / `getStormReport` | `/api/v1/storm-reports[/{id}]` | |
 | `getAttribution` | `GET /api/v1/attribution` | |
 
 A named location is the pair (state, slug). An SDK may accept `"or/mt-hood-meadows"`
@@ -162,20 +162,22 @@ then op (`ge` before `le`), then window (start, then end), then aggregation
 (`total`, `any`, `all`), then threshold; they are joined by `,`. This is the
 server's own order (KAN-1313), so the URL is the shared cache key.
 
-**Results:** the server answers in the order sent, so after sorting the SDK
-maps each `ProbabilityResult` back to the caller's own term by its key
-(variable, op, rounded threshold, window, aggregation), and returns the results
-in the caller's order (duplicates share one result). A `null` `probability`
-(the series does not reach the window's end) is surfaced as an absent value,
-never as 0.
+**Results:** every `ProbabilityResult` echoes its canonical `term` (the
+spelling the SDK sent), so the SDK maps each result back to the caller's own
+term by `term`, never by position, and returns the results in the caller's
+order (duplicates share one result). A `null` `probability` is surfaced as an
+absent value, never as 0, together with its `null_reason`
+(`window_not_covered`, `too_few_members`, `variable_unavailable`).
 
 ## 5. Window totals (`totals=`)
 
 `<precipitation|snowfall>:<window>` (window as in section 4, always sent),
 de-duplicated, sorted by variable then window, comma-joined with literal `,`.
-The answers come back in `window_totals` as `WindowTotal` with `quantiles`
-(`null` when the window is not covered) and are mapped back to the caller's
-order like probabilities. This is the only "storm total" an SDK offers.
+The answers come back in `window_totals` as `WindowTotal` with `term`,
+`aggregation` (`total` for these) and `quantiles` (`null`, with its
+`null_reason`, when the window is not covered) and are mapped back to the
+caller's order by `term`, like probabilities. This is the only "storm total"
+an SDK offers.
 
 ## 6. Quantiles
 
@@ -187,8 +189,10 @@ and may offer named views:
   where present). Any other pair is a usage error. There is no interpolation.
 - `median`: p50.
 
-`wind_direction` quantiles are circular: `max` may be numerically less than
-`min`. The SDK documents this and does not "fix" it.
+`wind_direction` is not a `Quantiles`: it is the circular distribution
+(`CircularStats`: `mean`, `stddev`, `sector_50 {from, to}`, `sector_90 {from,
+to}`). A sector runs clockwise from `from` to `to`, so `to` may be numerically
+less than `from`. The SDK documents this and does not "fix" it.
 
 ## 7. Units
 
@@ -201,13 +205,16 @@ units, the SDK asks the server.
 
 ## 8. Errors
 
-Every non-2xx JSON response is `{"error": "<CODE>", "message": "..."}`. The SDK
+Every non-2xx JSON response is `{"error": "<CODE>", "message": "...",
+"request_id": "...", "doc_url": "..."}` (a 400 about one parameter also names
+it in `param`). The SDK
 raises/returns one error type per language (with subtypes where the idiom
 calls for them) carrying:
 
 - `status` (HTTP status), `code` (the string, kept verbatim even when
   unknown), `message`;
-- `request_id` if the response carries `X-Request-Id`;
+- `request_id` (from the body, else the `X-Request-Id` header) and `doc_url`
+  when present;
 - for 429: `retry_after` (seconds).
 
 Required categories (as subtypes or a discriminant), mapped by code first and
@@ -216,12 +223,15 @@ by status when the code is unknown or the body is not JSON:
 | Category | Codes | Status fallback |
 |---|---|---|
 | authentication | `INVALID_API_KEY`, `UNAUTHORIZED` | 401 |
-| permission | `PRO_REQUIRED`, `FORBIDDEN` | 403 |
-| not found | `LOCATION_NOT_FOUND`, `MODEL_RUN_NOT_FOUND`, `NOT_FOUND`, `GONE` | 404, 410 |
-| invalid request | `BAD_REQUEST`, `INVALID_COORDINATES`, `INVALID_ELEVATION`, `INVALID_MAX_HOURS`, `ELEVATION_REQUIRED`, `AMBIGUOUS`, `FEELS_LIKE_UNAVAILABLE` | 400 |
-| outside coverage | `OUTSIDE_COVERAGE` | (code only) |
+| permission | `PRO_REQUIRED` | 403 |
+| not found | `LOCATION_NOT_FOUND`, `NOT_FOUND` | 404, 410 |
+| invalid request | `BAD_REQUEST`, `INVALID_COORDINATES`, `INVALID_ELEVATION`, `ELEVATION_REQUIRED` | 400 |
+| outside coverage | `OUTSIDE_COVERAGE` (a 404) | (code only) |
 | rate limited | `TOO_MANY_REQUESTS` | 429 |
-| unavailable | `FORECAST_UNAVAILABLE`, `TIMEOUT`, `INTERNAL_ERROR`, `DATABASE_ERROR` | 5xx |
+| unavailable | `FORECAST_UNAVAILABLE`, `TIMEOUT`, `INTERNAL_ERROR`, `DATABASE_ERROR`, `AUTH_UNAVAILABLE` | 5xx |
+
+These are the public spec's `ErrorResponse.error` codes. A code outside the
+table (an older or newer one) keeps its string and maps by status.
 | connection | (no response: DNS, TLS, reset, timeout) | n/a |
 | usage | (raised by the SDK before sending: an invalid term, an unserved quantile pair) | n/a |
 
@@ -233,7 +243,8 @@ Requests are all GET, so retrying is safe.
 
 The delay before retry `n` (1-based) is:
 
-- after a 429 or 503 with `Retry-After` (delta-seconds or HTTP-date): exactly
+- after a 429, 503 or 504 with `Retry-After` (the API sends it on every
+  503 and 504) (delta-seconds or HTTP-date): exactly
   that, capped at 60 s. If it is over 60 s, the SDK does not retry and
   returns the error with `retry_after` set;
 - otherwise: full jitter, a random value in `[0, min(8 s, 0.5 s × 2^(n-1))]`.

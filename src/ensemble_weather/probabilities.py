@@ -27,8 +27,6 @@ from .errors import UsageError
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-    from .models import ProbabilityResult
-
 __all__ = ["MAX_WINDOW_HOURS", "Chance", "Total", "Window", "WindowLike"]
 
 MAX_WINDOW_HOURS = 360
@@ -250,18 +248,6 @@ def chance_key(chance: Chance, units: UnitSystem) -> ChanceKey:
     )
 
 
-def result_key(result: ProbabilityResult, units: UnitSystem) -> ChanceKey:
-    """The key of an answered term, comparable with :func:`chance_key`."""
-    return (
-        result.variable.value,
-        result.op.value,
-        format_rounded(result.threshold, precision(result.variable, units)),
-        result.window_start_hours,
-        result.window_end_hours,
-        result.aggregation.value,
-    )
-
-
 def _chance_wire(key: ChanceKey) -> str:
     variable, op, threshold, start, end, aggregation = key
     text = f"{variable}:{op}:{threshold}:{Window(start, end).to_query()}"
@@ -283,11 +269,15 @@ def _chance_sort(key: ChanceKey) -> tuple[str, int, int, int, int, float]:
     )
 
 
-def prob_query(chances: Sequence[Chance], units: UnitSystem) -> tuple[str, list[ChanceKey]]:
-    """The canonical ``prob=`` value, and each caller term's key in order."""
+def prob_query(chances: Sequence[Chance], units: UnitSystem) -> tuple[str, list[str]]:
+    """The canonical ``prob=`` value, and each caller term's canonical spelling in order.
+
+    The server echoes that spelling as ``ProbabilityResult.term``, so results
+    are matched to the caller's terms by it (BEHAVIOR 4).
+    """
     keys = [chance_key(c, units) for c in chances]
     unique = sorted(set(keys), key=_chance_sort)
-    return ",".join(_chance_wire(k) for k in unique), keys
+    return ",".join(_chance_wire(k) for k in unique), [_chance_wire(k) for k in keys]
 
 
 def total_key(total: Total) -> TotalKey:
@@ -295,9 +285,16 @@ def total_key(total: Total) -> TotalKey:
     return (total.variable.value, total.window.start, total.window.end)
 
 
-def totals_query(totals: Sequence[Total]) -> tuple[str, list[TotalKey]]:
-    """The canonical ``totals=`` value, and each caller request's key in order."""
+def _total_wire(key: TotalKey) -> str:
+    variable, start, end = key
+    return f"{variable}:{Window(start, end).to_query()}"
+
+
+def totals_query(totals: Sequence[Total]) -> tuple[str, list[str]]:
+    """The canonical ``totals=`` value, and each caller request's canonical spelling.
+
+    The server echoes that spelling as ``WindowTotal.term`` (BEHAVIOR 5).
+    """
     keys = [total_key(t) for t in totals]
     unique = sorted(set(keys))
-    wire = ",".join(f"{v}:{Window(s, e).to_query()}" for v, s, e in unique)
-    return wire, keys
+    return ",".join(_total_wire(k) for k in unique), [_total_wire(k) for k in keys]

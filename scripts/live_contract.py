@@ -22,6 +22,8 @@ def main() -> int:
         assert forecast.location.slug == "mt-hood-meadows"
         assert len(forecast.probabilities) == 2
         assert len(forecast.window_totals) == 1
+        assert all(p.term for p in forecast.probabilities)  # matched by the echoed term
+        assert forecast.forecast.timeseries[0].ensemble.wind_direction.sector_50 is not None
         hits = client.search("hood meadows")
         assert any(hit.slug == "mt-hood-meadows" for hit in hits.items)
         page = client.list_catalog_locations(limit=5)
@@ -30,6 +32,7 @@ def main() -> int:
         client.current("or/mt-hood-meadows")
         client.alerts("or/mt-hood-meadows")
         client.runs(limit=2)
+        client.list_catalog_stations(limit=2)  # may be empty: the shape is what is checked
         try:
             client.forecast("or/this-location-does-not-exist")
         except NotFoundError:

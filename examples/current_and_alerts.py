@@ -15,4 +15,4 @@ else:
 
 print(f"{alerts.alert_count} active alert(s)")
 for alert in alerts.alerts:
-    print(f"- {alert.event} ({alert.severity}): {alert.headline}")
+    print(f"- {alert.event} ({alert.severity}, {alert.certainty}): {alert.headline}")

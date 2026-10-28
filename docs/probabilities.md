@@ -31,9 +31,11 @@ The terms are sent de-duplicated and in the server's canonical order (one
 URL, one edge-cache entry), and `forecast.probabilities` lists the answers in
 **your** order. Each [`ProbabilityResult`][ensemble_weather.ProbabilityResult]
 carries its reference class: `variable`, `op`, `threshold`, the window,
-`aggregation`, `from_`/`to` and `members`, plus `term`, your `Chance`. A
-`probability` of `None` means the served series does not reach the window's
-end; it is never 0.
+`aggregation`, `from_`/`to` and `members`, plus `term` (the canonical
+spelling the SDK sent, which the server echoes and the SDK matches your terms
+by, never by position) and `request`, your `Chance`. A `probability` of
+`None` is never 0: `null_reason` says why (`window_not_covered`,
+`too_few_members`, `variable_unavailable`).
 
 ## Window totals
 
@@ -45,7 +47,10 @@ total = forecast.window_totals[0]
 total.quantiles.p10, total.quantiles.median, total.quantiles.p90
 ```
 
-`quantiles` is `None` when the window is not covered.
+Each [`WindowTotal`][ensemble_weather.WindowTotal] carries `term`,
+`aggregation` (`total`) and `request`, your `Total`, and is matched by `term`
+like a probability. `quantiles` is `None` when the window cannot be answered,
+with the reason in `null_reason`.
 
 ## Quantiles
 
@@ -53,5 +58,10 @@ A [`Quantiles`][ensemble_weather.Quantiles] has `mean`, `p10`, `p25`, `p50`,
 `p75`, `p90` and sometimes `min`, `max` and `probability`; a value the server
 did not send is `None`. `median` is the p50. `range(10, 90)` and
 `range(25, 75)` return the served pairs; any other pair is a `UsageError`
-(there is no interpolation). Wind-direction quantiles are circular, so `max`
-can be less than `min`.
+(there is no interpolation).
+
+Wind direction is not a `Quantiles` but a
+[`CircularStats`][ensemble_weather.models.CircularStats]: `mean`, `stddev`,
+and the sectors `sector_50` and `sector_90`, each running clockwise from
+`from_` to `to`, so `to` can be numerically less than `from_` (`350` to `20`
+crosses north). The SDK leaves it as sent.

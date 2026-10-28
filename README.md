@@ -86,7 +86,7 @@ For a **storm total**, ask for the window total's distribution:
 
 ```python
 forecast = client.forecast("or/mt-hood-meadows", totals=[Total("snowfall", 72)])
-storm = forecast.window_totals[0].quantiles  # None when the window is not covered
+storm = forecast.window_totals[0].quantiles  # None (see null_reason) when not covered
 ```
 
 Read **quantiles** directly; `median` is the p50, not "the forecast":
@@ -112,15 +112,15 @@ request's units before sending; response values are never converted. More in
 | [`storm_total.py`](examples/storm_total.py) | `totals` window distributions for precipitation and snowfall |
 | [`search_and_catalog.py`](examples/search_and_catalog.py) | search, then page through the catalog with the cursor |
 | [`current_and_alerts.py`](examples/current_and_alerts.py) | current conditions and active alerts for a location |
-| [`error_handling.py`](examples/error_handling.py) | catching an out-of-coverage error; reading rate-limit state |
+| [`error_handling.py`](examples/error_handling.py) | catching an out-of-coverage error, the keyless alternative to `PRO_REQUIRED`; reading rate-limit state |
 | [`units.py`](examples/units.py) | the same forecast in metric and imperial |
 | [`async_forecast.py`](examples/async_forecast.py) | `AsyncClient` with `asyncio.gather` |
 
 ## Errors, retries and rate limits
 
 Every error derives from `OureaError`. HTTP errors are `APIError`s with
-`status`, `code` (the API's string, verbatim), `message` and `request_id`,
-in one subclass per category: `AuthenticationError`, `PermissionDeniedError`,
+`status`, `code` (the API's string, verbatim), `message`, `request_id` and
+`doc_url`, in one subclass per category: `AuthenticationError`, `PermissionDeniedError`,
 `NotFoundError`, `InvalidRequestError`, `OutsideCoverageError`,
 `RateLimitError` (with `retry_after`) and `UnavailableError`. With no
 response at all you get `APIConnectionError`; a call refused before sending
@@ -136,7 +136,8 @@ except OutsideCoverageError as err:
 ```
 
 Connection errors, 429, 502, 503 and 504 are retried up to `max_retries`
-(default 2) with full-jitter backoff, honouring `Retry-After` up to 60 s.
+(default 2) with full-jitter backoff, honouring `Retry-After` (on 429, 503
+and 504) up to 60 s.
 Nothing else is retried. The rate-limit state the server reported is on
 `result.rate_limit` and `client.rate_limit` (`limit`, `remaining`, `reset`,
 `policy`); the SDK never hard-codes limits.

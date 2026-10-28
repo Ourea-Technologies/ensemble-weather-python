@@ -7,7 +7,7 @@
       "operation": "getLocationForecast",
       "args": {
         "state": "or",
-        "name": "mt-hood-meadows",
+        "slug": "mt-hood-meadows",
         "units": "imperial",
         "prob": [
           {
@@ -25,7 +25,7 @@
       "operation": "getLocationForecast",
       "args": {
         "state": "or",
-        "name": "mt-hood-meadows",
+        "slug": "mt-hood-meadows",
         "prob": [
           {
             "variable": "precipitation",

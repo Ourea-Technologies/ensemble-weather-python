@@ -15,32 +15,37 @@ from __future__ import annotations
 from enum import Enum
 
 __all__ = [
-    "AdProvider",
-    "AdSlotKind",
     "Aggregation",
+    "AlertCertainty",
+    "AlertSeverity",
+    "AlertUrgency",
     "AstronomicalSeason",
     "AttributionSourceKind",
     "ClampedOption",
+    "ConditionIcon",
     "CurrentSource",
     "DailyCondition",
-    "DailyConditionIcon",
     "ElevationSource",
     "FreezingLevelKind",
     "GapFlowStatus",
     "HourlyCondition",
-    "HourlyConditionIcon",
     "InversionKind",
     "LocationType",
     "MembersView",
     "MoonPhase",
     "NowcastLayer",
+    "NullReason",
     "Op",
     "OpenEnum",
     "PrecipKind",
     "PrecipitationType",
     "ProvenanceVariable",
+    "StationNetwork",
+    "StationStatus",
     "StormOrientation",
     "TemplateSectionKind",
+    "TemplateVariant",
+    "TotalAggregation",
     "TotalVariable",
     "Unit",
     "UnitSystem",
@@ -140,6 +145,28 @@ class Aggregation(OpenEnum):
     ALL = "all"
 
 
+class TotalAggregation(OpenEnum):
+    """How a window total combines each member's hours (``total`` for amounts)."""
+
+    TOTAL = "total"
+    MIN = "min"
+    MAX = "max"
+
+
+class NullReason(OpenEnum):
+    """Why a probability or a window total is ``None``.
+
+    ``window_not_covered``: the served series does not reach the window's end
+    (ask for more ``max_hours``). ``too_few_members``: fewer than two members
+    cover the window. ``variable_unavailable``: no member carries the
+    variable through the window (e.g. ``hourly=false``).
+    """
+
+    WINDOW_NOT_COVERED = "window_not_covered"
+    TOO_FEW_MEMBERS = "too_few_members"
+    VARIABLE_UNAVAILABLE = "variable_unavailable"
+
+
 class LocationType(OpenEnum):
     """The primary type of a named location."""
 
@@ -203,8 +230,12 @@ class HourlyCondition(OpenEnum):
     FREEZING_RAIN = "freezing_rain"
 
 
-class HourlyConditionIcon(OpenEnum):
-    """The icon name of one forecast hour."""
+class ConditionIcon(OpenEnum):
+    """The icon hint of an hour, a day or current conditions (one enum everywhere).
+
+    Night hours take the ``night_`` forms; a daily row is daytime. Treat an
+    unknown icon as "other".
+    """
 
     SUNNY = "sunny"
     MOSTLY_SUNNY = "mostly_sunny"
@@ -213,10 +244,14 @@ class HourlyConditionIcon(OpenEnum):
     CLOUDY = "cloudy"
     SUN_CHANCE_SHOWERS = "sun_chance_showers"
     SUN_SHOWERS_LIKELY = "sun_showers_likely"
+    SUN_SHOWERS = "sun_showers"
     CHANCE_SHOWERS = "chance_showers"
+    CHANCE_RAIN = "chance_rain"
     SHOWERS_LIKELY = "showers_likely"
-    RAIN = "rain"
+    RAIN_LIKELY = "rain_likely"
+    SHOWERS = "showers"
     LIGHT_RAIN = "light_rain"
+    RAIN = "rain"
     HEAVY_RAIN = "heavy_rain"
     RAIN_SNOW_MIX = "rain_snow_mix"
     SNOW = "snow"
@@ -228,10 +263,14 @@ class HourlyConditionIcon(OpenEnum):
     NIGHT_CLOUDY = "night_cloudy"
     NIGHT_MOON_CHANCE_SHOWERS = "night_moon_chance_showers"
     NIGHT_MOON_SHOWERS_LIKELY = "night_moon_showers_likely"
+    NIGHT_MOON_SHOWERS = "night_moon_showers"
     NIGHT_CHANCE_SHOWERS = "night_chance_showers"
+    NIGHT_CHANCE_RAIN = "night_chance_rain"
     NIGHT_SHOWERS_LIKELY = "night_showers_likely"
-    NIGHT_RAIN = "night_rain"
+    NIGHT_RAIN_LIKELY = "night_rain_likely"
+    NIGHT_SHOWERS = "night_showers"
     NIGHT_LIGHT_RAIN = "night_light_rain"
+    NIGHT_RAIN = "night_rain"
     NIGHT_HEAVY_RAIN = "night_heavy_rain"
     NIGHT_RAIN_SNOW_MIX = "night_rain_snow_mix"
     NIGHT_SNOW = "night_snow"
@@ -260,27 +299,6 @@ class DailyCondition(OpenEnum):
     SLIGHT_CHANCE_SNOW = "slight_chance_snow"
     CHANCE_SNOW = "chance_snow"
     SNOW_LIKELY = "snow_likely"
-    SNOW = "snow"
-
-
-class DailyConditionIcon(OpenEnum):
-    """The icon name of one forecast day."""
-
-    SUNNY = "sunny"
-    MOSTLY_SUNNY = "mostly_sunny"
-    PARTLY_CLOUDY = "partly_cloudy"
-    MOSTLY_CLOUDY = "mostly_cloudy"
-    CLOUDY = "cloudy"
-    SUN_CHANCE_SHOWERS = "sun_chance_showers"
-    SUN_SHOWERS_LIKELY = "sun_showers_likely"
-    SUN_SHOWERS = "sun_showers"
-    CHANCE_SHOWERS = "chance_showers"
-    CHANCE_RAIN = "chance_rain"
-    SHOWERS_LIKELY = "showers_likely"
-    RAIN_LIKELY = "rain_likely"
-    SHOWERS = "showers"
-    RAIN = "rain"
-    RAIN_SNOW_MIX = "rain_snow_mix"
     SNOW = "snow"
 
 
@@ -441,16 +459,92 @@ class TemplateSectionKind(OpenEnum):
     MEDIA = "media"
 
 
-class AdSlotKind(OpenEnum):
-    """Whether a catalog ad slot is a house or a third-party placement."""
+class TemplateVariant(OpenEnum):
+    """The page-template variant of a catalog entry."""
 
-    HOUSE = "house"
-    THIRD_PARTY = "third_party"
+    MOUNTAIN = "mountain"
+    COASTAL = "coastal"
+    TRAIL = "trail"
+    PASS = "pass"  # noqa: S105 - a mountain pass, not a password
+    GENERIC = "generic"
+    STATION = "station"
 
 
-class AdProvider(OpenEnum):
-    """The provider of a third-party ad placement."""
+class StationNetwork(OpenEnum):
+    """The observation network of a catalog station."""
 
-    ADSENSE = "adsense"
-    GAM = "gam"
-    CUSTOM = "custom"
+    SNOTEL = "snotel"
+    SNOLITE = "snolite"
+    RAWS = "raws"
+    ASOS = "asos"
+    AWOS = "awos"
+    METAR = "metar"
+    RWIS_WSDOT = "rwis_wsdot"
+    RWIS_ODOT = "rwis_odot"
+    RWIS_CALTRANS = "rwis_caltrans"
+    RWIS_IDOT = "rwis_idot"
+    RWIS_NDOT = "rwis_ndot"
+    RWIS_UDOT = "rwis_udot"
+    RWIS_CDOT = "rwis_cdot"
+    RWIS_MDT = "rwis_mdt"
+    RWIS_WYDOT = "rwis_wydot"
+    RWIS_OTHER = "rwis_other"
+    AGRIMET = "agrimet"
+    AGWEATHERNET = "agweathernet"
+    COCORAHS = "cocorahs"
+    COOP = "coop"
+    USGS = "usgs"
+    TEMPEST = "tempest"
+    DAVIS = "davis"
+    WXFLOW = "wxflow"
+    CDEC = "cdec"
+    CIMIS = "cimis"
+    MESONET_OREGON = "mesonet_oregon"
+    MESONET_SYNOPTIC = "mesonet_synoptic"
+    MESONET_OTHER = "mesonet_other"
+    NDBC_BUOY = "ndbc_buoy"
+    OTHER = "other"
+    HADS = "hads"
+    MADIS = "madis"
+    NWAC = "nwac"
+    MT_MESONET = "mt_mesonet"
+
+
+class StationStatus(OpenEnum):
+    """The reporting status of a catalog station."""
+
+    ACTIVE = "active"
+    INTERMITTENT = "intermittent"
+    INACTIVE = "inactive"
+    DECOMMISSIONED = "decommissioned"
+    UNKNOWN = "unknown"
+
+
+class AlertSeverity(OpenEnum):
+    """The severity of a weather alert (CAP)."""
+
+    EXTREME = "extreme"
+    SEVERE = "severe"
+    MODERATE = "moderate"
+    MINOR = "minor"
+    UNKNOWN = "unknown"
+
+
+class AlertUrgency(OpenEnum):
+    """The urgency of a weather alert (CAP)."""
+
+    IMMEDIATE = "immediate"
+    EXPECTED = "expected"
+    FUTURE = "future"
+    PAST = "past"
+    UNKNOWN = "unknown"
+
+
+class AlertCertainty(OpenEnum):
+    """The certainty of a weather alert (CAP)."""
+
+    OBSERVED = "observed"
+    LIKELY = "likely"
+    POSSIBLE = "possible"
+    UNLIKELY = "unlikely"
+    UNKNOWN = "unknown"

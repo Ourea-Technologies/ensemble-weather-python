@@ -65,7 +65,7 @@ def test_unit_conversion_uses_exact_factors() -> None:
 
 
 def test_prob_query_kelvin_and_order() -> None:
-    wire, keys = prob_query(
+    wire, terms = prob_query(
         [
             Chance.at_most("temperature", 32, "degF"),
             Chance.at_least("precipitation", 0.5, "in", window=Window(24, 48)),
@@ -76,7 +76,13 @@ def test_prob_query_kelvin_and_order() -> None:
     assert (
         wire == "precipitation:ge:12.70:24h,precipitation:ge:12.70:24-48h,temperature:le:273.2:24h"
     )  # 273.15 * 10 == 2731.5 in doubles
-    assert [k[0] for k in keys] == ["temperature", "precipitation", "precipitation"]
+    # Each caller term's canonical spelling, in the caller's order: the server
+    # echoes it as ProbabilityResult.term.
+    assert terms == [
+        "temperature:le:273.2:24h",
+        "precipitation:ge:12.70:24-48h",
+        "precipitation:ge:12.70:24h",
+    ]
 
 
 def test_prob_sort_by_aggregation_then_threshold() -> None:
@@ -92,11 +98,11 @@ def test_prob_sort_by_aggregation_then_threshold() -> None:
 
 
 def test_totals_query_sorted_and_deduplicated() -> None:
-    wire, keys = totals_query(
+    wire, terms = totals_query(
         [Total("snowfall", 48), Total("precipitation", Window(24, 48)), Total("snowfall", 48)]
     )
     assert wire == "precipitation:24-48h,snowfall:48h"
-    assert len(keys) == 3
+    assert terms == ["snowfall:48h", "precipitation:24-48h", "snowfall:48h"]
 
 
 @pytest.mark.parametrize(
@@ -140,14 +146,16 @@ def test_forecast_options_are_canonical(
         run=dt.datetime(2026, 11, 15, tzinfo=dt.timezone.utc),
         feels_like=["nws"],
         diagnostics="provenance",
+        include=["skin_temperature", "mslp", "mslp"],
         elevations="all",
         max_days=5,
     )
     path = recorder.requests[-1].url.raw_path.split(b"?")[0]
     assert path == b"/api/v1/locations/or/mt-hood-meadows"
+    # Comma lists are sorted, de-duplicated and joined by a literal "," (else a 301).
     assert _query(recorder) == (
-        "diagnostics=provenance&elevations=all&max_days=5"
-        "&run=2026-11-15T00%3A00%3A00Z&sources=snotel%2Cski_resort"
+        "diagnostics=provenance&elevations=all&include=mslp,skin_temperature&max_days=5"
+        "&run=2026-11-15T00%3A00%3A00Z&sources=ski_resort,snotel"
     )
 
 
@@ -168,12 +176,14 @@ def test_naive_datetime_is_refused(make_client: Callable[..., Client]) -> None:
         make_client().forecast("or/mt-hood-meadows", run=dt.datetime(2026, 11, 15))  # noqa: DTZ001
 
 
-def test_repeated_capability_is_sorted_once(
+def test_capability_is_one_sorted_comma_list(
     recorder: Recorder, make_client: Callable[..., Client]
 ) -> None:
     recorder.add(200, name="catalog-page-2.json")
-    make_client().list_catalog_stations(capabilities=["swe", "air_temp", "swe"], network="Snotel")
-    assert _query(recorder) == "capability=air_temp&capability=swe&network=Snotel"
+    make_client().list_catalog_stations(
+        capabilities=["swe", "air_temp", "swe"], network=["snotel", "raws"], status="active"
+    )
+    assert _query(recorder) == "capability=air_temp,swe&network=raws,snotel&status=active"
 
 
 def test_location_from_an_object(recorder: Recorder, make_client: Callable[..., Client]) -> None:
@@ -231,14 +241,13 @@ def test_every_route_builds_its_path(
             "limit=100&type=summit",
         ),
         (
-            lambda: client.catalog_location("a b", include=["content", "ads"], locale="en"),
+            lambda: client.catalog_location("a b", include=["template", "content"], locale="en"),
             "/api/v1/catalog/locations/a%20b",
-            "include=content%2Cads",
+            "include=content,template",
         ),
         (lambda: client.catalog_station("snotel-651"), "/api/v1/catalog/stations/snotel-651", ""),
         (lambda: client.runs(limit=10), "/api/v1/runs", ""),
-        (lambda: client.storm_reports(limit=5), "/api/v1/storm-reports", "limit=5"),
-        (lambda: client.storm_report(42), "/api/v1/storm-reports/42", ""),
+        (lambda: client.runs(limit=5, cursor="c1"), "/api/v1/runs", "cursor=c1&limit=5"),
     ]
     for call, path, query in calls:
         recorder.add(404, name="error-not-found.json")

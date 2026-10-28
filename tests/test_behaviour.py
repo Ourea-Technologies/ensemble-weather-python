@@ -18,7 +18,9 @@ from ensemble_weather import (
     Client,
     MemoryCache,
     OureaDeprecationWarning,
+    PermissionDeniedError,
     RateLimitError,
+    UnavailableError,
     UnexpectedResponseError,
     UsageError,
     __version__,
@@ -153,6 +155,59 @@ def test_backoff_is_capped_full_jitter(recorder: Recorder) -> None:
     client.close()
 
 
+def test_504_honours_retry_after(recorder: Recorder) -> None:
+    # BEHAVIOR 9: the API sends Retry-After on every 503 and 504.
+    recorder.add(504, name="error-unavailable.json", headers={"Retry-After": "5"})
+    recorder.add(200, name="attribution.json")
+    delays: list[float] = []
+    client = Client(transport=httpx.MockTransport(recorder))
+    client._sleep = delays.append
+    client.attribution()
+    assert delays == [5.0]
+    client.close()
+
+
+def test_auth_unavailable_is_unavailable(
+    recorder: Recorder, make_client: Callable[..., Client]
+) -> None:
+    body = {"error": "AUTH_UNAVAILABLE", "message": "Try again.", "request_id": "r"}
+    recorder.add(503, json=body, headers={"Retry-After": "1"})
+    recorder.add(503, json=body, headers={"Retry-After": "1"})
+    recorder.add(503, json=body, headers={"Retry-After": "1"})
+    with pytest.raises(UnavailableError) as caught:
+        make_client().attribution()
+    assert caught.value.code == "AUTH_UNAVAILABLE"
+    assert caught.value.request_id == "r"
+
+
+def test_pro_required_names_the_nearest_location(
+    recorder: Recorder, make_client: Callable[..., Client]
+) -> None:
+    near = {
+        "slug": "mt-hood-meadows",
+        "url": "/api/v1/locations/or/mt-hood-meadows",
+        "distance_km": 4.25,
+        "elevation_m": 1635.6,
+    }
+    body = {"error": "PRO_REQUIRED", "message": "Pro.", "nearest_location": near}
+    recorder.add(403, json=body)
+    with pytest.raises(PermissionDeniedError) as caught:
+        make_client().forecast_at(45.33, -121.67)
+    assert caught.value.nearest_location is not None
+    assert caught.value.nearest_location.url == "/api/v1/locations/or/mt-hood-meadows"
+    assert caught.value.nearest_location.distance_km == 4.25
+
+
+def test_bad_request_names_its_param(
+    recorder: Recorder, make_client: Callable[..., Client]
+) -> None:
+    body = {"error": "BAD_REQUEST", "message": "Unknown include.", "param": "include"}
+    recorder.add(400, json=body)
+    with pytest.raises(Exception) as caught:  # noqa: PT011 - the attribute is what matters
+        make_client().forecast("or/mt-hood-meadows", include=["nope"])
+    assert getattr(caught.value, "param", None) == "include"
+
+
 def test_connection_errors_are_retried() -> None:
     attempts = 0
 
@@ -197,7 +252,8 @@ def test_rate_limit_error_carries_state(
         client.attribution()
     error = caught.value
     assert error.retry_after == 120
-    assert error.request_id == "req-1"
+    assert error.request_id == "01JBQ6ZK3V8M4T2N7XQH5R9W0C"  # the body's, before the header's
+    assert error.doc_url == "https://docs.oureawx.com/features/errors/#too_many_requests"
     assert error.rate_limit is not None
     assert error.rate_limit.remaining == 0
     assert client.rate_limit is not None
@@ -220,7 +276,8 @@ def test_results_carry_the_callers_term(
     recorder.add(200, name="forecast-prob-snow.json")
     term = Chance.at_least("snowfall", 6, "in")
     forecast = make_client().forecast("or/mt-hood-meadows", units="imperial", prob=[term])
-    assert forecast.probabilities[0].term is term
+    assert forecast.probabilities[0].request is term
+    assert forecast.probabilities[0].term == "snowfall:ge:6.000:24h"
     assert forecast.probabilities[0].window.to_query() == "24h"
 
 
@@ -259,7 +316,7 @@ def test_async_iterator_follows_cursor(
     recorder.add(200, name="catalog-page-1.json")
     recorder.add(200, name="catalog-page-2.json")
 
-    async def main() -> list[str]:
+    async def main() -> list[str | None]:
         async with make_async_client() as client:
             return [item.slug async for item in client.iter_catalog_locations()]
 

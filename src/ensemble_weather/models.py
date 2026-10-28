@@ -23,31 +23,36 @@ import httpx
 
 from ._decode import JSON_NAME, NOT_JSON, decode_model, encode
 from .enums import (
-    AdProvider,
-    AdSlotKind,
     Aggregation,
+    AlertCertainty,
+    AlertSeverity,
+    AlertUrgency,
     AstronomicalSeason,
     AttributionSourceKind,
     ClampedOption,
+    ConditionIcon,
     CurrentSource,
     DailyCondition,
-    DailyConditionIcon,
     ElevationSource,
     FreezingLevelKind,
     GapFlowStatus,
     HourlyCondition,
-    HourlyConditionIcon,
     InversionKind,
     LocationType,
     MembersView,
     MoonPhase,
     NowcastLayer,
+    NullReason,
     Op,
     PrecipitationType,
     PrecipKind,
     ProvenanceVariable,
+    StationNetwork,
+    StationStatus,
     StormOrientation,
     TemplateSectionKind,
+    TemplateVariant,
+    TotalAggregation,
     TotalVariable,
     UnitSystem,
     Variable,
@@ -68,13 +73,9 @@ __all__ = [
     "AttributionProvider",
     "AttributionRegistry",
     "AttributionSource",
-    "CatalogHousePlacement",
-    "CatalogResolvedAdSlot",
     "CatalogResolvedEntry",
     "CatalogTemplateSummary",
-    "CatalogThirdPartyPlacement",
     "CircularStats",
-    "CmsAdCreativeContent",
     "CmsTemplateSection",
     "CurrentConditions",
     "CurrentResponse",
@@ -91,7 +92,6 @@ __all__ = [
     "GapFlow",
     "HourProvenance",
     "InversionInfo",
-    "LegacyHourlyPoint",
     "LocationElevation",
     "LocationRef",
     "LocationSummary",
@@ -106,6 +106,7 @@ __all__ = [
     "NearbyLocation",
     "NearbyLocationsResponse",
     "NearbyPointResponse",
+    "NearestLocation",
     "NearestSensor",
     "PointInfo",
     "PrecipDisplay",
@@ -137,8 +138,6 @@ __all__ = [
     "ServedRun",
     "SnowOutlook",
     "SnowOutlookQuantiles",
-    "StormReportCard",
-    "StormReportsResponse",
     "TimeSeriesPoint",
     "WindowTotal",
 ]
@@ -264,8 +263,8 @@ class Quantiles(Model):
     """A distribution over the ensemble's members, as the server computed it.
 
     Every field is optional: a percentile the server did not send is
-    ``None``, not ``0``. For wind direction the values are circular, so
-    ``max`` may be numerically less than ``min``; the SDK leaves them as sent.
+    ``None``, not ``0``. Wind direction is not a ``Quantiles`` but a
+    :class:`CircularStats`.
 
     Attributes:
         mean: The ensemble mean.
@@ -320,16 +319,17 @@ class LocationRef(Model):
     """A named location, as forecasts reference it.
 
     ``state`` and ``slug`` together name it: pass the object itself to
-    :meth:`~ensemble_weather.Client.forecast`.
+    :meth:`~ensemble_weather.Client.forecast`. A coordinate forecast's
+    location has no ``slug`` or ``type`` (both ``None``).
     """
 
-    slug: str
+    slug: str | None = None
     state: str
     name: str
     lat: float
     lon: float
     elevation_m: float
-    type: LocationType
+    type: LocationType | None = None
     timezone: str
 
 
@@ -404,6 +404,28 @@ class NearbyPointResponse(Response):
     radius_km: float
     count: int
     locations: list[NearbyLocation]
+
+
+@dataclass(frozen=True, kw_only=True)
+class NearestLocation(Model):
+    """A named location near a refused coordinate, answered without a key.
+
+    Carried by :class:`~ensemble_weather.PermissionDeniedError` on a
+    ``PRO_REQUIRED`` coordinate request, when one is within 10 km and 300 m
+    of elevation. Pass ``slug`` with the state from ``url`` to
+    :meth:`~ensemble_weather.Client.forecast`.
+
+    Attributes:
+        slug: The location's slug.
+        url: The location route's path on this API.
+        distance_km: Its distance from the requested point.
+        elevation_m: Its elevation, metres.
+    """
+
+    slug: str
+    url: str
+    distance_km: float
+    elevation_m: float
 
 
 # --- attribution ---------------------------------------------------------------
@@ -481,7 +503,18 @@ class Sector(Model):
 
 @dataclass(frozen=True, kw_only=True)
 class CircularStats(Model):
-    """Circular statistics of wind direction."""
+    """The circular distribution of wind direction, in degrees.
+
+    Each sector runs clockwise from ``from_`` to ``to``, so ``to`` may be
+    numerically less than ``from_`` (``350`` to ``20`` crosses north); the
+    SDK leaves it as sent.
+
+    Attributes:
+        mean: The circular mean direction.
+        stddev: The circular standard deviation.
+        sector_50: The narrowest sector holding half of the members.
+        sector_90: The narrowest sector holding 90 % of the members.
+    """
 
     mean: float
     stddev: float | None = None
@@ -495,21 +528,20 @@ class EnsembleStats(Model):
 
     temperature: Quantiles
     feels_like: Quantiles | None = None
-    feels_like_utci: Quantiles | None = None
     dewpoint: Quantiles | None = None
     precipitation: Quantiles
     wind_speed: Quantiles
     wind_gust: Quantiles | None = None
-    wind_direction: Quantiles
-    """Circular: ``max`` may be numerically less than ``min``."""
-    wind_direction_circular: CircularStats | None = None
+    wind_direction: CircularStats
+    """Circular: see :class:`CircularStats`."""
     snow_level: Quantiles | None = None
     slr: Quantiles | None = None
     snowfall: Quantiles | None = None
     cloud_cover: Quantiles | None = None
     skin_temperature: Quantiles | None = None
-    ptype: Quantiles | None = None
+    """Only with ``include=["skin_temperature"]``."""
     mslp: Quantiles | None = None
+    """Only with ``include=["mslp"]``."""
     cape: Quantiles | None = None
     relative_humidity: Quantiles | None = None
 
@@ -579,7 +611,7 @@ class ModelStats(Model):
     dewpoint: Quantiles | None = None
     precipitation: Quantiles | None = None
     wind_speed: Quantiles | None = None
-    wind_direction: Quantiles | None = None
+    wind_direction: CircularStats | None = None
     snow_level: Quantiles | None = None
     slr: Quantiles | None = None
     snowfall: Quantiles | None = None
@@ -628,9 +660,9 @@ class TimeSeriesPoint(Model):
     is_night: bool
     condition: HourlyCondition
     condition_text: str
-    condition_icon: HourlyConditionIcon
+    condition_icon: ConditionIcon
     gust_notable: bool | None = None
-    precip_type: PrecipType | None = None
+    precipitation_type: PrecipType | None = None
     inversion: InversionInfo | None = None
     freezing_level: FreezingLevel | None = None
     ensemble: EnsembleStats
@@ -685,7 +717,7 @@ class DailyWind(Model):
 class DailyForecast(Model):
     """One local calendar date's summary.
 
-    ``total_precip`` and ``total_snowfall`` are the distributions of each
+    ``total_precipitation`` and ``total_snowfall`` are the distributions of each
     member's own day total, computed by the server; they are not sums of
     hourly quantiles.
     """
@@ -693,24 +725,22 @@ class DailyForecast(Model):
     date: dt.date
     condition: DailyCondition
     condition_text: str
-    condition_icon: DailyConditionIcon
-    precip_type: PrecipitationType | None = None
+    condition_icon: ConditionIcon
+    precipitation_type: PrecipitationType | None = None
     high: Quantiles
     low: Quantiles
     feels_like_high: Quantiles | None = None
     feels_like_low: Quantiles | None = None
-    feels_like_utci_high: Quantiles | None = None
-    feels_like_utci_low: Quantiles | None = None
-    total_precip: Quantiles
+    total_precipitation: Quantiles
     total_snowfall: Quantiles | None = None
-    precip_probability: float
-    precip_occurrence_probability: float
+    precipitation_probability: float
+    precipitation_occurrence_probability: float
     snow_probability: float
     snow_level_mean: float | None = None
     snow_level: Quantiles | None = None
-    total_precip_if_wet: Quantiles | None = None
+    total_precipitation_if_wet: Quantiles | None = None
     total_snowfall_if_wet: Quantiles | None = None
-    precip_display: PrecipDisplay
+    precipitation_display: PrecipDisplay
     cloud_cover_mean: float | None = None
     wind: DailyWind | None = None
     storm_orientation: StormOrientation | None = None
@@ -770,31 +800,13 @@ class ForecastData(Model):
 
 
 @dataclass(frozen=True, kw_only=True)
-class LegacyHourlyPoint(Model):
-    """A compact hourly point of an elevation forecast (legacy; prefer ``hourly``)."""
-
-    valid_time: dt.datetime | None = None
-    lead_time_hours: int | None = None
-    temperature: Quantiles | None = None
-    snow_level_delta: Quantiles | None = None
-    wind_speed: Quantiles | None = None
-    wind_gust: Quantiles | None = None
-    precipitation: Quantiles | None = None
-    condition: HourlyCondition | None = None
-    condition_text: str | None = None
-    condition_icon: HourlyConditionIcon | None = None
-
-
-@dataclass(frozen=True, kw_only=True)
 class ElevationForecast(Model):
     """A full forecast at one of a location's extra elevations."""
 
     name: str
     elevation: float
-    default: bool | None = None
     lat: float
     lon: float
-    timeseries: list[LegacyHourlyPoint] | None = None
     hourly: list[TimeSeriesPoint] | None = None
     daily: list[DailyForecast] | None = None
     snow_outlook: SnowOutlook | None = None
@@ -806,8 +818,8 @@ class ProbabilityThresholds(Model):
 
     hourly_precipitation: float
     hourly_snowfall: float
-    daily_precip_probability: float
-    daily_precip_occurrence_probability: float
+    daily_precipitation_probability: float
+    daily_precipitation_occurrence_probability: float
     daily_snow_probability: float
 
 
@@ -816,6 +828,8 @@ class ProbabilityResult(Model):
     """One answered probability term, with its full reference class.
 
     Attributes:
+        term: The canonical term the SDK sent (``"snowfall:ge:6.000:24h"``);
+            the SDK matches each result to the caller's term by it.
         variable: The variable asked about.
         op: ``ge`` or ``le``.
         threshold: In the request's units, at the variable's served precision.
@@ -825,13 +839,14 @@ class ProbabilityResult(Model):
         from_: The window's first instant (JSON ``from``).
         to: The window's end (exclusive).
         probability: The share of members meeting the term, 0..1, or ``None``
-            when the served series does not reach the window's end. ``None``
-            is not zero.
+            (see :attr:`null_reason`). ``None`` is not zero.
         members: The members that voted.
-        term: The :class:`~ensemble_weather.Chance` this answers, as the
+        null_reason: Why :attr:`probability` is ``None``; ``None`` otherwise.
+        request: The :class:`~ensemble_weather.Chance` this answers, as the
             caller wrote it.
     """
 
+    term: str
     variable: Variable
     op: Op
     threshold: float
@@ -842,7 +857,8 @@ class ProbabilityResult(Model):
     to: dt.datetime | None = None
     probability: float | None = None
     members: int
-    term: Chance | None = field(default=None, compare=False, metadata={NOT_JSON: True})
+    null_reason: NullReason | None = None
+    request: Chance | None = field(default=None, compare=False, metadata={NOT_JSON: True})
 
     @property
     def window(self) -> Window:
@@ -855,25 +871,31 @@ class WindowTotal(Model):
     """One answered window total: the distribution of each member's total.
 
     Attributes:
+        term: The canonical term the SDK sent (``"precipitation:48h"``); the
+            SDK matches each result to the caller's request by it.
         variable: ``precipitation`` or ``snowfall``.
         window_start_hours: The window's first hour.
         window_end_hours: The window's end hour.
+        aggregation: ``total`` for precipitation and snowfall.
         from_: The window's first instant (JSON ``from``).
         to: The window's end (exclusive).
-        quantiles: The distribution, or ``None`` when the window is not
-            covered by the served series.
+        quantiles: The distribution, or ``None`` (see :attr:`null_reason`).
         members: The members whose values cover the whole window.
-        term: The :class:`~ensemble_weather.Total` this answers.
+        null_reason: Why :attr:`quantiles` is ``None``; ``None`` otherwise.
+        request: The :class:`~ensemble_weather.Total` this answers.
     """
 
+    term: str
     variable: TotalVariable
     window_start_hours: int
     window_end_hours: int
+    aggregation: TotalAggregation
     from_: dt.datetime | None = field(default=None, metadata={JSON_NAME: "from"})
     to: dt.datetime | None = None
     quantiles: Quantiles | None = None
     members: int
-    term: Total | None = field(default=None, compare=False, metadata={NOT_JSON: True})
+    null_reason: NullReason | None = None
+    request: Total | None = field(default=None, compare=False, metadata={NOT_JSON: True})
 
     @property
     def window(self) -> Window:
@@ -931,6 +953,7 @@ class PointInfo(Model):
 class CurrentStation(Model):
     """The station that anchored current conditions."""
 
+    station_id: str
     name: str
     observation_time: dt.datetime
 
@@ -944,13 +967,13 @@ class CurrentConditions(Model):
     feels_like: float | None = None
     condition: str
     condition_text: str
-    condition_icon: str
+    condition_icon: ConditionIcon
     wind_speed: float
     wind_gust: float | None = None
     wind_direction: float
     relative_humidity: float | None = None
     dewpoint: float | None = None
-    precip_probability: float | None = None
+    precipitation_probability: float | None = None
     source: CurrentSource
     station: CurrentStation | None = None
 
@@ -999,8 +1022,9 @@ class ActiveAlert(Model):
 
     id: str
     event: str
-    severity: str
-    urgency: str
+    severity: AlertSeverity
+    urgency: AlertUrgency
+    certainty: AlertCertainty
     headline: str
     onset: dt.datetime | None = None
     expires: dt.datetime
@@ -1023,7 +1047,7 @@ class SensorObservation(Model):
     wind_direction: float | None = None
     pressure: float | None = None
     precipitation: float | None = None
-    precip_rate: float | None = None
+    precipitation_rate: float | None = None
     reflectivity: float | None = None
     pavement_temp: float | None = None
     subsurface_temp: float | None = None
@@ -1067,7 +1091,7 @@ class AlertsResponse(Response):
     attribution: ResponseAttribution
 
 
-# --- runs and storm reports -----------------------------------------------------
+# --- runs -----------------------------------------------------------------------
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -1087,38 +1111,15 @@ class RunEntry(Model):
 
 @dataclass(frozen=True, kw_only=True)
 class RunsResponse(Response):
-    """The served run and the recent runs, newest first."""
+    """The served run and the recent runs, newest first.
+
+    ``next_cursor`` is ``None`` on the last page.
+    """
 
     served: ServedRun | None = None
     runs: list[RunEntry]
     count: int
-
-
-@dataclass(frozen=True, kw_only=True)
-class StormReportCard(Response):
-    """A verified storm: what was forecast against what was observed."""
-
-    id: int
-    location_name: str
-    event_type: str
-    onset_time: dt.datetime
-    end_time: dt.datetime
-    forecast_total_mm: float
-    observed_total_mm: float
-    forecast_snowfall_mm: float | None = None
-    observed_snowfall_mm: float | None = None
-    best_model: str | None = None
-    best_lead_time_hours: int | None = None
-    composite_score: float | None = None
-    headline: str | None = None
-
-
-@dataclass(frozen=True, kw_only=True)
-class StormReportsResponse(Response):
-    """Recent storm reports."""
-
-    reports: list[StormReportCard]
-    count: int
+    next_cursor: str | None = None
 
 
 # --- catalog --------------------------------------------------------------------
@@ -1191,8 +1192,8 @@ class PublicCatalogNearbyStation(Model):
 
     slug: str
     name: str
-    network: str
-    station_status: str
+    network: StationNetwork
+    station_status: StationStatus
     distance_km: float | None = None
     elevation_diff_m: float | None = None
     is_primary: bool
@@ -1212,8 +1213,8 @@ class CatalogTemplateSummary(Model):
     """The page template of a catalog entry (``include=template``)."""
 
     id: str
-    location_type: str | None = None
-    template_variant: str | None = None
+    location_type: LocationType | None = None
+    template_variant: TemplateVariant | None = None
     spec: list[CmsTemplateSection]
 
 
@@ -1232,46 +1233,6 @@ class CatalogResolvedEntry(Model):
 
 
 @dataclass(frozen=True, kw_only=True)
-class CmsAdCreativeContent(Model):
-    """The content of a house ad creative."""
-
-    headline: str | None = None
-    body: str | None = None
-    cta: str | None = None
-    click_url: str | None = None
-    photo_id: str | None = None
-
-
-@dataclass(frozen=True, kw_only=True)
-class CatalogHousePlacement(Model):
-    """A house ad placement."""
-
-    campaign_id: str
-    creative_id: str
-    content: CmsAdCreativeContent
-
-
-@dataclass(frozen=True, kw_only=True)
-class CatalogThirdPartyPlacement(Model):
-    """A third-party ad placement."""
-
-    unit_id: str
-    provider: AdProvider
-    config: dict[str, Any]
-
-
-@dataclass(frozen=True, kw_only=True)
-class CatalogResolvedAdSlot(Model):
-    """A resolved ad slot (``include=ads``)."""
-
-    slot_key: str
-    kind: AdSlotKind
-    house: CatalogHousePlacement | None = None
-    third_party: CatalogThirdPartyPlacement | None = None
-    sizes: list[list[int]]
-
-
-@dataclass(frozen=True, kw_only=True)
 class PublicCatalogLocationDetail(PublicCatalogLocation, Response):
     """A catalog location with its elevations, media and nearby stations."""
 
@@ -1281,7 +1242,6 @@ class PublicCatalogLocationDetail(PublicCatalogLocation, Response):
     nearby_stations: list[PublicCatalogNearbyStation]
     template: CatalogTemplateSummary | None = None
     content: list[CatalogResolvedEntry] | None = None
-    ads: list[CatalogResolvedAdSlot] | None = None
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -1291,12 +1251,12 @@ class PublicCatalogStation(LocationRef):
     county: str | None = None
     country: str | None = None
     aliases: list[str] | None = None
-    network: str | None = None
+    network: StationNetwork | None = None
     source_station_id: str | None = None
     elevation_msl_m: float | None = None
     sensor_height_agl_m: float | None = None
     sensor_capabilities: list[str] | None = None
-    station_status: str | None = None
+    station_status: StationStatus | None = None
     last_report_at: dt.datetime | None = None
     last_report_summary: Any = None
     install_date: dt.date | None = None
@@ -1341,4 +1301,3 @@ class PublicCatalogStationDetail(PublicCatalogStation, Response):
     primary_location: PublicCatalogPrimaryLocation | None = None
     template: CatalogTemplateSummary | None = None
     content: list[CatalogResolvedEntry] | None = None
-    ads: list[CatalogResolvedAdSlot] | None = None

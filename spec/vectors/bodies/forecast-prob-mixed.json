@@ -60,7 +60,10 @@
             "p25": 0.2,
             "p50": 0.6,
             "p75": 1.2,
-            "p90": 2.0
+            "p90": 2.0,
+            "min": 0.0,
+            "max": 3.1,
+            "probability": 0.71
           },
           "wind_speed": {
             "mean": 6.0,
@@ -68,17 +71,21 @@
             "p25": 4.5,
             "p50": 6.0,
             "p75": 7.5,
-            "p90": 9.0
+            "p90": 9.0,
+            "min": 1.5,
+            "max": 11.0
           },
           "wind_direction": {
             "mean": 5.0,
-            "p10": 355.0,
-            "p25": 0.0,
-            "p50": 5.0,
-            "p75": 10.0,
-            "p90": 15.0,
-            "min": 350.0,
-            "max": 20.0
+            "stddev": 12.0,
+            "sector_50": {
+              "from": 355.0,
+              "to": 15.0
+            },
+            "sector_90": {
+              "from": 340.0,
+              "to": 30.0
+            }
           },
           "snow_level": {
             "mean": 900.0,
@@ -86,7 +93,9 @@
             "p25": 750.0,
             "p50": 900.0,
             "p75": 1050.0,
-            "p90": 1200.0
+            "p90": 1200.0,
+            "min": 450.0,
+            "max": 1400.0
           }
         }
       },
@@ -124,7 +133,10 @@
             "p25": 0.2,
             "p50": 0.6,
             "p75": 1.2,
-            "p90": 2.0
+            "p90": 2.0,
+            "min": 0.0,
+            "max": 3.1,
+            "probability": 0.71
           },
           "wind_speed": {
             "mean": 6.0,
@@ -132,17 +144,21 @@
             "p25": 4.5,
             "p50": 6.0,
             "p75": 7.5,
-            "p90": 9.0
+            "p90": 9.0,
+            "min": 1.5,
+            "max": 11.0
           },
           "wind_direction": {
             "mean": 5.0,
-            "p10": 355.0,
-            "p25": 0.0,
-            "p50": 5.0,
-            "p75": 10.0,
-            "p90": 15.0,
-            "min": 350.0,
-            "max": 20.0
+            "stddev": 12.0,
+            "sector_50": {
+              "from": 355.0,
+              "to": 15.0
+            },
+            "sector_90": {
+              "from": 340.0,
+              "to": 30.0
+            }
           },
           "snow_level": {
             "mean": 900.0,
@@ -150,7 +166,9 @@
             "p25": 750.0,
             "p50": 900.0,
             "p75": 1050.0,
-            "p90": 1200.0
+            "p90": 1200.0,
+            "min": 450.0,
+            "max": 1400.0
           }
         }
       },
@@ -188,7 +206,10 @@
             "p25": 0.2,
             "p50": 0.6,
             "p75": 1.2,
-            "p90": 2.0
+            "p90": 2.0,
+            "min": 0.0,
+            "max": 3.1,
+            "probability": 0.71
           },
           "wind_speed": {
             "mean": 6.0,
@@ -196,17 +217,21 @@
             "p25": 4.5,
             "p50": 6.0,
             "p75": 7.5,
-            "p90": 9.0
+            "p90": 9.0,
+            "min": 1.5,
+            "max": 11.0
           },
           "wind_direction": {
             "mean": 5.0,
-            "p10": 355.0,
-            "p25": 0.0,
-            "p50": 5.0,
-            "p75": 10.0,
-            "p90": 15.0,
-            "min": 350.0,
-            "max": 20.0
+            "stddev": 12.0,
+            "sector_50": {
+              "from": 355.0,
+              "to": 15.0
+            },
+            "sector_90": {
+              "from": 340.0,
+              "to": 30.0
+            }
           },
           "snow_level": {
             "mean": 900.0,
@@ -214,7 +239,9 @@
             "p25": 750.0,
             "p50": 900.0,
             "p75": 1050.0,
-            "p90": 1200.0
+            "p90": 1200.0,
+            "min": 450.0,
+            "max": 1400.0
           }
         }
       }
@@ -231,6 +258,7 @@
   },
   "probabilities": [
     {
+      "term": "snow_level:le:1524:24h",
       "variable": "snow_level",
       "op": "le",
       "threshold": 1524,
@@ -240,9 +268,11 @@
       "from": "2026-11-15T00:00:00Z",
       "to": "2026-11-16T00:00:00Z",
       "probability": 0.8,
-      "members": 131
+      "members": 131,
+      "null_reason": null
     },
     {
+      "term": "temperature:ge:-5.0:24h",
       "variable": "temperature",
       "op": "ge",
       "threshold": -5.0,
@@ -252,9 +282,11 @@
       "from": "2026-11-15T00:00:00Z",
       "to": "2026-11-16T00:00:00Z",
       "probability": 0.7,
-      "members": 131
+      "members": 131,
+      "null_reason": null
     },
     {
+      "term": "temperature:le:-5.0:24h",
       "variable": "temperature",
       "op": "le",
       "threshold": -5.0,
@@ -264,9 +296,11 @@
       "from": "2026-11-15T00:00:00Z",
       "to": "2026-11-16T00:00:00Z",
       "probability": 0.3,
-      "members": 131
+      "members": 131,
+      "null_reason": null
     },
     {
+      "term": "wind_speed:ge:15.0:24h",
       "variable": "wind_speed",
       "op": "ge",
       "threshold": 15.0,
@@ -276,9 +310,11 @@
       "from": "2026-11-15T00:00:00Z",
       "to": "2026-11-16T00:00:00Z",
       "probability": 0.05,
-      "members": 131
+      "members": 131,
+      "null_reason": null
     },
     {
+      "term": "wind_speed:ge:15.0:12-36h",
       "variable": "wind_speed",
       "op": "ge",
       "threshold": 15.0,
@@ -288,7 +324,8 @@
       "from": "2026-11-15T12:00:00Z",
       "to": "2026-11-16T12:00:00Z",
       "probability": 0.11,
-      "members": 131
+      "members": 131,
+      "null_reason": null
     }
   ]
 }

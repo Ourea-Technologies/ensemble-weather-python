@@ -54,11 +54,12 @@ def hour(i: int, units: str) -> dict:
         "ensemble": {
             "temperature": t,
             "dewpoint": t,
-            "precipitation": q(0.8, 0.0, 0.2, 0.6, 1.2, 2.0),
-            "wind_speed": q(6.0, 3.0, 4.5, 6.0, 7.5, 9.0),
-            # Circular: the arc runs clockwise from min (350) to max (20).
-            "wind_direction": q(5.0, 355.0, 0.0, 5.0, 10.0, 15.0, min=350.0, max=20.0),
-            "snow_level": q(900.0, 600.0, 750.0, 900.0, 1050.0, 1200.0),
+            "precipitation": q(0.8, 0.0, 0.2, 0.6, 1.2, 2.0, min=0.0, max=3.1, probability=0.71),
+            "wind_speed": q(6.0, 3.0, 4.5, 6.0, 7.5, 9.0, min=1.5, max=11.0),
+            # Circular (CircularStats): each sector runs clockwise from `from`
+            # to `to`, so `from` may be numerically greater than `to`.
+            "wind_direction": {"mean": 5.0, "stddev": 12.0, "sector_50": {"from": 355.0, "to": 15.0}, "sector_90": {"from": 340.0, "to": 30.0}},
+            "snow_level": q(900.0, 600.0, 750.0, 900.0, 1050.0, 1200.0, min=450.0, max=1400.0),
         },
     }
 
@@ -79,8 +80,10 @@ def forecast(units: str = "metric", hours: int = 3, **extra: object) -> dict:
     }
 
 
-def prob(variable: str, op: str, threshold: float, start: int, end: int, aggregation: str, p: float | None, members: int = 131) -> dict:
+def prob(variable: str, op: str, threshold: float, start: int, end: int, aggregation: str, p: float | None, members: int = 131, term: str | None = None) -> dict:
+    # `term` is the canonical spelling the server echoes (the request's own).
     return {
+        "term": term,
         "variable": variable,
         "op": op,
         "threshold": threshold,
@@ -91,15 +94,21 @@ def prob(variable: str, op: str, threshold: float, start: int, end: int, aggrega
         "to": f"2026-11-{15 + end // 24}T{end % 24:02d}:00:00Z" if p is not None else None,
         "probability": p,
         "members": members,
+        "null_reason": None if p is not None else "window_not_covered",
     }
 
 
 def error(code: str, message: str) -> dict:
-    return {"error": code, "message": message}
+    return {
+        "error": code,
+        "message": message,
+        "request_id": "01JBQ6ZK3V8M4T2N7XQH5R9W0C",
+        "doc_url": f"https://docs.oureawx.com/features/errors/#{code.lower()}",
+    }
 
 
 FC_PATH = "/api/v1/locations/or/mt-hood-meadows"
-FC_CALL = {"operation": "getLocationForecast", "args": {"state": "or", "name": "mt-hood-meadows"}}
+FC_CALL = {"operation": "getLocationForecast", "args": {"state": "or", "slug": "mt-hood-meadows"}}
 
 BODIES: dict[str, object] = {
     "forecast-metric.json": forecast(),
@@ -108,42 +117,48 @@ BODIES: dict[str, object] = {
         "imperial",
         probabilities=[
             # In the order SENT (canonical), not the caller's order.
-            prob("snowfall", "ge", 6, 0, 24, "total", 0.42),
-            prob("snowfall", "ge", 12, 0, 240, "total", None, members=0),
-            prob("temperature", "le", 32, 0, 12, "any", 0.97),
+            prob("snowfall", "ge", 6, 0, 24, "total", 0.42, term="snowfall:ge:6.000:24h"),
+            prob("snowfall", "ge", 12, 0, 240, "total", None, members=0, term="snowfall:ge:12.000:240h"),
+            prob("temperature", "le", 32, 0, 12, "any", 0.97, term="temperature:le:32.0:12h"),
         ],
     ),
     "forecast-totals.json": forecast(
         "metric",
         window_totals=[
             {
+                "term": "precipitation:48h",
                 "variable": "precipitation",
                 "window_start_hours": 0,
                 "window_end_hours": 48,
                 "from": "2026-11-15T00:00:00Z",
                 "to": "2026-11-17T00:00:00Z",
+                "aggregation": "total",
                 "quantiles": q(31.0, 12.0, 20.0, 29.0, 40.0, 52.0, min=4.0, max=88.0),
                 "members": 131,
+                "null_reason": None,
             },
             {
+                "term": "snowfall:240h",
                 "variable": "snowfall",
                 "window_start_hours": 0,
                 "window_end_hours": 240,
                 "from": None,
                 "to": None,
+                "aggregation": "total",
                 "quantiles": None,
                 "members": 0,
+                "null_reason": "window_not_covered",
             },
         ],
     ),
     "forecast-prob-mixed.json": forecast(
         probabilities=[
             # In the order SENT (canonical).
-            prob("snow_level", "le", 1524, 0, 24, "any", 0.8),
-            prob("temperature", "ge", -5.0, 0, 24, "any", 0.7),
-            prob("temperature", "le", -5.0, 0, 24, "any", 0.3),
-            prob("wind_speed", "ge", 15.0, 0, 24, "any", 0.05),
-            prob("wind_speed", "ge", 15.0, 12, 36, "any", 0.11),
+            prob("snow_level", "le", 1524, 0, 24, "any", 0.8, term="snow_level:le:1524:24h"),
+            prob("temperature", "ge", -5.0, 0, 24, "any", 0.7, term="temperature:ge:-5.0:24h"),
+            prob("temperature", "le", -5.0, 0, 24, "any", 0.3, term="temperature:le:-5.0:24h"),
+            prob("wind_speed", "ge", 15.0, 0, 24, "any", 0.05, term="wind_speed:ge:15.0:24h"),
+            prob("wind_speed", "ge", 15.0, 12, 36, "any", 0.11, term="wind_speed:ge:15.0:12-36h"),
         ],
     ),
     "catalog-detail.json": {**LOCATION, "elevations": [], "photos": [], "webcams": [], "nearby_stations": []},
@@ -373,7 +388,7 @@ CASES: list[dict] = [
             "expect": {"error": {"category": cat, "code": code, "status": status}, "requests": 1},
         }
         for name, desc, call, status, body, cat, code in [
-            ("outside-coverage", "OUTSIDE_COVERAGE maps by code, not status.", {"operation": "getPointForecast", "args": {"lat": 45.0, "lon": 10.0}}, 400, "error-outside-coverage.json", "outside_coverage", "OUTSIDE_COVERAGE"),
+            ("outside-coverage", "OUTSIDE_COVERAGE maps by code, not status.", {"operation": "getPointForecast", "args": {"lat": 45.0, "lon": 10.0}}, 404, "error-outside-coverage.json", "outside_coverage", "OUTSIDE_COVERAGE"),
             ("pro-required", "PRO_REQUIRED is a permission error.", {"operation": "getPointForecast", "args": {"lat": 45.3, "lon": -121.7}}, 403, "error-pro-required.json", "permission", "PRO_REQUIRED"),
             ("invalid-key", "INVALID_API_KEY is an authentication error, not retried.", fc(), 401, "error-invalid-key.json", "authentication", "INVALID_API_KEY"),
             ("bad-request", "BAD_REQUEST is an invalid-request error.", fc(), 400, "error-bad-request.json", "invalid_request", "BAD_REQUEST"),
@@ -510,7 +525,7 @@ CASES: list[dict] = [
         "name": "canonical/defaults-omitted",
         "description": "Parameters set explicitly to their defaults are not sent; the state is lowercased.",
         "client": {},
-        "call": {"operation": "getLocationForecast", "args": {"state": "OR", "name": "mt-hood-meadows", "units": "metric", "max_hours": 24, "nowcast": True, "daily": True, "hourly": True, "include_past": False, "members": False, "models": False}},
+        "call": {"operation": "getLocationForecast", "args": {"state": "OR", "slug": "mt-hood-meadows", "units": "metric", "max_hours": 24, "nowcast": True, "daily": True, "hourly": True, "include_past": False, "members": False, "models": False}},
         "expect_request": {"method": "GET", "path": FC_PATH, "query_string": ""},
         "responses": [ok("forecast-metric.json")],
         "expect": {"result": {"location.slug": "mt-hood-meadows"}},
@@ -615,7 +630,7 @@ CASES: list[dict] = [
         "name": "redirect/follows-same-host",
         "description": "A 301 on the same host is followed, keeping the key.",
         "client": {"api_key": "ow_pro"},
-        "call": {"operation": "getLocationForecast", "args": {"state": "oregon", "name": "mt-hood-meadows"}},
+        "call": {"operation": "getLocationForecast", "args": {"state": "oregon", "slug": "mt-hood-meadows"}},
         "expect_requests": [
             {"method": "GET", "path": "/api/v1/locations/oregon/mt-hood-meadows", "headers": {"X-API-Key": "ow_pro"}},
             {"method": "GET", "path": FC_PATH, "headers": {"X-API-Key": "ow_pro"}},
@@ -664,7 +679,7 @@ CASES: list[dict] = [
         "name": "cache/keys-never-mix",
         "description": "An entry stored under one API key is never revalidated or served under another (or keyless).",
         "client": {"api_key": "ow_a"},
-        "calls": [fc(), {"operation": "getLocationForecast", "args": {"state": "or", "name": "mt-hood-meadows"}, "with_api_key": "ow_b"}],
+        "calls": [fc(), {"operation": "getLocationForecast", "args": {"state": "or", "slug": "mt-hood-meadows"}, "with_api_key": "ow_b"}],
         "expect_requests": [
             {"method": "GET", "headers": {"X-API-Key": "ow_a"}, "headers_absent": ["If-None-Match"]},
             {"method": "GET", "headers": {"X-API-Key": "ow_b"}, "headers_absent": ["If-None-Match"]},

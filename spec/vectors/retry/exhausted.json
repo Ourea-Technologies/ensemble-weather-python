@@ -6,7 +6,7 @@
     "operation": "getLocationForecast",
     "args": {
       "state": "or",
-      "name": "mt-hood-meadows"
+      "slug": "mt-hood-meadows"
     }
   },
   "expect_request": {

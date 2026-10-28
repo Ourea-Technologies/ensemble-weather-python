@@ -14,7 +14,7 @@
   },
   "responses": [
     {
-      "status": 400,
+      "status": 404,
       "headers": {
         "Content-Type": "application/json"
       },
@@ -25,7 +25,7 @@
     "error": {
       "category": "outside_coverage",
       "code": "OUTSIDE_COVERAGE",
-      "status": 400
+      "status": 404
     },
     "requests": 1
   }

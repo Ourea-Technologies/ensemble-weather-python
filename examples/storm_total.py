@@ -16,7 +16,7 @@ with Client() as client:
 for total in forecast.window_totals:
     span = f"{total.window_start_hours}-{total.window_end_hours} h"
     if total.quantiles is None:
-        print(f"{total.variable} {span}: not covered by the served forecast")
+        print(f"{total.variable} {span}: no distribution ({total.null_reason})")
         continue
     q = total.quantiles
     print(f"{total.variable} {span}: median {q.median} in, p10-p90 {q.range(10, 90)} in")

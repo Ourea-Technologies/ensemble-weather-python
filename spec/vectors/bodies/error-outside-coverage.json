@@ -1,4 +1,6 @@
 {
   "error": "OUTSIDE_COVERAGE",
-  "message": "45.0,10.0 is outside the forecast domain (CONUS)."
+  "message": "45.0,10.0 is outside the forecast domain (CONUS).",
+  "request_id": "01JBQ6ZK3V8M4T2N7XQH5R9W0C",
+  "doc_url": "https://docs.oureawx.com/features/errors/#outside_coverage"
 }

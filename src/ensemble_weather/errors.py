@@ -3,7 +3,7 @@
 Everything the SDK raises derives from :class:`OureaError`. Errors that come
 with an HTTP response derive from :class:`APIError` and carry its ``status``,
 ``code`` (the API's error string, verbatim, even when this SDK does not know
-it), ``message`` and ``request_id``. Catch the subclass for the category you
+it), ``message``, ``request_id`` and ``doc_url``. Catch the subclass for the category you
 care about::
 
     try:
@@ -19,7 +19,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, ClassVar
 
 if TYPE_CHECKING:
-    from .models import RateLimit
+    from .models import NearestLocation, RateLimit
 
 __all__ = [
     "APIConnectionError",
@@ -102,7 +102,10 @@ class APIError(OureaError):
         code: The API's error code (``"LOCATION_NOT_FOUND"``), verbatim, or
             ``None`` when the body was not the API's JSON error shape.
         message: The API's message.
-        request_id: The ``X-Request-Id`` response header, for support.
+        request_id: The request's id, for support (the body's
+            ``request_id``, else the ``X-Request-Id`` header).
+        doc_url: The documentation of the error code, when the body names it.
+        param: The query parameter a ``400`` is about, when it names one.
         retry_after: Seconds the server asked the client to wait, if it did.
         rate_limit: The rate-limit state the response reported, if any.
     """
@@ -116,6 +119,8 @@ class APIError(OureaError):
         status: int,
         code: str | None = None,
         request_id: str | None = None,
+        doc_url: str | None = None,
+        param: str | None = None,
         retry_after: float | None = None,
         rate_limit: RateLimit | None = None,
     ) -> None:
@@ -124,6 +129,8 @@ class APIError(OureaError):
         self.status = status
         self.code = code
         self.request_id = request_id
+        self.doc_url = doc_url
+        self.param = param
         self.retry_after = retry_after
         self.rate_limit = rate_limit
 
@@ -150,13 +157,20 @@ class AuthenticationError(APIError):
 
 
 class PermissionDeniedError(APIError):
-    """The key's tier does not allow this request, e.g. ``PRO_REQUIRED`` (403)."""
+    """The key's tier does not allow this request, e.g. ``PRO_REQUIRED`` (403).
+
+    Attributes:
+        nearest_location: On a ``PRO_REQUIRED`` coordinate request, the
+            nearest named location whose forecast answers without a key, if
+            one is close enough; else ``None``.
+    """
 
     category = "permission"
+    nearest_location: NearestLocation | None = None
 
 
 class NotFoundError(APIError):
-    """The location, run or report does not exist (404, 410)."""
+    """The location or resource does not exist (404, 410)."""
 
     category = "not_found"
 
@@ -168,7 +182,7 @@ class InvalidRequestError(APIError):
 
 
 class OutsideCoverageError(APIError):
-    """The coordinates are outside the forecast domain (``OUTSIDE_COVERAGE``)."""
+    """The coordinates are outside the forecast domain (``OUTSIDE_COVERAGE``, a 404)."""
 
     category = "outside_coverage"
 
@@ -185,28 +199,25 @@ class UnavailableError(APIError):
     category = "unavailable"
 
 
+# The public spec's ErrorResponse.error codes (BEHAVIOR 8). Any other code keeps
+# its string and maps by status.
 _BY_CODE: dict[str, type[APIError]] = {
     "INVALID_API_KEY": AuthenticationError,
     "UNAUTHORIZED": AuthenticationError,
     "PRO_REQUIRED": PermissionDeniedError,
-    "FORBIDDEN": PermissionDeniedError,
     "LOCATION_NOT_FOUND": NotFoundError,
-    "MODEL_RUN_NOT_FOUND": NotFoundError,
     "NOT_FOUND": NotFoundError,
-    "GONE": NotFoundError,
     "BAD_REQUEST": InvalidRequestError,
     "INVALID_COORDINATES": InvalidRequestError,
     "INVALID_ELEVATION": InvalidRequestError,
-    "INVALID_MAX_HOURS": InvalidRequestError,
     "ELEVATION_REQUIRED": InvalidRequestError,
-    "AMBIGUOUS": InvalidRequestError,
-    "FEELS_LIKE_UNAVAILABLE": InvalidRequestError,
     "OUTSIDE_COVERAGE": OutsideCoverageError,
     "TOO_MANY_REQUESTS": RateLimitError,
     "FORECAST_UNAVAILABLE": UnavailableError,
     "TIMEOUT": UnavailableError,
     "INTERNAL_ERROR": UnavailableError,
     "DATABASE_ERROR": UnavailableError,
+    "AUTH_UNAVAILABLE": UnavailableError,
 }
 
 _BY_STATUS: dict[int, type[APIError]] = {

@@ -1,4 +1,6 @@
 {
   "error": "INVALID_API_KEY",
-  "message": "The API key is not valid."
+  "message": "The API key is not valid.",
+  "request_id": "01JBQ6ZK3V8M4T2N7XQH5R9W0C",
+  "doc_url": "https://docs.oureawx.com/features/errors/#invalid_api_key"
 }

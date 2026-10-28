@@ -1,4 +1,6 @@
 {
   "error": "BAD_REQUEST",
-  "message": "prob term 'snowfall:gt:6' has an unknown op 'gt'."
+  "message": "prob term 'snowfall:gt:6' has an unknown op 'gt'.",
+  "request_id": "01JBQ6ZK3V8M4T2N7XQH5R9W0C",
+  "doc_url": "https://docs.oureawx.com/features/errors/#bad_request"
 }

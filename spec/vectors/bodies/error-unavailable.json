@@ -1,4 +1,6 @@
 {
   "error": "FORECAST_UNAVAILABLE",
-  "message": "No forecast is available for this location yet."
+  "message": "No forecast is available for this location yet.",
+  "request_id": "01JBQ6ZK3V8M4T2N7XQH5R9W0C",
+  "doc_url": "https://docs.oureawx.com/features/errors/#forecast_unavailable"
 }

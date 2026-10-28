@@ -1,4 +1,6 @@
 {
   "error": "PRO_REQUIRED",
-  "message": "Forecasts at arbitrary coordinates need a Pro API key."
+  "message": "Forecasts at arbitrary coordinates need a Pro API key.",
+  "request_id": "01JBQ6ZK3V8M4T2N7XQH5R9W0C",
+  "doc_url": "https://docs.oureawx.com/features/errors/#pro_required"
 }
