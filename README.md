@@ -55,7 +55,7 @@ export OUREA_API_KEY=ow_...   # or: Client("ow_...")
   plume view), plus search and the catalog.
 - **Free key**: the same, with your own rate-limit budget.
 - **Pro key**: the 15-day horizon, forecasts and current conditions at any
-  coordinates (`get_point_forecast`, `current_at`), every member variable,
+  coordinates (`get_point_forecast`, `get_point_current`), every member variable,
   per-model breakdowns and historical runs.
 
 See [pricing](https://oureawx.com/pricing). The key is sent only as

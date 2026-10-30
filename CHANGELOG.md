@@ -13,9 +13,10 @@ server's public spec byte for byte). Breaking, as 0.x allows.
 
 ### Changed
 
-- `forecast_at` is renamed `get_point_forecast` (on `Client` and
-  `AsyncClient`), matching the operation `getPointForecast`; there is no
-  alias.
+- The coordinate methods follow the operation ids: `forecast_at` is
+  `get_point_forecast`, `current_at` is `get_point_current`, `alerts_at` is
+  `get_point_alerts` and `nearby_at` is `get_point_nearby` (on `Client` and
+  `AsyncClient`). There are no aliases.
 - The location argument of `forecast`, `current`, `alerts` and `nearby` is
   `slug` (was `name`), as the path parameter `{slug}`.
 - `precip_*` fields are `precipitation_*`: `DailyForecast`

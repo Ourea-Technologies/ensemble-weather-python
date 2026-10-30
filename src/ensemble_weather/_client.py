@@ -359,7 +359,7 @@ class Client:
             )
         )
 
-    def current_at(
+    def get_point_current(
         self,
         lat: float,
         lon: float,
@@ -390,7 +390,7 @@ class Client:
         path = _location_path(location, slug) + "/alerts"
         return self._run(self._core.alerts(path, Query(), "getLocationAlerts"))
 
-    def alerts_at(self, lat: float, lon: float) -> AlertsResponse:
+    def get_point_alerts(self, lat: float, lon: float) -> AlertsResponse:
         """Active alerts at coordinates (``getAlertsByCoordinates``). Pro."""
         query = _coordinates(lat, lon)
         return self._run(self._core.alerts("/api/v1/alerts", query, "getAlertsByCoordinates"))
@@ -413,7 +413,7 @@ class Client:
             )
         )
 
-    def nearby_at(
+    def get_point_nearby(
         self,
         lat: float,
         lon: float,

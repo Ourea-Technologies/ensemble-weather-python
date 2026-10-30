@@ -362,7 +362,7 @@ class AsyncClient:
             )
         )
 
-    async def current_at(
+    async def get_point_current(
         self,
         lat: float,
         lon: float,
@@ -393,7 +393,7 @@ class AsyncClient:
         path = _location_path(location, slug) + "/alerts"
         return await self._run(self._core.alerts(path, Query(), "getLocationAlerts"))
 
-    async def alerts_at(self, lat: float, lon: float) -> AlertsResponse:
+    async def get_point_alerts(self, lat: float, lon: float) -> AlertsResponse:
         """Active alerts at coordinates (``getAlertsByCoordinates``). Pro."""
         query = _coordinates(lat, lon)
         return await self._run(self._core.alerts("/api/v1/alerts", query, "getAlertsByCoordinates"))
@@ -416,7 +416,7 @@ class AsyncClient:
             )
         )
 
-    async def nearby_at(
+    async def get_point_nearby(
         self,
         lat: float,
         lon: float,

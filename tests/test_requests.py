@@ -218,19 +218,19 @@ def test_every_route_builds_its_path(
             "include=nowcast_hours",
         ),
         (
-            lambda: client.current_at(45.5, -122.5, elevation_m=100),
+            lambda: client.get_point_current(45.5, -122.5, elevation_m=100),
             "/api/v1/current",
             "elevation_m=100&lat=45.5&lon=-122.5",
         ),
         (lambda: client.alerts("or", "x"), "/api/v1/locations/or/x/alerts", ""),
-        (lambda: client.alerts_at(45.5, -122.5), "/api/v1/alerts", "lat=45.5&lon=-122.5"),
+        (lambda: client.get_point_alerts(45.5, -122.5), "/api/v1/alerts", "lat=45.5&lon=-122.5"),
         (
             lambda: client.nearby("or/x", limit=3, radius_km=25),
             "/api/v1/locations/or/x/nearby",
             "radius_km=25",
         ),
         (
-            lambda: client.nearby_at(45.5, -122.5, limit=5),
+            lambda: client.get_point_nearby(45.5, -122.5, limit=5),
             "/api/v1/nearby",
             "lat=45.5&limit=5&lon=-122.5",
         ),
