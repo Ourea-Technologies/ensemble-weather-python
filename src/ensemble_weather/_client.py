@@ -275,7 +275,7 @@ class Client:
         )
         return self._run(call)
 
-    def forecast_at(
+    def get_point_forecast(
         self,
         lat: float,
         lon: float,

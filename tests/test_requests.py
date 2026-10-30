@@ -204,7 +204,7 @@ def test_bad_location_strings(bad: str, make_client: Callable[..., Client]) -> N
 @pytest.mark.parametrize(("lat", "lon"), [(91, 0), (0, -181), (float("nan"), 0)])
 def test_bad_coordinates(lat: float, lon: float, make_client: Callable[..., Client]) -> None:
     with pytest.raises(UsageError):
-        make_client().forecast_at(lat, lon)
+        make_client().get_point_forecast(lat, lon)
 
 
 def test_every_route_builds_its_path(

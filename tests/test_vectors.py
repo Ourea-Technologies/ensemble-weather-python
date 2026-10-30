@@ -100,7 +100,7 @@ def _chance(term: dict[str, Any]) -> Chance:
 
 _METHODS = {
     "getLocationForecast": "forecast",
-    "getPointForecast": "forecast_at",
+    "getPointForecast": "get_point_forecast",
     "getCurrentConditions": "current",
     "getCurrentByCoordinates": "current_at",
     "getLocationAlerts": "alerts",

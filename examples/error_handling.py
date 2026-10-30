@@ -12,7 +12,7 @@ from ensemble_weather import (
 with Client() as client:
     # Coordinates outside the forecast domain (CONUS).
     try:
-        client.forecast_at(45.0, 10.0)
+        client.get_point_forecast(45.0, 10.0)
     except OutsideCoverageError as err:
         print(f"outside coverage: {err.code}: {err.message}")
     except PermissionDeniedError as err:  # no Pro key: PRO_REQUIRED comes first
@@ -20,7 +20,7 @@ with Client() as client:
 
     # A refused coordinate request may name a nearby location that needs no key.
     try:
-        client.forecast_at(45.33, -121.67)
+        client.get_point_forecast(45.33, -121.67)
     except PermissionDeniedError as err:
         near = err.nearest_location
         if near is not None:

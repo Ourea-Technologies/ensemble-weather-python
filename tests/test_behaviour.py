@@ -192,7 +192,7 @@ def test_pro_required_names_the_nearest_location(
     body = {"error": "PRO_REQUIRED", "message": "Pro.", "nearest_location": near}
     recorder.add(403, json=body)
     with pytest.raises(PermissionDeniedError) as caught:
-        make_client().forecast_at(45.33, -121.67)
+        make_client().get_point_forecast(45.33, -121.67)
     assert caught.value.nearest_location is not None
     assert caught.value.nearest_location.url == "/api/v1/locations/or/mt-hood-meadows"
     assert caught.value.nearest_location.distance_km == 4.25

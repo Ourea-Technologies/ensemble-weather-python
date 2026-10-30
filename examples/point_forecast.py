@@ -13,7 +13,7 @@ if not os.environ.get("OUREA_API_KEY"):
     sys.exit(0)
 
 with Client() as client:
-    forecast = client.forecast_at(45.3311, -121.6649, elevation_m=2000, max_hours=48)
+    forecast = client.get_point_forecast(45.3311, -121.6649, elevation_m=2000, max_hours=48)
 
 point = forecast.point
 if point is not None:

@@ -278,7 +278,7 @@ class AsyncClient:
         )
         return await self._run(call)
 
-    async def forecast_at(
+    async def get_point_forecast(
         self,
         lat: float,
         lon: float,

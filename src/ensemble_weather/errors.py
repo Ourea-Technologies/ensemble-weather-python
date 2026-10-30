@@ -7,7 +7,7 @@ it), ``message``, ``request_id`` and ``doc_url``. Catch the subclass for the cat
 care about::
 
     try:
-        client.forecast_at(45.0, 10.0)
+        client.get_point_forecast(45.0, 10.0)
     except OutsideCoverageError as err:
         print(err.code, err.message)
 

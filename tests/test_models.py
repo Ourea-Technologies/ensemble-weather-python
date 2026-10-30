@@ -22,7 +22,7 @@ OUT_OF_SCOPE = {"getMapsToken"}  # BEHAVIOR 3: a web-map credential, not in the 
 # operationId -> the method that exposes it (the vectors runner uses the same names).
 EXPOSED = {
     "getLocationForecast": "forecast",
-    "getPointForecast": "forecast_at",
+    "getPointForecast": "get_point_forecast",
     "getCurrentConditions": "current",
     "getCurrentByCoordinates": "current_at",
     "getLocationAlerts": "alerts",

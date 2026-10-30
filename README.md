@@ -55,7 +55,7 @@ export OUREA_API_KEY=ow_...   # or: Client("ow_...")
   plume view), plus search and the catalog.
 - **Free key**: the same, with your own rate-limit budget.
 - **Pro key**: the 15-day horizon, forecasts and current conditions at any
-  coordinates (`forecast_at`, `current_at`), every member variable,
+  coordinates (`get_point_forecast`, `current_at`), every member variable,
   per-model breakdowns and historical runs.
 
 See [pricing](https://oureawx.com/pricing). The key is sent only as
@@ -130,7 +130,7 @@ response at all you get `APIConnectionError`; a call refused before sending
 from ensemble_weather import OutsideCoverageError
 
 try:
-    client.forecast_at(45.0, 10.0)
+    client.get_point_forecast(45.0, 10.0)
 except OutsideCoverageError as err:
     print(err.code, err.message)
 ```
