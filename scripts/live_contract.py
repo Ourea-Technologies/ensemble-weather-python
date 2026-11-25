@@ -34,7 +34,7 @@ def main() -> int:
         client.alerts("or/mt-hood-meadows")
         client.runs(limit=2)
         client.list_catalog_stations(limit=2)  # may be empty: the shape is what is checked
-        # The routes added with spec 15bdeb5 (server 256cd770).
+        # The routes added with spec 1f97e6a (server 256cd770).
         plume = client.forecast("or/mt-hood-meadows", members="plume", max_hours=12)
         assert plume.forecast.plume is not None
         ranked = client.explore("snow_5d", limit=3)

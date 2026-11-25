@@ -107,6 +107,33 @@ A named location is the pair (state, slug). An SDK may accept `"or/mt-hood-meado
 as one string (split on its one `/`), but it sends the two path segments
 percent-encoded.
 
+### 3.0 Names: no stutter
+
+No public name repeats a word of the namespace it is read in (Harrison,
+2026-11-24). The namespace is the documented path: the package or module
+a user imports from, the type that holds a member, or the client that holds
+a method. So it is `client.forecast(...)` or `client.get_point_forecast(...)`,
+not `client.forecasts.get_forecast()`; Go `ensembleweather.Client`, not
+`ensembleweather.EnsembleWeatherClient`; Rust `ensemble_weather::Forecast`,
+not `ensemble_weather::forecast::ForecastForecast`.
+
+- The method names in this section's table and in SDK-STANDARD.md stay
+  (the `getPoint*` names among them). They hold no namespace word in
+  context.
+- Where the language itself requires a word, its idiom wins:
+  - an exception's `Error` or `Exception` suffix (Python, Java, Kotlin,
+    .NET, Swift);
+  - Go's type-prefixed constants (`ConditionIconSnow`);
+  - R's `ew_` prefix;
+  - .NET's `services.AddEnsembleWeather()`.
+- Response fields keep the wire's names (the spec's, in the language's
+  case), so every SDK and the API reference read alike. When a wire name
+  stutters in context (`ForecastResponse.forecast`, `CurrentResponse.current`,
+  `ProbabilityResult.probability`), the fix belongs in the API, not in one
+  SDK.
+- An SDK-owned name, such as a module, a type that is not a schema, or a
+  method, never stutters. Rename it before its first release.
+
 ### 3.1 Canonical URLs: one request, one edge-cache entry
 
 Cloudflare sits in front of the API and keys its cache on the **URL alone**.

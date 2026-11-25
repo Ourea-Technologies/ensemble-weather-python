@@ -32,10 +32,11 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Iterator, Sequence
     from types import TracebackType
 
+    from ._cache import Cache
     from ._core import Prepared
-    from .cache import Cache
     from .enums import AlertClass, ExploreMetric, LocationType, StationStatus, TemplateVariant
-    from .models import (
+    from .probabilities import Chance, Total
+    from .types import (
         AlertOutlineCollection,
         AlertsResponse,
         AttributionRegistry,
@@ -64,7 +65,6 @@ if TYPE_CHECKING:
         SnowpackResponse,
         SnowTrendResponse,
     )
-    from .probabilities import Chance, Total
 
 __all__ = ["Client"]
 

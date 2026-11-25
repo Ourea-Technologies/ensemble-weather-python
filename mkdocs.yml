@@ -27,7 +27,7 @@ nav:
   - API reference:
       - Clients: reference/clients.md
       - Probabilities: reference/probabilities.md
-      - Models: reference/models.md
+      - Types: reference/types.md
       - Enumerations: reference/enums.md
       - Errors: reference/errors.md
       - Cache: reference/cache.md

@@ -20,7 +20,7 @@ from ensemble_weather import (
     ResponseTooLargeError,
     UnavailableError,
 )
-from ensemble_weather.models import ForecastResponse
+from ensemble_weather.types import ForecastResponse
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator, Callable, Iterator

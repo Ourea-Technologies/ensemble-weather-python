@@ -28,7 +28,7 @@ print(forecast.probabilities[0].probability)
 - [`Client`][ensemble_weather.Client] and
   [`AsyncClient`][ensemble_weather.AsyncClient] have one method per API
   operation, and both work as context managers.
-- Every value is a [`Quantiles`][ensemble_weather.models.Quantiles]
+- Every value is a [`Quantiles`][ensemble_weather.types.Quantiles]
   distribution computed by the server.
 - Ask for probabilities with [`Chance`][ensemble_weather.Chance] and storm
   totals with [`Total`][ensemble_weather.Total]; the SDK never computes them.

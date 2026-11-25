@@ -20,9 +20,9 @@ import math
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, TypeVar
 
+from ._errors import UsageError
 from ._units import check_unit, convert, format_rounded, precision, request_unit
 from .enums import Aggregation, Op, OpenEnum, TotalVariable, Unit, UnitSystem, Variable
-from .errors import UsageError
 
 if TYPE_CHECKING:
     from collections.abc import Sequence

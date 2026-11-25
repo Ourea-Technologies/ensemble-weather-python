@@ -22,6 +22,7 @@ from typing import TYPE_CHECKING, Any, TypeVar
 import httpx
 
 from ._decode import JSON_NAME, NOT_JSON, decode_model, encode
+from ._errors import UsageError
 from .enums import (
     Aggregation,
     AlertCertainty,
@@ -61,7 +62,6 @@ from .enums import (
     Variable,
     WindStatus,
 )
-from .errors import UsageError
 from .probabilities import Chance, Total, Window
 
 if TYPE_CHECKING:

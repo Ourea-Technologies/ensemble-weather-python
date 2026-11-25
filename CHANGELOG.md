@@ -11,7 +11,7 @@ contract v1.
 ## [0.1.0] - 2026-11-24
 
 The first release on PyPI. Targets the v1 contract at ensemble-weather-spec
-15bdeb5 (the server's public spec at 256cd770, byte for byte).
+1f97e6a (the server's public spec at 256cd770, byte for byte).
 
 ### Added since the v1 contract of 2026-10-27
 
@@ -55,6 +55,12 @@ The first release on PyPI. Targets the v1 contract at ensemble-weather-spec
 
 ### Changed
 
+- No name stutters (BEHAVIOR.md 3.0): the response types' module
+  `ensemble_weather.models` is `ensemble_weather.types` (so not
+  `models.ModelEntry`), and the `cache` and `errors` modules are private:
+  import `Cache`, `CacheEntry`, `MemoryCache` and every exception from
+  `ensemble_weather` itself (not `cache.CacheEntry` or
+  `errors.NotFoundError`).
 - `LocationElevation` is `ElevationSummary`, the spec's name, and has
   `display_name`. `MembersCumulative` holds `MemberQuantiles`.
 

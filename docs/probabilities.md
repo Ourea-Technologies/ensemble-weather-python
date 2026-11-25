@@ -61,7 +61,7 @@ did not send is `None`. `median` is the p50. `range(10, 90)` and
 (there is no interpolation).
 
 Wind direction is not a `Quantiles` but a
-[`CircularStats`][ensemble_weather.models.CircularStats]: `mean`, `stddev`,
+[`CircularStats`][ensemble_weather.types.CircularStats]: `mean`, `stddev`,
 and the sectors `sector_50` and `sector_90`, each running clockwise from
 `from_` to `to`, so `to` can be numerically less than `from_` (`350` to `20`
 crosses north). The SDK leaves it as sent.

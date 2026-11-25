@@ -10,10 +10,10 @@ import pytest
 import yaml
 
 from conftest import json_body
-from ensemble_weather import AsyncClient, Client, Quantiles, UsageError, models
+from ensemble_weather import AsyncClient, Client, Quantiles, UsageError, types
 from ensemble_weather._decode import _fields
+from ensemble_weather._errors import error_class
 from ensemble_weather.enums import LocationType, UnitSystem
-from ensemble_weather.errors import error_class
 
 SPEC = Path(__file__).resolve().parent.parent / "spec" / "openapi" / "v1" / "openapi.yaml"
 _LOADER = getattr(yaml, "CSafeLoader", yaml.SafeLoader)
@@ -94,8 +94,8 @@ def test_every_schema_has_a_model() -> None:
     for name in OPENAPI["components"]["schemas"]:
         if name in elsewhere:
             continue
-        assert hasattr(models, name), f"no model for schema {name}"
-    assert hasattr(models, "ModelStats")
+        assert hasattr(types, name), f"no model for schema {name}"
+    assert hasattr(types, "ModelStats")
 
 
 def _schema_fields(schema: dict[str, Any]) -> set[str]:
@@ -111,7 +111,7 @@ def test_every_schema_field_has_a_model_field() -> None:
     # Field-level drift: every property of every modelled schema is read.
     missing = []
     for name, schema in OPENAPI["components"]["schemas"].items():
-        model = getattr(models, name, None)
+        model = getattr(types, name, None)
         if not (isinstance(model, type) and dataclasses.is_dataclass(model)):
             continue
         have = {f.json for f in _fields(model)}
@@ -158,7 +158,7 @@ def _examples() -> list[Any]:
 
 @pytest.mark.parametrize(("schema", "example"), _examples())
 def test_openapi_examples_round_trip(schema: str, example: dict[str, Any]) -> None:
-    cls = getattr(models, schema)
+    cls = getattr(types, schema)
     model = cls.from_dict(example)
     assert _unknown_keys(example, model.to_dict(), "$") == [], "example fields the model drops"
     assert cls.from_dict(model.to_dict()) == model
@@ -170,9 +170,9 @@ def test_openapi_examples_round_trip(schema: str, example: dict[str, Any]) -> No
 )
 def test_vector_bodies_round_trip(name: str) -> None:
     data = json_body(name)
-    model = models.ForecastResponse.from_dict(data)
+    model = types.ForecastResponse.from_dict(data)
     assert _unknown_keys(data, model.to_dict(), "$") == []
-    assert models.ForecastResponse.from_dict(model.to_dict()) == model
+    assert types.ForecastResponse.from_dict(model.to_dict()) == model
 
 
 def test_quantiles_views() -> None:
@@ -203,9 +203,9 @@ def test_unknown_enum_keeps_raw_value() -> None:
 
 def test_wind_direction_is_left_circular() -> None:
     body = json_body("forecast-metric.json")
-    forecast = models.ForecastResponse.from_dict(body)
+    forecast = types.ForecastResponse.from_dict(body)
     wind = forecast.forecast.timeseries[0].ensemble.wind_direction
-    assert isinstance(wind, models.CircularStats)
+    assert isinstance(wind, types.CircularStats)
     assert wind.sector_50.from_ == 355.0  # clockwise across north: from > to
     assert wind.sector_50.to == 15.0
     assert wind.sector_90.from_ == 340.0
@@ -215,7 +215,7 @@ def test_wind_direction_is_left_circular() -> None:
 def test_coordinate_location_has_no_slug() -> None:
     body = json_body("forecast-metric.json")
     body["location"] = {**body["location"], "slug": None, "type": None}
-    location = models.ForecastResponse.from_dict(body).location
+    location = types.ForecastResponse.from_dict(body).location
     assert location.slug is None
     assert location.type is None
     with pytest.raises(UsageError):
@@ -223,7 +223,7 @@ def test_coordinate_location_has_no_slug() -> None:
 
 
 def test_hourly_dataframe() -> None:
-    forecast = models.ForecastResponse.from_dict(json_body("forecast-metric.json"))
+    forecast = types.ForecastResponse.from_dict(json_body("forecast-metric.json"))
     frame = forecast.to_dataframe()
     assert len(frame) == 3
     assert frame["temperature.p50"].tolist() == [-2.0, -1.0, 0.0]
