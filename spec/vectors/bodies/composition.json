@@ -1,0 +1,17 @@
+{
+  "initialized_at": "2026-11-25T00:00:00Z",
+  "models": [
+    {
+      "id": "aifs",
+      "cycle": "2026-11-24T18:00:00Z",
+      "members": 51
+    },
+    {
+      "id": "aigefs",
+      "cycle": "2026-11-24T18:00:00Z",
+      "members": 31
+    }
+  ],
+  "model_count": 5,
+  "total_members": 164
+}

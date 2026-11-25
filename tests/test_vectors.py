@@ -37,7 +37,7 @@ from ensemble_weather._core import _reset_deprecation_warnings
 
 VECTORS = Path(__file__).resolve().parent.parent / "spec" / "vectors"
 CASES = sorted(p for p in VECTORS.rglob("*.json") if "bodies" not in p.relative_to(VECTORS).parts)
-EXPECTED_VECTOR_COUNT = 43
+EXPECTED_VECTOR_COUNT = 51
 
 
 def test_every_vector_is_collected() -> None:
@@ -116,12 +116,21 @@ _METHODS = {
     "getCatalogStation": "catalog_station",
     "getAvailableRuns": "runs",
     "getAttribution": "attribution",
+    "explore": "explore",
+    "getComposition": "composition",
+    "getLocationSeason": "season",
+    "getLocationSnowTrend": "snow_trend",
+    "getLocationSnowpack": "snowpack",
+    "getLocationSnowpackPlume": "snowpack_plume",
+    "getAlertOutlines": "alert_outlines",
+    "getAvalancheZones": "avalanche_zones",
 }
 
 _ITERATORS = {
     "list_locations": "iter_locations",
     "list_catalog_locations": "iter_catalog_locations",
     "list_catalog_stations": "iter_catalog_stations",
+    "explore": "iter_explore",
 }
 
 _POSITIONAL = ("location", "state", "slug", "lat", "lon", "q")
@@ -136,11 +145,20 @@ def plan(call: dict[str, Any]) -> Plan:
     if args.pop("iterate", False):
         result.method = _ITERATORS[method]
         result.iterate = True
-    for name in _POSITIONAL:
+    positional = ("metric",) if method in {"explore", "iter_explore"} else _POSITIONAL
+    for name in positional:
         if name in args:
             result.args.append(args.pop(name))
     if "prob" in args:
         result.kwargs["prob"] = [_chance(t) for t in args.pop("prob")]
+    if "near" in args:
+        near = args.pop("near")
+        result.kwargs["near"] = (near["lat"], near["lon"])
+    if "bbox" in args:
+        box = args.pop("bbox")
+        result.kwargs["bbox"] = (box["west"], box["south"], box["east"], box["north"])
+    if result.method == "season" and "include" in args:
+        result.kwargs["include_daily"] = "daily" in args.pop("include")
     if "totals" in args:
         result.kwargs["totals"] = [
             Total(t["variable"], _window(t.get("window"))) for t in args.pop("totals")
@@ -154,7 +172,7 @@ def plan(call: dict[str, Any]) -> Plan:
 
 
 _TOKEN = re.compile(r"([^.\[\]]+)|\[(\d+)\]")
-_ATTRIBUTES = {"from": "from_"}
+_ATTRIBUTES = {"from": "from_", "pass": "pass_", "class": "class_"}
 
 
 def resolve(result: Any, path: str) -> Any:

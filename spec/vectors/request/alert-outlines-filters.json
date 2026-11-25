@@ -1,0 +1,40 @@
+{
+  "name": "request/alert-outlines-filters",
+  "description": "class is one comma list, sorted and de-duplicated (the API's name is `class`; the semantic arg is `classes`); bbox is 'west,south,east,north' with literal commas.",
+  "client": {},
+  "call": {
+    "operation": "getAlertOutlines",
+    "args": {
+      "classes": [
+        "winter",
+        "wind",
+        "winter"
+      ],
+      "bbox": {
+        "west": -125,
+        "south": 41,
+        "east": -116,
+        "north": 49
+      }
+    }
+  },
+  "expect_request": {
+    "method": "GET",
+    "path": "/api/v1/alerts/outlines",
+    "query_string": "bbox=-125,41,-116,49&class=wind,winter"
+  },
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/geo+json"
+      },
+      "body_file": "bodies/alert-outlines.json"
+    }
+  ],
+  "expect": {
+    "result": {
+      "features[0].properties.event": "Winter Storm Warning"
+    }
+  }
+}

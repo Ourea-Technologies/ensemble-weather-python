@@ -1,0 +1,283 @@
+{
+  "location": {
+    "slug": "snoqualmie-pass-i-90",
+    "state": "wa",
+    "name": "Snoqualmie Pass (I-90)",
+    "lat": 47.4281,
+    "lon": -121.416,
+    "elevation_m": 921.1,
+    "type": "mountain_pass",
+    "timezone": "America/Los_Angeles"
+  },
+  "alerts": [],
+  "alerts_as_of": "2026-11-25T04:23:05Z",
+  "sensors": [
+    {
+      "station_id": "Snoqualmie Pass Summit",
+      "name": "Snoqualmie Pass Summit",
+      "source": "wsdot",
+      "observation_time": "2026-11-25T04:00:00Z",
+      "distance_km": 0.19,
+      "elevation_diff": 138.9,
+      "temperature": 1.2,
+      "dewpoint": 0.6,
+      "relative_humidity": 96.0,
+      "wind_speed": 0.9,
+      "wind_gust": 2.2,
+      "wind_direction": 55.0,
+      "pressure": 908.9
+    },
+    {
+      "station_id": "F6102",
+      "name": "F6102 (APRSWXNET)",
+      "source": "madis",
+      "observation_time": "2026-11-25T03:40:00Z",
+      "distance_km": 3.98,
+      "elevation_diff": -97.1,
+      "temperature": 1.1,
+      "relative_humidity": 96.0
+    }
+  ],
+  "sensor_count": 6,
+  "as_of": "2026-11-25T04:23:13Z",
+  "model_run_initialized_at": "2026-11-25T00:00:00Z",
+  "current": {
+    "time": "2026-11-25T04:00:00Z",
+    "temperature": 3.7,
+    "feels_like": 1.5,
+    "condition": "cloudy",
+    "condition_text": "Cloudy",
+    "condition_icon": "night_cloudy",
+    "wind_speed": 2.8,
+    "wind_gust": 5.3,
+    "wind_direction": 68.0,
+    "relative_humidity": 83.0,
+    "dewpoint": 1.0,
+    "precipitation_probability": 0.047,
+    "measured": false,
+    "cloud_cover": 95.0,
+    "source": "nowcast",
+    "station": {
+      "station_id": "Snoqualmie Pass Summit",
+      "name": "Snoqualmie Pass Summit",
+      "observation_time": "2026-11-25T04:00:00Z",
+      "calm": false
+    }
+  },
+  "units": "metric",
+  "attribution": {
+    "sources": [
+      "aifs",
+      "aigefs"
+    ],
+    "credit": "Contains modified ECMWF data: based on data and products of the European Centre for Medium-Range Weather Forecasts (ECMWF), CC BY 4.0; NOAA/NWS data (public domain), modified by Ourea; NOAA MADIS and its data providers; USDA NRCS National Water and Climate Center (SNOTEL); Washington State DOT; Avalanche forecasts by the avalanche centers via avalanche.org",
+    "url": "/api/v1/attribution"
+  },
+  "summary": {
+    "short": "The next 7 days bring 5 cm (up to 14 cm) of snow, most on Monday.",
+    "long": [
+      "The next 7 days bring 5 cm (up to 14 cm) of snow, most on Monday.",
+      "High 6° tomorrow, showers."
+    ],
+    "events": [
+      {
+        "kind": "snow_coming",
+        "template": "snow_coming.v1.5",
+        "values": {
+          "snowfall": 46.83,
+          "snowfall_p10": 0.0,
+          "snowfall_p90": 135.04,
+          "snowfall_window": "next_7d"
+        }
+      },
+      {
+        "kind": "day_headline",
+        "template": "day_headline.v1.5",
+        "at": "2026-11-25T20:00:00Z",
+        "values": {
+          "temperature": 5.8
+        }
+      }
+    ],
+    "elevation": 921.1,
+    "run": "2026-11-25T00:00:00Z",
+    "generated_at": "2026-11-25T04:23:13Z"
+  },
+  "pass": {
+    "elevation": 921.1,
+    "elevation_m": 921.1,
+    "from": "2026-11-25T04:00:00Z",
+    "snow_24h": {
+      "total": 0.0,
+      "p10": 0.0,
+      "p90": 0.06,
+      "starts_at": null
+    },
+    "chances": {
+      "window_hours": 24,
+      "from": "2026-11-25T04:00:00Z",
+      "to": "2026-11-26T04:00:00Z",
+      "p_snow_ge_1in": {
+        "probability": 0.0,
+        "threshold": 25.4,
+        "members": 164,
+        "method": "members"
+      },
+      "p_snow_ge_6in": {
+        "probability": 0.0,
+        "threshold": 152.4,
+        "members": 164,
+        "method": "members"
+      },
+      "p_wet_below_freezing": {
+        "probability": 0.116,
+        "threshold": 0.0,
+        "precipitation_threshold": 0.25,
+        "members": 164,
+        "method": "members"
+      },
+      "p_gust_gt_40mph": {
+        "probability": 0.0,
+        "threshold": 17.9,
+        "members": 0,
+        "method": "hourly_gust_distribution"
+      }
+    },
+    "snow_windows": [],
+    "hours": [
+      {
+        "time": "2026-11-25T04:00:00Z",
+        "temperature": 2.7,
+        "precipitation": 0.28,
+        "precipitation_probability": 0.27,
+        "precipitation_type": "rain",
+        "snowfall": 0.0,
+        "snow_level": 999.0,
+        "snow_level_above_pass": 78.0,
+        "freezing_on_wet_road": false,
+        "wind_speed": 3.8,
+        "wind_gust": 6.9,
+        "gust_over_40mph": false,
+        "blowing_snow": false
+      },
+      {
+        "time": "2026-11-25T05:00:00Z",
+        "temperature": 2.6,
+        "precipitation": 0.28,
+        "precipitation_probability": 0.272,
+        "precipitation_type": "rain",
+        "snowfall": 0.0,
+        "snow_level": 1012.0,
+        "snow_level_above_pass": 91.0,
+        "freezing_on_wet_road": false,
+        "wind_speed": 3.5,
+        "wind_gust": 6.4,
+        "gust_over_40mph": false,
+        "blowing_snow": false
+      }
+    ],
+    "windows": {
+      "horizon_hours": 24,
+      "least_weather": {
+        "start": "2026-11-25T03:00:00Z",
+        "end": "2026-11-26T03:00:00Z",
+        "snowfall": 0.0,
+        "freezing_on_wet_road_hours": 0,
+        "max_wind_gust": 6.9
+      },
+      "most_weather": null
+    },
+    "official_status": {
+      "source": "wsdot",
+      "attribution": "WSDOT",
+      "url": "https://wsdot.com/travel/real-time/mountainpasses/snoqualmie",
+      "checked_at": "2026-11-25T04:21:02.277920Z",
+      "stale": false,
+      "level": "none",
+      "segments": [
+        {
+          "id": "11-1",
+          "route": "I-90",
+          "direction": "Eastbound",
+          "location": "Snoqualmie Pass I-90",
+          "status": "No restrictions",
+          "level": "none",
+          "status_text": "No restrictions",
+          "updated_at": "2026-11-25T03:33:03.807Z",
+          "lat": 47.41,
+          "lon": -121.405833,
+          "road_condition": "Bare and dry, wet in places",
+          "weather_condition": "Overcast"
+        },
+        {
+          "id": "11-2",
+          "route": "I-90",
+          "direction": "Westbound",
+          "location": "Snoqualmie Pass I-90",
+          "status": "No restrictions",
+          "level": "none",
+          "status_text": "No restrictions",
+          "updated_at": "2026-11-25T03:33:03.807Z",
+          "lat": 47.41,
+          "lon": -121.405833,
+          "road_condition": "Bare and dry, wet in places",
+          "weather_condition": "Overcast"
+        }
+      ]
+    },
+    "road_sensors": [
+      {
+        "station_id": "Snoqualmie Pass Summit",
+        "name": "Snoqualmie Pass Summit",
+        "source": "wsdot",
+        "attribution": "Washington State DOT",
+        "distance_km": 0.19,
+        "elevation": 1060.0,
+        "elevation_m": 1060.0,
+        "observed_at": "2026-11-25T04:00:00Z",
+        "stale": false,
+        "temperature": 1.2,
+        "wind_speed": 0.9,
+        "wind_gust": 2.2,
+        "wind_direction": 55.0
+      },
+      {
+        "station_id": "Franklin Falls on I-90 at mp 51.25",
+        "name": "Franklin Falls on I-90 at mp 51.25",
+        "source": "wsdot",
+        "attribution": "Washington State DOT",
+        "distance_km": 1.23,
+        "elevation": 1060.0,
+        "elevation_m": 1060.0,
+        "observed_at": "2026-11-25T04:00:00Z",
+        "stale": false,
+        "temperature": 2.4,
+        "wind_speed": 1.8,
+        "wind_gust": 5.4,
+        "wind_direction": 25.0
+      }
+    ],
+    "cameras": [
+      {
+        "id": "wsdot:9428",
+        "title": "I-90 at MP 53.4: East Snoqualmie Summit",
+        "image_url": "https://images.wsdot.wa.gov/sc/090VC05347.jpg",
+        "url": "https://wsdot.com/travel/real-time/mountainpasses/snoqualmie",
+        "captured_at": "2026-11-25T04:07:35Z",
+        "stale": false,
+        "source": "wsdot",
+        "attribution": "WSDOT"
+      },
+      {
+        "id": "wsdot:1100",
+        "title": "I-90 at MP 52: Snoqualmie Summit",
+        "image_url": "https://images.wsdot.wa.gov/sc/090VC05200.jpg",
+        "url": "https://wsdot.com/travel/real-time/mountainpasses/snoqualmie",
+        "captured_at": "2026-11-25T04:06:55Z",
+        "stale": false,
+        "source": "wsdot",
+        "attribution": "WSDOT"
+      }
+    ]
+  }
+}

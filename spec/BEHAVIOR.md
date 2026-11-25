@@ -68,6 +68,40 @@ One SDK method (or idiomatic equivalent) per OpenAPI operation, except
 | `listCatalogStations` / `getCatalogStation` | `/api/v1/catalog/stations[/{slug}]` | cursor paging |
 | `getAvailableRuns` | `GET /api/v1/runs` | |
 | `getAttribution` | `GET /api/v1/attribution` | |
+| `explore` | `GET /api/v1/explore` | places ranked by a metric; `metric` required; cursor paging |
+| `getComposition` | `GET /api/v1/composition` | the served models and members; open route |
+| `getLocationSeason` | `.../season` | observed season-to-date precipitation and snowfall |
+| `getLocationSnowTrend` | `.../snow-trend` | each recent run's daily snowfall; Plus or Pro (`403 PLUS_REQUIRED` otherwise) |
+| `getLocationSnowpack` / `getLocationSnowpackPlume` | `.../snowpack`, `.../snowpack/plume` | beta: the body carries `beta: true` |
+| `getAlertOutlines` | `GET /api/v1/alerts/outlines` | GeoJSON `FeatureCollection` (`application/geo+json`) |
+| `getAvalancheZones` | `GET /api/v1/avalanche/zones` | GeoJSON `FeatureCollection` (`application/geo+json`) |
+
+`.../` is a named location's route, `/api/v1/locations/{state}/{slug}`.
+The SDKs speak JSON only: `format` (`json` or `capnp`) is never exposed and
+never sent. The two GeoJSON routes are decoded like any other JSON body (the
+SDK still sends `Accept: application/json`; the server answers
+`application/geo+json` either way). Their models are the spec's
+(`AlertOutlineCollection`, `AvalancheZoneCollection`); a `geometry` is kept
+as its `type` and raw `coordinates` (nested arrays of numbers), never
+reprojected or simplified.
+
+`members` on the two forecast routes takes `true`, `false` or `"plume"`
+(the plume view: `forecast.plume` columns instead of per-hour members). An
+SDK accepts all three, in its idiom (for example a boolean or a string).
+
+`searchLocations` takes `sort` (`relevance`, the default, or an `explore`
+metric), `order`, `near`, `radius_km` and `units` besides `q`, `state`,
+`county`, `type` and `limit`; with a metric `sort`, each hit carries
+`explore`.
+
+Two values are built by the SDK from numbers and sent with **literal
+commas**, like the comma lists (section 3.1, rule 5): `near` (`lat,lon`, on
+`explore` and `searchLocations`) and `bbox` (`west,south,east,north`, on
+`getAlertOutlines`). The SDK takes them as numbers, never as a
+pre-formatted string, and prints each number by rule 6. `class` on
+`getAlertOutlines` is a comma list (sorted, de-duplicated); since `class` is
+a reserved word in many languages, the SDK may name the argument `classes`
+(the vectors do).
 
 A named location is the pair (state, slug). An SDK may accept `"or/mt-hood-meadows"`
 as one string (split on its one `/`), but it sends the two path segments
@@ -81,13 +115,15 @@ on the location routes each non-canonical spelling costs a `301` round trip
 (KAN-1313). So the SDK only ever sends the canonical URL:
 
 1. **State:** lowercase USPS code (`or`). The SDK lowercases a two-letter
-   code. It does not translate state names; it passes them through, and the
+   code, in a path and in a `state` query parameter (search, explore). It does not translate state names; it passes them through, and the
    server answers with a 301 (which the SDK follows, section 3.3).
 2. **No parameter at its default.** A parameter the caller did not set, or set
    to the route's default, is omitted. The defaults are the OpenAPI `default`
    of each parameter (for example `units=metric`, `max_hours=24`,
    `nowcast=true`, `format=json`, `feels_like=nws`, and on nearby `limit=3`,
-   `radius_km=50`). Booleans are `true`/`false`.
+   `radius_km=50`; on explore `order=desc`, `limit=25`, `points=primary`,
+   `radius_km=100`; on search `sort=relevance`, `order=desc`,
+   `radius_km=100`). Booleans are `true`/`false`.
 3. **Each parameter under its own name** (`units`, never the alias
    `unit_system`), at most once, and no parameter the route does not
    define. An unknown parameter is a `400` (KAN-1308), never ignored.
@@ -110,7 +146,7 @@ need no credentials (`security: []` in the spec) are therefore sent **without
 entry:
 
 - keyless: `searchLocations`, `getCatalogLocation`, `getCatalogStation`,
-  `getAttribution`;
+  `getAttribution`, `getComposition`;
 - with the key: `listCatalogLocations`, `listCatalogStations` (anonymous
   list pages are capped and catalog walks are slowed per address, so a keyed
   client keeps its own budget there), and every other route.
@@ -299,7 +335,8 @@ operation per process through the language's warning channel (Python
 
 ## 12. Paging
 
-List operations return a page plus `next_cursor`. Each SDK offers the page call
+List operations (`getAllLocations`, `getLocations`, the two catalog lists,
+`getAvailableRuns` and `explore`) return a page plus `next_cursor`. Each SDK offers the page call
 and an idiomatic lazy iterator (generator, async iterator, `Iterator`,
 `AsyncSequence`, ...) that follows the cursor until it is null.
 
@@ -318,7 +355,7 @@ Keys:
 | Key | Meaning |
 |---|---|
 | `client` | Client config: `api_key`, `base_url`, `max_retries`, `cache` (bool), `send_key_on_open_routes` (bool), `env` (environment variables visible to it). Missing = the defaults in section 2. |
-| `call` / `calls` | `{"operation": <operationId>, "args": {...}}`. The args use this document's semantic names, and each SDK's runner maps them to its own API: **that mapping is the only per-language code.** A `threshold` is `{"value", "unit"}` with unit one of `mm in degC degF K m ft m/s mph`; a `window` is `{"hours": N}` or `{"start_hours": A, "end_hours": B}`; `"location": "or/slug"` is the combined form; `"iterate": true` on a list operation means "use the lazy iterator and collect everything". A call may carry `"with_api_key"`: make it with that key instead (a per-request override, or a second client sharing the first one's cache). |
+| `call` / `calls` | `{"operation": <operationId>, "args": {...}}`. The args use this document's semantic names, and each SDK's runner maps them to its own API: **that mapping is the only per-language code.** A `threshold` is `{"value", "unit"}` with unit one of `mm in degC degF K m ft m/s mph`; `near` is `{"lat", "lon"}`; `bbox` is `{"west", "south", "east", "north"}`; `classes` is `getAlertOutlines`' `class` list; a `window` is `{"hours": N}` or `{"start_hours": A, "end_hours": B}`; `"location": "or/slug"` is the combined form; `"iterate": true` on a list operation means "use the lazy iterator and collect everything". A call may carry `"with_api_key"`: make it with that key instead (a per-request override, or a second client sharing the first one's cache). |
 | `expect_request(s)` | `method`; `path` (exact, as sent, still percent-encoded); `query` (decoded values, compared per parameter); `query_string` (the raw query string, **exact**: this pins the canonical form, section 3.1); `query_absent`; `headers` (exact); `headers_absent`; `headers_match` (regex); `url_prefix`. |
 | `responses` | Consumed in order: `status`, `headers`, and `body_file` (relative to `vectors/`) or `body` (raw text). The runner injects a fake clock, so no vector sleeps. |
 | `expect.result` / `expect.results` | Path → value over the semantic model (dot and `[i]` paths). `null` means absent. `{"unknown": "<raw>"}` means "the unknown-enum case, keeping this raw string". `rate_limit.*` reads the rate-limit state and `revalidated` the 304 flag. |

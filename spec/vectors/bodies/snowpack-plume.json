@@ -1,0 +1,67 @@
+{
+  "beta": true,
+  "location": {
+    "slug": "mt-hood-meadows",
+    "state": "or",
+    "name": "Mt Hood Meadows",
+    "lat": 45.33172,
+    "lon": -121.66534,
+    "elevation_m": 1639.2,
+    "type": "ski_area",
+    "timezone": "America/Los_Angeles"
+  },
+  "units": "metric",
+  "model_run": {
+    "initialized_at": "2026-11-24T12:00:00Z",
+    "generated_at": "2026-11-24T16:17:16Z",
+    "model": {
+      "name": "SNOWPACK",
+      "by": "WSL Institute for Snow and Avalanche Research SLF",
+      "license": "LGPL-3.0"
+    }
+  },
+  "stale": false,
+  "depth": {
+    "start_time": "2026-11-24T14:00:00Z",
+    "interval_hours": 3,
+    "members": [
+      163
+    ],
+    "p50": [
+      20.6
+    ],
+    "mean": [
+      20.6
+    ],
+    "p10": [
+      20.6
+    ],
+    "p25": [
+      20.6
+    ],
+    "p75": [
+      20.6
+    ],
+    "p90": [
+      20.6
+    ]
+  },
+  "models": [
+    {
+      "id": "aifs",
+      "member_ids": [
+        0
+      ],
+      "depth": [
+        [
+          20.6
+        ]
+      ],
+      "depth_mean": [
+        20.6
+      ],
+      "members_skipped": 0
+    }
+  ],
+  "spread": "Each member is one ensemble forecast run through the snow model. The bands count members; they are not a calibrated probability."
+}

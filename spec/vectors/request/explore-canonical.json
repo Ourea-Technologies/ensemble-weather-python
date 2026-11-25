@@ -1,0 +1,50 @@
+{
+  "name": "request/explore-canonical",
+  "description": "explore: metric is required; the state is lowercased; near is 'lat,lon' with a literal comma; defaults (order=desc, limit=25, points=primary, radius_km=100) are omitted; units is the request's.",
+  "client": {
+    "api_key": "ow_pro"
+  },
+  "call": {
+    "operation": "explore",
+    "args": {
+      "metric": "snow_5d",
+      "state": "OR",
+      "near": {
+        "lat": 45.33,
+        "lon": -121.66
+      },
+      "radius_km": 50,
+      "order": "desc",
+      "limit": 25,
+      "points": "primary",
+      "units": "imperial"
+    }
+  },
+  "expect_request": {
+    "method": "GET",
+    "path": "/api/v1/explore",
+    "query_string": "metric=snow_5d&near=45.33,-121.66&radius_km=50&state=or&units=imperial",
+    "headers": {
+      "X-API-Key": "ow_pro"
+    }
+  },
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/explore.json"
+    }
+  ],
+  "expect": {
+    "result": {
+      "metric": "snow_5d",
+      "unit": "in",
+      "items[0].rank": 1,
+      "items[0].location.slug": "brundage-mountain",
+      "items[0].value": 11.431,
+      "next_cursor": "eyJyYW5rIjozLCJ2YWx1ZSI6MTAuNTM1LCJuYW1lIjoiQ2FzY2FkZSBQb3dkZXIgR3VpZGVzIChjYXQtc2tpKSIsInN0YXRlIjoid2EiLCJzbHVnIjoiY2FzY2FkZS1wb3dkZXItZ3VpZGVzLWNhdC1za2kiLCJlbGV2YXRpb24iOiIifQ"
+    }
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -122.0,
+              45.1
+            ],
+            [
+              -121.5,
+              45.1
+            ],
+            [
+              -121.5,
+              45.5
+            ],
+            [
+              -122.0,
+              45.5
+            ],
+            [
+              -122.0,
+              45.1
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "urn:oid:2.49.0.1.840.0.0000000000000000000000000000000000000000.001.1",
+        "event": "Winter Storm Warning",
+        "class": "winter",
+        "severity": "moderate",
+        "urgency": "expected",
+        "certainty": "likely",
+        "headline": "Winter Storm Warning issued November 24 at 2:10PM PST until November 26 at 4:00AM PST by NWS Portland OR",
+        "onset": "2026-11-25T04:00:00Z",
+        "expires": "2026-11-25T12:00:00Z",
+        "ends": "2026-11-26T12:00:00Z",
+        "sender_name": "NWS Portland OR",
+        "source_url": "https://forecast.weather.gov/MapClick.php?lat=45.33&lon=-121.66"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -84.0,
+              35.0
+            ],
+            [
+              -83.5,
+              35.0
+            ],
+            [
+              -83.5,
+              35.5
+            ],
+            [
+              -84.0,
+              35.5
+            ],
+            [
+              -84.0,
+              35.0
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "urn:oid:2.49.0.1.840.0.0000000000000000000000000000000000000000.002.1",
+        "event": "Wind Advisory",
+        "class": "wind",
+        "severity": "moderate",
+        "urgency": "expected",
+        "certainty": "likely",
+        "headline": "Wind Advisory issued November 24 at 10:44PM EST until November 26 at 10:00AM EST by NWS Morristown TN",
+        "expires": "2026-11-25T20:00:00Z",
+        "sender_name": "NWS Morristown TN",
+        "source_url": "https://forecast.weather.gov/MapClick.php?lat=35.2650&lon=-84.1730"
+      }
+    }
+  ],
+  "attribution": {
+    "sources": [
+      "alerts"
+    ],
+    "credit": "NOAA/NWS data (public domain), modified by Ourea",
+    "url": "/api/v1/attribution"
+  }
+}

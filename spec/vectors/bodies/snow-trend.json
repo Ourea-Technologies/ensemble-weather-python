@@ -1,0 +1,41 @@
+{
+  "location": {
+    "slug": "mt-hood-meadows",
+    "state": "or",
+    "name": "Mt Hood Meadows",
+    "lat": 45.33172,
+    "lon": -121.66534,
+    "elevation_m": 1639.2,
+    "type": "ski_area",
+    "timezone": "America/Los_Angeles"
+  },
+  "units": "metric",
+  "elevation": {
+    "name": "main_lodge",
+    "display_name": "Main Lodge",
+    "elevation": 1639.2
+  },
+  "retention_days": 5,
+  "dates": [
+    "2026-11-20"
+  ],
+  "grids": [
+    {
+      "source": "ourea",
+      "runs": [
+        {
+          "initialized_at": "2026-11-20T06:00:00Z",
+          "backfilled": false,
+          "days": [
+            {
+              "date": "2026-11-20",
+              "snow": null,
+              "partial": false,
+              "kind": "none"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

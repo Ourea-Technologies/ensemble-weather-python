@@ -102,6 +102,27 @@ A threshold you give in another unit is converted exactly into the
 request's units before sending; response values are never converted. More in
 [Probabilities](https://docs.oureawx.com/concepts/probabilities).
 
+## Every route
+
+| Method (`Client` and `AsyncClient`) | Route | Access |
+|---|---|---|
+| `forecast`, `get_point_forecast` | a named location's forecast; one at coordinates | anonymous; Pro |
+| `current`, `get_point_current` | current conditions (a mountain pass also gets `pass_`) | anonymous; Pro |
+| `alerts`, `get_point_alerts` | active alerts | anonymous; Pro |
+| `nearby`, `get_point_nearby` | nearby locations | anonymous |
+| `search` | search by name, optionally `sort` by a metric and `near` a point | anonymous |
+| `explore`, `iter_explore` | places ranked by a metric (`snow_5d`, `base_depth`, `season_precip`, ...) | anonymous |
+| `season` | observed season-to-date precipitation and snowfall | anonymous |
+| `snow_trend` | each recent run's daily snowfall, run by run | Plus or Pro |
+| `snowpack`, `snowpack_plume` | the modelled snowpack and its snow-depth plume (beta) | anonymous |
+| `alert_outlines`, `avalanche_zones` | GeoJSON for maps: alert outlines, avalanche zones and ratings | anonymous |
+| `list_locations`, `iter_locations` | every location, paged | anonymous |
+| `list_catalog_locations`, `catalog_location`, `list_catalog_stations`, `catalog_station` | the catalog | anonymous |
+| `runs`, `composition`, `attribution` | served runs, the blend's models and members, data credits | anonymous |
+
+`members="plume"` on a forecast returns the plume view: columns in
+`forecast.plume`, ready to draw.
+
 ## More examples
 
 | Example | Shows |
@@ -115,6 +136,7 @@ request's units before sending; response values are never converted. More in
 | [`error_handling.py`](examples/error_handling.py) | catching an out-of-coverage error, the keyless alternative to `PRO_REQUIRED`; reading rate-limit state |
 | [`units.py`](examples/units.py) | the same forecast in metric and imperial |
 | [`async_forecast.py`](examples/async_forecast.py) | `AsyncClient` with `asyncio.gather` |
+| [`snow_report.py`](examples/snow_report.py) | `explore` rankings, a season to date, and the run-by-run snow trend |
 
 ## Errors, retries and rate limits
 

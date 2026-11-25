@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 from pathlib import Path
 from typing import Any
 
@@ -10,6 +11,7 @@ import yaml
 
 from conftest import json_body
 from ensemble_weather import AsyncClient, Client, Quantiles, UsageError, models
+from ensemble_weather._decode import _fields
 from ensemble_weather.enums import LocationType, UnitSystem
 from ensemble_weather.errors import error_class
 
@@ -38,6 +40,14 @@ EXPOSED = {
     "getCatalogStation": "catalog_station",
     "getAvailableRuns": "runs",
     "getAttribution": "attribution",
+    "explore": "explore",
+    "getComposition": "composition",
+    "getLocationSeason": "season",
+    "getLocationSnowTrend": "snow_trend",
+    "getLocationSnowpack": "snowpack",
+    "getLocationSnowpackPlume": "snowpack_plume",
+    "getAlertOutlines": "alert_outlines",
+    "getAvalancheZones": "avalanche_zones",
 }
 
 
@@ -62,12 +72,19 @@ def test_every_schema_has_a_model() -> None:
     # ErrorResponse becomes the exceptions; UnitSystem is an enum; ModelMeans is
     # a list of ModelStats (each with its model id); the three FreezingLevel
     # variants are one FreezingLevel model discriminated by ``kind``.
-    # ConditionIcon and NullReason are enums; NextCursor is ``str | None``.
+    # ConditionIcon, NullReason, AlertClass, SnowCharacter and PassStatusLevel
+    # are enums; NextCursor is ``str | None``; MemberColumn and NullableNumbers
+    # are ``list[list[float | None]]`` and ``list[float | None]``.
     elsewhere = {
         "ErrorResponse",
         "UnitSystem",
         "ConditionIcon",
         "NullReason",
+        "AlertClass",
+        "SnowCharacter",
+        "PassStatusLevel",
+        "MemberColumn",
+        "NullableNumbers",
         "NextCursor",
         "ModelMeans",
         "FreezingLevelBelowSurface",
@@ -79,6 +96,27 @@ def test_every_schema_has_a_model() -> None:
             continue
         assert hasattr(models, name), f"no model for schema {name}"
     assert hasattr(models, "ModelStats")
+
+
+def _schema_fields(schema: dict[str, Any]) -> set[str]:
+    schemas = OPENAPI["components"]["schemas"]
+    out: set[str] = set()
+    for part in schema.get("allOf", []):
+        ref = part.get("$ref")
+        out |= _schema_fields(schemas[ref.rsplit("/", 1)[-1]] if ref else part)
+    return out | set(schema.get("properties") or {})
+
+
+def test_every_schema_field_has_a_model_field() -> None:
+    # Field-level drift: every property of every modelled schema is read.
+    missing = []
+    for name, schema in OPENAPI["components"]["schemas"].items():
+        model = getattr(models, name, None)
+        if not (isinstance(model, type) and dataclasses.is_dataclass(model)):
+            continue
+        have = {f.json for f in _fields(model)}
+        missing += [f"{name}.{field}" for field in sorted(_schema_fields(schema) - have)]
+    assert not missing, f"spec fields without a model field: {missing}"
 
 
 def test_every_error_code_maps_to_a_category() -> None:

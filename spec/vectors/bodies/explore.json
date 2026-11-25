@@ -1,0 +1,50 @@
+{
+  "metric": "snow_5d",
+  "order": "desc",
+  "units": "imperial",
+  "unit": "in",
+  "items": [
+    {
+      "rank": 1,
+      "location": {
+        "slug": "brundage-mountain",
+        "state": "id",
+        "name": "Brundage Mountain",
+        "lat": 44.99979,
+        "lon": -116.14259,
+        "elevation_m": 2078.3,
+        "type": "ski_area",
+        "timezone": "America/Denver"
+      },
+      "elevation_name": null,
+      "elevation": 6818.7,
+      "value": 11.431,
+      "as_of": "2026-11-25T04:08:33Z",
+      "initialized_at": "2026-11-25T00:00:00Z",
+      "source": "ourea",
+      "path": "/api/v1/locations/id/brundage-mountain"
+    },
+    {
+      "rank": 2,
+      "location": {
+        "slug": "stevens-pass",
+        "state": "wa",
+        "name": "Stevens Pass",
+        "lat": 47.74451,
+        "lon": -121.08906,
+        "elevation_m": 1253.7,
+        "type": "ski_area",
+        "timezone": "America/Los_Angeles"
+      },
+      "elevation_name": null,
+      "elevation": 4113.2,
+      "value": 10.916,
+      "as_of": "2026-11-25T04:12:13Z",
+      "initialized_at": "2026-11-25T00:00:00Z",
+      "source": "ourea",
+      "path": "/api/v1/locations/wa/stevens-pass"
+    }
+  ],
+  "count": 3,
+  "next_cursor": "eyJyYW5rIjozLCJ2YWx1ZSI6MTAuNTM1LCJuYW1lIjoiQ2FzY2FkZSBQb3dkZXIgR3VpZGVzIChjYXQtc2tpKSIsInN0YXRlIjoid2EiLCJzbHVnIjoiY2FzY2FkZS1wb3dkZXItZ3VpZGVzLWNhdC1za2kiLCJlbGV2YXRpb24iOiIifQ"
+}

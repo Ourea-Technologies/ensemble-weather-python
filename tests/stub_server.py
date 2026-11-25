@@ -153,6 +153,18 @@ def route(path: str, query: dict[str, str], keyed: bool) -> tuple[int, dict[str,
         if parts[1:] != ["or", "mt-hood-meadows"]:
             return 404, _error("LOCATION_NOT_FOUND", f"No location {parts[1]}/{parts[2]}.")
         return 200, _forecast(query)
+    if parts[:1] == ["locations"] and len(parts) in {4, 5}:
+        sub = "/".join(parts[3:])
+        if sub == "snow-trend" and not keyed:
+            return 403, _body("error-pro-required.json")
+        bodies = {
+            "season": "season.json",
+            "snow-trend": "snow-trend.json",
+            "snowpack": "snowpack.json",
+            "snowpack/plume": "snowpack-plume.json",
+        }
+        if sub in bodies:
+            return 200, _body(bodies[sub])
     if parts[:1] == ["locations"] and len(parts) == 4:
         if parts[3] == "current":
             return 200, _current(location)
@@ -175,6 +187,14 @@ def route(path: str, query: dict[str, str], keyed: bool) -> tuple[int, dict[str,
     if parts == ["catalog", "locations"]:
         page = "catalog-page-2.json" if query.get("cursor") else "catalog-page-1.json"
         return 200, _body(page)
+    simple = {
+        ("explore",): "explore.json",
+        ("composition",): "composition.json",
+        ("alerts", "outlines"): "alert-outlines.json",
+        ("avalanche", "zones"): "avalanche-zones.json",
+    }
+    if tuple(parts) in simple:
+        return 200, _body(simple[tuple(parts)])
     if parts == ["attribution"]:
         return 200, _body("attribution.json")
     return 404, _error("NOT_FOUND", f"No route {path}.")

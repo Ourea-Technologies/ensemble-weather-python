@@ -22,7 +22,16 @@ SPEC = ROOT / "openapi" / "v1" / "openapi.yaml"
 # Which component schema each vector body must satisfy.
 BODY_SCHEMA = {
     "forecast-": "ForecastResponse",
+    "current-": "CurrentResponse",
     "search": "SearchLocationsResponse",
+    "explore": "ExploreResponse",
+    "composition": "CompositionResponse",
+    "season": "SeasonResponse",
+    "snow-trend": "SnowTrendResponse",
+    "snowpack-plume": "SnowpackPlumeResponse",
+    "snowpack": "SnowpackResponse",
+    "alert-outlines": "AlertOutlineCollection",
+    "avalanche-zones": "AvalancheZoneCollection",
     "catalog-page-": "PublicCatalogLocationPage",
     "catalog-detail": "PublicCatalogLocationDetail",
     "attribution": "AttributionRegistry",

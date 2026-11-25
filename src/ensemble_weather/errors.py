@@ -205,6 +205,7 @@ _BY_CODE: dict[str, type[APIError]] = {
     "INVALID_API_KEY": AuthenticationError,
     "UNAUTHORIZED": AuthenticationError,
     "PRO_REQUIRED": PermissionDeniedError,
+    "PLUS_REQUIRED": PermissionDeniedError,
     "LOCATION_NOT_FOUND": NotFoundError,
     "NOT_FOUND": NotFoundError,
     "BAD_REQUEST": InvalidRequestError,

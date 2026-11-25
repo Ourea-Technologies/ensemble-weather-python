@@ -17,6 +17,7 @@ from enum import Enum
 __all__ = [
     "Aggregation",
     "AlertCertainty",
+    "AlertClass",
     "AlertSeverity",
     "AlertUrgency",
     "AstronomicalSeason",
@@ -26,6 +27,7 @@ __all__ = [
     "CurrentSource",
     "DailyCondition",
     "ElevationSource",
+    "ExploreMetric",
     "FreezingLevelKind",
     "GapFlowStatus",
     "HourlyCondition",
@@ -37,9 +39,11 @@ __all__ = [
     "NullReason",
     "Op",
     "OpenEnum",
+    "PassStatusLevel",
     "PrecipKind",
     "PrecipitationType",
     "ProvenanceVariable",
+    "SnowCharacter",
     "StationNetwork",
     "StationStatus",
     "StormOrientation",
@@ -224,6 +228,8 @@ class HourlyCondition(OpenEnum):
     CHANCE_SNOW = "chance_snow"
     SNOW_LIKELY = "snow_likely"
     SNOW = "snow"
+    LIGHT_SNOW = "light_snow"
+    HEAVY_SNOW = "heavy_snow"
     SLIGHT_CHANCE_FREEZING_RAIN = "slight_chance_freezing_rain"
     CHANCE_FREEZING_RAIN = "chance_freezing_rain"
     FREEZING_RAIN_LIKELY = "freezing_rain_likely"
@@ -254,7 +260,9 @@ class ConditionIcon(OpenEnum):
     RAIN = "rain"
     HEAVY_RAIN = "heavy_rain"
     RAIN_SNOW_MIX = "rain_snow_mix"
+    LIGHT_SNOW = "light_snow"
     SNOW = "snow"
+    HEAVY_SNOW = "heavy_snow"
     FREEZING_RAIN = "freezing_rain"
     NIGHT_CLEAR = "night_clear"
     NIGHT_MOSTLY_CLEAR = "night_mostly_clear"
@@ -273,7 +281,9 @@ class ConditionIcon(OpenEnum):
     NIGHT_RAIN = "night_rain"
     NIGHT_HEAVY_RAIN = "night_heavy_rain"
     NIGHT_RAIN_SNOW_MIX = "night_rain_snow_mix"
+    NIGHT_LIGHT_SNOW = "night_light_snow"
     NIGHT_SNOW = "night_snow"
+    NIGHT_HEAVY_SNOW = "night_heavy_snow"
     NIGHT_FREEZING_RAIN = "night_freezing_rain"
 
 
@@ -338,8 +348,9 @@ class FreezingLevelKind(OpenEnum):
 
 
 class MembersView(OpenEnum):
-    """Which member variables a forecast carries (Free: plume; Pro: full)."""
+    """Which member view a forecast carries (``pool``, ``plume`` or ``full``)."""
 
+    POOL = "pool"
     PLUME = "plume"
     FULL = "full"
 
@@ -431,6 +442,7 @@ class AttributionSourceKind(OpenEnum):
     PEER = "peer"
     OBSERVATION = "observation"
     ALERTS = "alerts"
+    AVALANCHE_FORECAST = "avalanche_forecast"
     CLIMATOLOGY = "climatology"
     TERRAIN = "terrain"
     PLACES = "places"
@@ -508,6 +520,8 @@ class StationNetwork(OpenEnum):
     MADIS = "madis"
     NWAC = "nwac"
     MT_MESONET = "mt_mesonet"
+    RAIN_GAUGE = "rain_gauge"
+    SURFRAD = "surfrad"
 
 
 class StationStatus(OpenEnum):
@@ -548,3 +562,55 @@ class AlertCertainty(OpenEnum):
     POSSIBLE = "possible"
     UNLIKELY = "unlikely"
     UNKNOWN = "unknown"
+
+
+class SnowCharacter(OpenEnum):
+    """The character of falling snow, from its snow-to-liquid ratio.
+
+    Labels: wet (sticky), dense (heavy), average, dry (powder), very dry
+    (cold smoke).
+    """
+
+    WET = "wet"
+    DENSE = "dense"
+    AVERAGE = "average"
+    DRY = "dry"
+    VERY_DRY = "very_dry"
+
+
+class AlertClass(OpenEnum):
+    """The class of an alert outline: ``winter`` or ``wind``."""
+
+    WIND = "wind"
+    WINTER = "winter"
+
+
+class PassStatusLevel(OpenEnum):
+    """A mountain pass's official road status, from least to most restrictive."""
+
+    NONE = "none"
+    ADVISORY = "advisory"
+    TRACTION = "traction"
+    R1 = "r1"
+    R2 = "r2"
+    R3 = "r3"
+    CHAINS = "chains"
+    CLOSED = "closed"
+
+
+class ExploreMetric(OpenEnum):
+    """What :meth:`~ensemble_weather.Client.explore` ranks places by (also a search ``sort``)."""
+
+    BASE_DEPTH = "base_depth"
+    NEW_SNOW_24H = "new_snow_24h"
+    SNOW_TODAY = "snow_today"
+    SNOW_5D = "snow_5d"
+    SNOW_10D = "snow_10d"
+    SNOW_14D = "snow_14d"
+    PRECIP_TODAY = "precip_today"
+    PRECIP_5D = "precip_5d"
+    PRECIP_10D = "precip_10d"
+    PRECIP_14D = "precip_14d"
+    SEASON_PRECIP = "season_precip"
+    SEASON_PRECIP_PCT_NORMAL = "season_precip_pct_normal"
+    SEASON_SNOW = "season_snow"

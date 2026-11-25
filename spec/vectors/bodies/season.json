@@ -1,0 +1,57 @@
+{
+  "location": {
+    "slug": "mt-hood-meadows",
+    "state": "or",
+    "name": "Mt Hood Meadows",
+    "lat": 45.33172,
+    "lon": -121.66534,
+    "elevation_m": 1639.2,
+    "type": "ski_area",
+    "timezone": "America/Los_Angeles"
+  },
+  "water_year": 2027,
+  "starts": "2026-10-01",
+  "through": "2026-11-23",
+  "as_of": "2026-11-24T11:00:26Z",
+  "units": "metric",
+  "precipitation": {
+    "total": 210.69,
+    "unit": "mm",
+    "source": "mrms_multisensor",
+    "days_covered": 52,
+    "days_missing": 2,
+    "provisional_days": 6,
+    "normal_to_date": 516.95,
+    "percent_of_normal": 41,
+    "normal_source": "prism_1991_2020"
+  },
+  "snowfall": null,
+  "station": {
+    "id": "651:OR:SNTL",
+    "network": "snotel",
+    "name": "Mt Hood Test Site",
+    "distance_km": 4.1,
+    "elevation_m": 1639.8,
+    "precipitation_total": 200.66,
+    "precipitation_percent_of_median": 38,
+    "swe": 17.78,
+    "swe_percent_of_median": 13,
+    "snow_depth": 12.7,
+    "through": "2026-11-23"
+  },
+  "daily": [
+    {
+      "date": "2026-10-01",
+      "precipitation": 0.0,
+      "snowfall": null,
+      "provisional": false
+    }
+  ],
+  "attribution": {
+    "sources": [
+      "prism"
+    ],
+    "credit": "NOAA/NWS data (public domain), modified by Ourea; PRISM Group, Oregon State University, https://prism.oregonstate.edu; USDA NRCS National Water and Climate Center (SNOTEL)",
+    "url": "/api/v1/attribution"
+  }
+}

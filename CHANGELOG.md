@@ -8,10 +8,67 @@ contract v1.
 
 ## [Unreleased]
 
-Targets the v1 contract as deployed (ensemble-weather-spec 8b85fea, the
-server's public spec byte for byte). Breaking, as 0.x allows.
+## [0.1.0] - 2026-11-24
+
+The first release on PyPI. Targets the v1 contract at ensemble-weather-spec
+15bdeb5 (the server's public spec at 256cd770, byte for byte).
+
+### Added since the v1 contract of 2026-10-27
+
+- `explore()` and `iter_explore()`: places ranked by a metric
+  (`ExploreMetric`: `snow_5d`, `base_depth`, `season_precip`, ...), with
+  `order`, `location_type`, `state`, `near`, `radius_km`, elevation bounds,
+  `points` and cursor paging.
+- `season()` (observed season-to-date precipitation and snowfall),
+  `snow_trend()` (each recent run's daily snowfall; Plus or Pro),
+  `snowpack()` and `snowpack_plume()` (beta), `composition()` (an open
+  route, sent without the key), and the GeoJSON routes `alert_outlines()`
+  and `avalanche_zones()`.
+- `search()` takes `sort`, `order`, `near`, `radius_km` and `units`; a hit
+  carries `explore` with a metric sort.
+- `members="plume"` on `forecast` and `get_point_forecast`: the plume view in
+  `ForecastData.plume` (`MemberPlume`); `MembersView.POOL`.
+- New fields: `ForecastResponse.location` is a `ForecastLocation` (adds
+  `elevation` and `elevations`), `.snow_on_ground` and `.avalanche`;
+  `snow_level_wet_bulb` on `EnsembleStats`, `ModelStats`, `MemberForecast`
+  and `DailyForecast`; `TimeSeriesPoint.measured`, `.snow_character`,
+  `.members_spread`, `.members_6h`, `.precipitation_by_type`;
+  `DailyForecast.covered_from`, `.measured_precipitation`,
+  `.snow_character`, `.slr`, `.snow_level_range`,
+  `.snow_level_wet_bulb_range`, `.normal`, `.departure`, `.percentile`;
+  `ForecastData` and `ElevationForecast` `.precipitation_outlook` and
+  `.plume`; `ElevationForecast.display_name`, `.snow_on_ground`,
+  `.nearest_sensors`; `SnowOutlook.next_72h`; `WindowTotal.method`;
+  `CurrentConditions.measured` and `.cloud_cover`; `CurrentStation.calm`;
+  `CurrentResponse.summary` (`PlaceSummary`) and `.pass_` (`PassForecast`,
+  JSON `pass`); `SensorObservation.distance_km` and `.elevation_diff`; ten
+  NWS fields on `ActiveAlert` (`sent`, `message_type`, `description`,
+  `instruction`, ...); `PrecipDisplay.snow_amount`;
+  `ModelEntry.display_members`; `SearchHit.explore`;
+  `PublicCatalogElevation.display_name`;
+  `PublicCatalogStationDetail.indexable`.
+- Enum values: `light_snow` and `heavy_snow` conditions and icons,
+  `AttributionSourceKind.AVALANCHE_FORECAST`, `StationNetwork.RAIN_GAUGE` and
+  `.SURFRAD`; new enums `SnowCharacter`, `AlertClass`, `PassStatusLevel`,
+  `ExploreMetric`. `PLUS_REQUIRED` is a `PermissionDeniedError`.
+- `examples/snow_report.py`; a field-level spec-drift test.
 
 ### Changed
+
+- `LocationElevation` is `ElevationSummary`, the spec's name, and has
+  `display_name`. `MembersCumulative` holds `MemberQuantiles`.
+
+### Fixed
+
+- `release.yml` called the CI workflow as `$/.github/workflows/ci.yml`, which
+  GitHub rejects; it is `./.github/workflows/ci.yml`.
+
+### Changes from the draft of 2026-10-26 (never published)
+
+Targets the v1 contract as deployed (ensemble-weather-spec 8b85fea). Breaking
+against that draft, as 0.x allows.
+
+#### Changed
 
 - The coordinate methods follow the operation ids: `forecast_at` is
   `get_point_forecast`, `current_at` is `get_point_current`, `alerts_at` is
@@ -50,7 +107,7 @@ server's public spec byte for byte). Breaking, as 0.x allows.
   (an unknown code still maps by status). `OUTSIDE_COVERAGE` is a 404.
 - `Retry-After` is honoured on 504 as well as 429 and 503.
 
-### Added
+#### Added
 
 - `include=` on `forecast` / `get_point_forecast` (`skin_temperature`, `mslp`:
   served only when asked for).
@@ -62,7 +119,7 @@ server's public spec byte for byte). Breaking, as 0.x allows.
 - `ActiveAlert.certainty`, `CurrentStation.station_id`.
 - `runs(cursor=...)` and `RunsResponse.next_cursor`.
 
-### Removed
+#### Removed
 
 - `storm_reports` / `storm_report` and `StormReportCard` /
   `StormReportsResponse`: storm reports are not in the public API.
@@ -73,9 +130,9 @@ server's public spec byte for byte). Breaking, as 0.x allows.
   `CatalogHousePlacement`, `CatalogThirdPartyPlacement`,
   `CmsAdCreativeContent`, `AdSlotKind`, `AdProvider`).
 
-## [0.1.0] - 2026-10-26
+### In the draft of 2026-10-26
 
-### Added
+#### Added
 
 - `Client` and `AsyncClient` (httpx), usable as (async) context managers,
   with one method per v1 operation except `getMapsToken`: `forecast`,
