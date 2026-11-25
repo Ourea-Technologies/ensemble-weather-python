@@ -12,6 +12,6 @@ with Client() as client:
 
 for m, i in zip(metric.series.timeseries, imperial.series.timeseries, strict=True):
     print(
-        f"{m.valid_at:%H:%M} UTC  median {m.ensemble.temperature.median} °C"
+        f"{m.valid_time:%H:%M} UTC  median {m.ensemble.temperature.median} °C"
         f" = {i.ensemble.temperature.median} °F"
     )

@@ -144,13 +144,9 @@ not `ensemble_weather::forecast::ForecastForecast`.
 | `ProbabilityResult` | `probability` | `value` |
 | `ProbabilityThresholds` | `daily_precipitation_probability`, `daily_precipitation_occurrence_probability`, `daily_snow_probability` | `daily_precipitation`, `daily_precipitation_occurrence`, `daily_snow` |
 | `WindowTotal` | `window_start_hours`, `window_end_hours` | `start_hours`, `end_hours` |
-| `TimeSeriesPoint` | `valid_time`, `lead_time_hours` | `valid_at`, `lead_hours` |
 | `TimeSeriesPoint.members[]` (a model's members) | `members` | `items` |
 | `MemberForecast` | `member_id` | `id` |
 | `MemberPlume` | `members` | `pool` |
-| `PrecipType` | `type` | `kind` |
-| `FreezingLevel` (`kind: height`) | `above_freezing_layer_aloft` | `warm_layer_aloft` |
-| `ModelRunInfo` | `models` | `contributors` |
 | `AlertsResponse` | `alerts`, `alert_count` | `items`, `count` |
 | `LocationsResponse` | `locations` | `items` |
 | `NearbyLocationsResponse` | `location`, `locations` | `origin`, `items` |
@@ -168,16 +164,34 @@ not `ensemble_weather::forecast::ForecastForecast`.
 | `AvalancheForecast` | `forecast_url` | `url` |
 | `SeasonTotal` | `total` | `amount` |
 | `SnowTrendDay` | `snow` | `amount` |
-| `SnowpackAspect` | `aspect` | `facing` |
 | `ErrorResponse` | `error` | `code` (on the SDK's error, as already) |
 
-  Not renamed, because the field does not repeat its holder's word:
-  `ProbabilityResult.window_*_hours` (a probability is not a window),
-  `CurrentStation.observation_time`, and `elevation` on `ForecastLocation`,
-  `ExploreItem`, `PassForecast` and the others. The rule judges a field
-  against the type that holds it, so these keep their wire names. A schema
-  added later is checked with the same rule, and its renames join this
-  table before any SDK ships it.
+  A field is renamed **only** when its name repeats a word of the type (or
+  namespace) that holds it; a rename for taste is not made (Harrison,
+  2026-11-24). So these keep their wire names:
+  - `TimeSeriesPoint.valid_time` and `lead_time_hours` (the type's "time"
+    is the series' word, not the field's subject);
+  - `PrecipType.type`, `FreezingLevel.above_freezing_layer_aloft`,
+    `ModelRunInfo.models` and `SnowpackAspect.aspect`;
+  - `ProbabilityResult.window_*_hours` and `CurrentStation.observation_time`;
+  - an hour's `condition*`;
+  - `elevation` on `ForecastLocation`, `ExploreItem` and `PassForecast`.
+
+  One row, `NearbyPointResponse.locations` → `items`, is kept on purpose for
+  consistency, so both nearby routes name their rows alike.
+
+  A schema added later is checked with the same rule, and its renames join
+  this table before any SDK ships it.
+
+- **GeoJSON is passed through untouched.** The bodies of
+  `getAlertOutlines` and `getAvalancheZones` (`application/geo+json`
+  FeatureCollections) keep every key exactly as the API sends it, so they go
+  straight to a map library. That means no rename from the table (an
+  avalanche zone's `properties.forecast_url` stays `forecast_url`, although
+  `ForecastResponse.avalanche.forecast_url` is `url`), no case conversion
+  (TS and the other camelCase SDKs keep `danger_level`, `sender_name`, ...),
+  and no reprojection or simplification of `geometry`. An SDK may type them,
+  but only with the wire keys.
 - An SDK-owned name, such as a module, a type that is not a schema, or a
   method, never stutters. Rename it before its first release.
 
@@ -437,7 +451,7 @@ Keys:
 | `call` / `calls` | `{"operation": <operationId>, "args": {...}}`. The args use this document's semantic names, and each SDK's runner maps them to its own API: **that mapping is the only per-language code.** A `threshold` is `{"value", "unit"}` with unit one of `mm in degC degF K m ft m/s mph`; `near` is `{"lat", "lon"}`; `bbox` is `{"west", "south", "east", "north"}`; `classes` is `getAlertOutlines`' `class` list; a `window` is `{"hours": N}` or `{"start_hours": A, "end_hours": B}`; `"location": "or/slug"` is the combined form; `"iterate": true` on a list operation means "use the lazy iterator and collect everything". A call may carry `"with_api_key"`: make it with that key instead (a per-request override, or a second client sharing the first one's cache). |
 | `expect_request(s)` | `method`; `path` (exact, as sent, still percent-encoded); `query` (decoded values, compared per parameter); `query_string` (the raw query string, **exact**: this pins the canonical form, section 3.1); `query_absent`; `headers` (exact); `headers_absent`; `headers_match` (regex); `url_prefix`. |
 | `responses` | Consumed in order: `status`, `headers`, and `body_file` (relative to `vectors/`) or `body` (raw text). The runner injects a fake clock, so no vector sleeps. |
-| `expect.result` / `expect.results` | Path → value over the semantic model (dot and `[i]` paths), **in the SDK names of section 3.0** (`series.timeseries[0]`, `probabilities[0].value`). A string expected at a timestamp field (`valid_at`, `observed_at`, `initialized_at`) matches when it is the same instant. `null` means absent. `{"unknown": "<raw>"}` means "the unknown-enum case, keeping this raw string". `rate_limit.*` reads the rate-limit state and `revalidated` the 304 flag. |
+| `expect.result` / `expect.results` | Path → value over the semantic model (dot and `[i]` paths), **in the SDK names of section 3.0** (`series.timeseries[0]`, `probabilities[0].value`). A string expected at a timestamp field (`valid_time`, `observed_at`, `initialized_at`) matches when it is the same instant. `null` means absent. `{"unknown": "<raw>"}` means "the unknown-enum case, keeping this raw string". `rate_limit.*` reads the rate-limit state and `revalidated` the 304 flag. |
 | `expect.error` | `category` (section 8, snake_case), `code`, `status`, `retry_after`, `string_excludes` (a substring that must not appear in the error's message or string form). |
 | `expect.requests` | Exact number of HTTP requests made. |
 | `expect.delays_s` | The retry delays chosen, with jitter seeded to its upper bound (1.0). |

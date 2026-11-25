@@ -1,6 +1,6 @@
 {
   "name": "names/forecast",
-  "description": "A forecast body decodes to the SDK names: forecast -> series, elevation_forecasts -> elevations, an hour's valid_time -> valid_at and lead_time_hours -> lead_hours, members[].members -> items and member_id -> id, precipitation_type.type -> kind, freezing_level.above_freezing_layer_aloft -> warm_layer_aloft, model_run.models -> contributors, probability -> value, window_*_hours -> *_hours on a window total, the thresholds' daily_*_probability -> daily_*, current.condition* -> code/text/icon, avalanche.forecast_url -> url, and an elevation's elevation -> height.",
+  "description": "A forecast body decodes to the SDK names: forecast -> series, elevation_forecasts -> elevations, members[].members -> items and member_id -> id, probability -> value, window_*_hours -> *_hours on a window total, the thresholds' daily_*_probability -> daily_*, current.condition* -> code/text/icon, avalanche.forecast_url -> url, and an elevation's elevation -> height. Fields that do not repeat their type's word keep the wire name (lead_time_hours, precipitation_type.type, above_freezing_layer_aloft, model_run.models).",
   "client": {},
   "call": {
     "operation": "getLocationForecast",
@@ -27,16 +27,15 @@
   ],
   "expect": {
     "result": {
-      "series.timeseries[0].valid_at": "2026-11-25T06:00:00Z",
-      "series.timeseries[0].lead_hours": 6,
-      "series.timeseries[0].precipitation_type.kind": "snow",
-      "series.timeseries[0].freezing_level.warm_layer_aloft": false,
+      "series.timeseries[0].lead_time_hours": 6,
+      "series.timeseries[0].precipitation_type.type": "snow",
+      "series.timeseries[0].freezing_level.above_freezing_layer_aloft": false,
+      "model_run.models[0].id": "aifs",
       "series.timeseries[0].members[0].id": "aifs",
       "series.timeseries[0].members[0].items[0].id": 0,
       "elevations[0].name": "hrm_lodge",
       "elevations[0].height": 1394.0,
       "location.elevations[0].height": 1639.2,
-      "model_run.contributors[0].id": "aifs",
       "probabilities[0].value": null,
       "window_totals[0].start_hours": 0,
       "window_totals[0].end_hours": 24,

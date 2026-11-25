@@ -1,6 +1,6 @@
 {
   "name": "names/season-and-snow",
-  "description": "Season, snow trend and snowpack names: a season total's total -> amount, the snow trend's elevation.elevation -> height and a day's snow -> amount, a snowpack aspect's aspect -> facing.",
+  "description": "Season, snow trend and snowpack names: a season total's total -> amount, the snow trend's elevation.elevation -> height and a day's snow -> amount; a snowpack aspect's aspect keeps its wire name.",
   "client": {
     "api_key": "ow_pro"
   },
@@ -71,7 +71,7 @@
         "grids[0].runs[0].days[0].amount": null
       },
       {
-        "spots[0].aspects[0].facing": "north"
+        "spots[0].aspects[0].aspect": "north"
       }
     ],
     "requests": 3

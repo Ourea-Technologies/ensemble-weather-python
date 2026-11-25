@@ -21,7 +21,7 @@ with Client() as client:  # no key: anonymous calls use the Free tier
     )
 
 for hour in forecast.series.timeseries[:24]:
-    print(hour.valid_at, hour.ensemble.temperature.range(10, 90))
+    print(hour.valid_time, hour.ensemble.temperature.range(10, 90))
 print(forecast.probabilities[0].value)
 ```
 

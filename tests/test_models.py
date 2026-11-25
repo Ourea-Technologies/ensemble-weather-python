@@ -227,7 +227,7 @@ def test_hourly_dataframe() -> None:
     frame = forecast.to_dataframe()
     assert len(frame) == 3
     assert frame["temperature.p50"].tolist() == [-2.0, -1.0, 0.0]
-    assert frame.index.name == "valid_at"
+    assert frame.index.name == "valid_time"
     assert forecast.series.daily_dataframe().empty
 
 
@@ -236,7 +236,7 @@ def test_renamed_fields_decode_and_encode_their_wire_names() -> None:
     data = json_body("forecast-metric.json")
     forecast = types.ForecastResponse.from_dict(data)
     assert (
-        forecast.series.timeseries[0].lead_hours
+        forecast.series.timeseries[0].lead_time_hours
         == data["forecast"]["timeseries"][0]["lead_time_hours"]
     )
     encoded = forecast.to_dict()
@@ -256,7 +256,7 @@ def test_every_rename_in_the_table_is_applied() -> None:
         if not line.startswith("|"):
             break
         rows.append(line)
-    assert len(rows) > 30
+    assert len(rows) > 25
     by_json = {
         (cls.__name__, f.json): f.attr
         for cls in vars(types).values()
@@ -273,3 +273,11 @@ def test_every_rename_in_the_table_is_applied() -> None:
         for wire, sdk in zip(wires, sdks, strict=True):
             assert wire in wire_names, f"{wire} is not renamed in any model"
             assert any(s == sdk for (_, w), s in renamed.items() if w == wire), (wire, sdk)
+    # And nothing is renamed that the table does not list (no renames for taste).
+    table_wires = set()
+    for row in rows:
+        table_wires |= {w.strip(" `") for w in row.split("|")[2].split(",")}
+    assert wire_names <= table_wires, wire_names - table_wires
+    # GeoJSON is passed through untouched: the zone's properties keep forecast_url.
+    zone = {f.attr: f.json for f in _fields(types.AvalancheZoneProperties)}
+    assert zone["forecast_url"] == "forecast_url"

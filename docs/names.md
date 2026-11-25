@@ -1,10 +1,13 @@
 # Names
 
-A few JSON fields would read twice in Python (`forecast.forecast`,
-`current.current`, `probability.probability`), so the SDK names them
-differently: one table for every Ourea SDK (ensemble-weather-spec
-BEHAVIOR.md 3.0). The decoder maps them, and `to_dict()` writes the JSON names
-back. Every other field has its JSON name.
+A JSON field that repeats a word of the type holding it would read twice in
+Python (`forecast.forecast`, `current.current`, `probability.probability`),
+so the SDK names it differently. There is one table for every Ourea SDK
+(ensemble-weather-spec BEHAVIOR.md 3.0). The decoder maps the names, and
+`to_dict()` writes the JSON names back. Every other field keeps its JSON
+name, and the GeoJSON routes (`alert_outlines`, `avalanche_zones`) are
+passed through untouched: an avalanche zone's `properties.forecast_url`
+stays `forecast_url`.
 
 | Type | JSON field | SDK attribute |
 |---|---|---|
@@ -21,14 +24,9 @@ back. Every other field has its JSON name.
 | `ProbabilityThresholds` | `daily_snow_probability` | `daily_snow` |
 | `WindowTotal` | `window_start_hours` | `start_hours` |
 | `WindowTotal` | `window_end_hours` | `end_hours` |
-| `TimeSeriesPoint` | `valid_time` | `valid_at` |
-| `TimeSeriesPoint` | `lead_time_hours` | `lead_hours` |
 | `MemberGroup` | `members` | `items` |
 | `MemberForecast` | `member_id` | `id` |
 | `MemberPlume` | `members` | `pool` |
-| `PrecipType` | `type` | `kind` |
-| `FreezingLevel` | `above_freezing_layer_aloft` | `warm_layer_aloft` |
-| `ModelRunInfo` | `models` | `contributors` |
 | `AlertsResponse` | `alerts` | `items` |
 | `AlertsResponse` | `alert_count` | `count` |
 | `LocationsResponse` | `locations` | `items` |
@@ -53,4 +51,3 @@ back. Every other field has its JSON name.
 | `AvalancheForecast` | `forecast_url` | `url` |
 | `SeasonTotal` | `total` | `amount` |
 | `SnowTrendDay` | `snow` | `amount` |
-| `SnowpackAspect` | `aspect` | `facing` |

@@ -2359,7 +2359,7 @@ CASES: list[dict] = [
     },
     {
         "name": "credentials/composition-keyless",
-        "description": "getComposition is an open route (security: []): sent WITHOUT X-API-Key even with a key configured. The GeoJSON routes keep the key.",
+        "description": "getComposition is an open route (security: []): sent WITHOUT X-API-Key even with a key configured. The GeoJSON routes keep the key, and their bodies are passed through untouched: wire keys (forecast_url, danger_level), no renames, no case conversion.",
         "client": {"api_key": "ow_pro"},
         "calls": [
             {"operation": "getComposition", "args": {}},
@@ -2376,7 +2376,8 @@ CASES: list[dict] = [
             "results": [
                 {"model_count": 5, "total_members": 164, "models[0].id": "aifs"},
                 {"type": "FeatureCollection", "features[0].properties.class": "winter", "features[1].properties.ends": None},
-                {"features[0].properties.danger_level": None, "features[1].properties.danger_level": 3, "features[1].properties.status": "rated"},
+                # GeoJSON is passed through untouched (BEHAVIOR.md 3.0): wire keys, no renames, no camelCase.
+                {"features[0].properties.danger_level": None, "features[1].properties.danger_level": 3, "features[1].properties.status": "rated", "features[1].properties.forecast_url": AVALANCHE_ZONES["features"][1]["properties"]["forecast_url"]},
             ],
             "requests": 3,
         },
@@ -2402,23 +2403,22 @@ CASES: list[dict] = [
     # --- SDK names of stuttering wire fields (BEHAVIOR.md 3.0): every rename, pinned ---
     {
         "name": "names/forecast",
-        "description": "A forecast body decodes to the SDK names: forecast -> series, elevation_forecasts -> elevations, an hour's valid_time -> valid_at and lead_time_hours -> lead_hours, members[].members -> items and member_id -> id, precipitation_type.type -> kind, freezing_level.above_freezing_layer_aloft -> warm_layer_aloft, model_run.models -> contributors, probability -> value, window_*_hours -> *_hours on a window total, the thresholds' daily_*_probability -> daily_*, current.condition* -> code/text/icon, avalanche.forecast_url -> url, and an elevation's elevation -> height.",
+        "description": "A forecast body decodes to the SDK names: forecast -> series, elevation_forecasts -> elevations, members[].members -> items and member_id -> id, probability -> value, window_*_hours -> *_hours on a window total, the thresholds' daily_*_probability -> daily_*, current.condition* -> code/text/icon, avalanche.forecast_url -> url, and an elevation's elevation -> height. Fields that do not repeat their type's word keep the wire name (lead_time_hours, precipitation_type.type, above_freezing_layer_aloft, model_run.models).",
         "client": {},
         "call": fc({"elevations": "all", "members": True}),
         "expect_request": {"method": "GET", "path": FC_PATH, "query_string": "elevations=all&members=true"},
         "responses": [ok("forecast-full.json")],
         "expect": {
             "result": {
-                "series.timeseries[0].valid_at": FORECAST_FULL["forecast"]["timeseries"][0]["valid_time"],
-                "series.timeseries[0].lead_hours": FORECAST_FULL["forecast"]["timeseries"][0]["lead_time_hours"],
-                "series.timeseries[0].precipitation_type.kind": "snow",
-                "series.timeseries[0].freezing_level.warm_layer_aloft": FORECAST_FULL["forecast"]["timeseries"][0]["freezing_level"]["above_freezing_layer_aloft"],
+                "series.timeseries[0].lead_time_hours": FORECAST_FULL["forecast"]["timeseries"][0]["lead_time_hours"],
+                "series.timeseries[0].precipitation_type.type": "snow",
+                "series.timeseries[0].freezing_level.above_freezing_layer_aloft": FORECAST_FULL["forecast"]["timeseries"][0]["freezing_level"]["above_freezing_layer_aloft"],
+                "model_run.models[0].id": FORECAST_FULL["model_run"]["models"][0]["id"],
                 "series.timeseries[0].members[0].id": FORECAST_FULL["forecast"]["timeseries"][0]["members"][0]["id"],
                 "series.timeseries[0].members[0].items[0].id": FORECAST_FULL["forecast"]["timeseries"][0]["members"][0]["members"][0]["member_id"],
                 "elevations[0].name": FORECAST_FULL["elevation_forecasts"][0]["name"],
                 "elevations[0].height": FORECAST_FULL["elevation_forecasts"][0]["elevation"],
                 "location.elevations[0].height": FORECAST_FULL["location"]["elevations"][0]["elevation"],
-                "model_run.contributors[0].id": FORECAST_FULL["model_run"]["models"][0]["id"],
                 "probabilities[0].value": FORECAST_FULL["probabilities"][0]["probability"],
                 "window_totals[0].start_hours": FORECAST_FULL["window_totals"][0]["window_start_hours"],
                 "window_totals[0].end_hours": FORECAST_FULL["window_totals"][0]["window_end_hours"],
@@ -2519,7 +2519,7 @@ CASES: list[dict] = [
     },
     {
         "name": "names/season-and-snow",
-        "description": "Season, snow trend and snowpack names: a season total's total -> amount, the snow trend's elevation.elevation -> height and a day's snow -> amount, a snowpack aspect's aspect -> facing.",
+        "description": "Season, snow trend and snowpack names: a season total's total -> amount, the snow trend's elevation.elevation -> height and a day's snow -> amount; a snowpack aspect's aspect keeps its wire name.",
         "client": {"api_key": "ow_pro"},
         "calls": [
             {"operation": "getLocationSeason", "args": {"location": FC_LOC}},
@@ -2536,7 +2536,7 @@ CASES: list[dict] = [
             "results": [
                 {"precipitation.amount": SEASON["precipitation"]["total"]},
                 {"elevation.height": SNOW_TREND["elevation"]["elevation"], "grids[0].runs[0].days[0].amount": None},
-                {"spots[0].aspects[0].facing": SNOWPACK["spots"][0]["aspects"][0]["aspect"]},
+                {"spots[0].aspects[0].aspect": SNOWPACK["spots"][0]["aspects"][0]["aspect"]},
             ],
             "requests": 3,
         },

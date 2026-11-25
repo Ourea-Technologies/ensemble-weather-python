@@ -16,7 +16,7 @@ with Client() as client:  # no key: anonymous calls use the Free tier
 print(forecast.location.name)
 for hour in forecast.series.timeseries[:24]:
     temp = hour.ensemble.temperature
-    print(f"{hour.valid_at:%a %H:%M} UTC  {temp.p10} to {temp.p90} °F (p10-p90)")
+    print(f"{hour.valid_time:%a %H:%M} UTC  {temp.p10} to {temp.p90} °F (p10-p90)")
 
 snow = forecast.probabilities[0]
 chance = "not available" if snow.value is None else f"{snow.value:.0%}"

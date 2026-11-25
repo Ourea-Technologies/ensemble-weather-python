@@ -40,8 +40,8 @@ def hourly_frame(points: Sequence[TimeSeriesPoint]) -> pd.DataFrame:
     rows = []
     for point in points:
         row: dict[str, Any] = {
-            "valid_at": point.valid_at,
-            "lead_hours": point.lead_hours,
+            "valid_time": point.valid_time,
+            "lead_time_hours": point.lead_time_hours,
             "is_night": point.is_night,
             "condition": point.condition.value,
         }
@@ -55,7 +55,7 @@ def hourly_frame(points: Sequence[TimeSeriesPoint]) -> pd.DataFrame:
                     row[f"{f.name}.{stat}"] = value
         rows.append(row)
     frame: pd.DataFrame = pandas.DataFrame(rows)
-    return frame.set_index("valid_at") if rows else frame
+    return frame.set_index("valid_time") if rows else frame
 
 
 def daily_frame(days: Sequence[DailyForecast]) -> pd.DataFrame:

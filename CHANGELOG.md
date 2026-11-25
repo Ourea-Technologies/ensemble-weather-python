@@ -11,7 +11,7 @@ contract v1.
 ## [0.1.0] - 2026-11-24
 
 The first release on PyPI. Targets the v1 contract at ensemble-weather-spec
-40c2ae8 (the server's public spec at 256cd770, byte for byte).
+7954268 (the server's public spec at 256cd770, byte for byte).
 
 ### Added since the v1 contract of 2026-10-27
 
@@ -55,17 +55,24 @@ The first release on PyPI. Targets the v1 contract at ensemble-weather-spec
 
 ### Changed
 
-- Stuttering JSON fields have SDK names (BEHAVIOR.md 3.0, one table for every
-  Ourea SDK; the decoder maps them and `to_dict()` writes the JSON names):
-  `ForecastResponse.forecast` is `series` and `.elevation_forecasts` is
-  `elevations`; `CurrentResponse.current` is `now`; `ProbabilityResult.probability`
-  is `value`; the list responses' rows are `items` and their counts `count`
-  (`alerts`, `alert_count`, `locations`, `runs`; nearby's `location` is
-  `origin`); an hour's `valid_time` and `lead_time_hours` are `valid_at` and
-  `lead_hours`; `WindowTotal.window_*_hours` are `start_hours`/`end_hours`;
-  `CurrentConditions.condition*` are `code`/`text`/`icon`; an elevation's
-  `elevation` is `height`; and the rest of the table in the README's "Names
-  that differ from the API's JSON". `to_dataframe()` is indexed by `valid_at`.
+- JSON fields that repeat a word of their own type have SDK names
+  (BEHAVIOR.md 3.0, one table for every Ourea SDK). The decoder maps them,
+  and `to_dict()` writes the JSON names back.
+  - `ForecastResponse.forecast` is `series` and `.elevation_forecasts` is
+    `elevations`.
+  - `CurrentResponse.current` is `now`.
+  - `ProbabilityResult.probability` is `value`.
+  - The list responses' rows are `items` and their counts `count`
+    (`alerts`, `alert_count`, `locations`, `runs`; nearby's `location` is
+    `origin`, and both nearby routes use `items`).
+  - `WindowTotal.window_*_hours` are `start_hours`/`end_hours`.
+  - `CurrentConditions.condition*` are `code`/`text`/`icon`.
+  - An elevation's `elevation` is `height`.
+  - The rest of the table is in the README's "Names that differ from the
+    API's JSON".
+
+  GeoJSON bodies are not renamed: `AvalancheZoneFeature.properties` is an
+  `AvalancheZoneProperties` with `forecast_url`.
 - No name stutters (BEHAVIOR.md 3.0): the response types' module
   `ensemble_weather.models` is `ensemble_weather.types` (so not
   `models.ModelEntry`), and the `cache` and `errors` modules are private:

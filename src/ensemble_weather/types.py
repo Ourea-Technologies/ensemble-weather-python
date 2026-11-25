@@ -84,6 +84,7 @@ __all__ = [
     "AvalancheZoneCollection",
     "AvalancheZoneFeature",
     "AvalancheZoneGeometry",
+    "AvalancheZoneProperties",
     "BandColumns",
     "CatalogResolvedEntry",
     "CatalogTemplateSummary",
@@ -576,8 +577,7 @@ class ModelRunInfo(Model):
 
     initialized_at: dt.datetime
     total_members: int
-    contributors: list[ModelEntry] = field(metadata={JSON_NAME: "models"})
-    """(JSON ``models``)"""
+    models: list[ModelEntry]
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -639,8 +639,7 @@ class EnsembleStats(Model):
 class PrecipType(Model):
     """An hour's most likely precipitation type and its chances."""
 
-    kind: PrecipitationType = field(metadata={JSON_NAME: "type"})
-    """(JSON ``type``)"""
+    type: PrecipitationType
     snow_probability: float
     rain_probability: float
 
@@ -659,16 +658,13 @@ class FreezingLevel(Model):
     """Where the freezing level is.
 
     ``kind`` says which fields apply: ``height`` (with :attr:`height` and
-    :attr:`warm_layer_aloft`), ``above_profile`` (with
+    :attr:`above_freezing_layer_aloft`), ``above_profile`` (with
     :attr:`top`) or ``below_surface`` (neither).
     """
 
     kind: FreezingLevelKind
     height: float | None = None
-    warm_layer_aloft: bool | None = field(
-        default=None, metadata={JSON_NAME: "above_freezing_layer_aloft"}
-    )
-    """(JSON ``above_freezing_layer_aloft``)"""
+    above_freezing_layer_aloft: bool | None = None
     top: float | None = None
 
 
@@ -752,10 +748,8 @@ class MembersCumulative(Model):
 class TimeSeriesPoint(Model):
     """One forecast hour."""
 
-    valid_at: dt.datetime = field(metadata={JSON_NAME: "valid_time"})
-    """(JSON ``valid_time``)"""
-    lead_hours: int = field(metadata={JSON_NAME: "lead_time_hours"})
-    """(JSON ``lead_time_hours``)"""
+    valid_time: dt.datetime
+    lead_time_hours: int
     is_night: bool
     measured: bool | None = None
     """``True`` on an hour whose values are observed, not forecast."""
@@ -909,7 +903,7 @@ class ForecastData(Model):
     def to_dataframe(self) -> pd.DataFrame:
         """The hourly series as a :class:`pandas.DataFrame` (needs ``[pandas]``).
 
-        One row per hour, indexed by ``valid_at``; one column per served
+        One row per hour, indexed by ``valid_time``; one column per served
         statistic, named ``<variable>.<statistic>`` (``temperature.p10``).
         The values are exactly the server's; nothing is computed.
         """
@@ -1698,6 +1692,50 @@ class AvalancheForecast(Model):
     """When the center's current product expires (UTC), when stated."""
     url: str = field(metadata={JSON_NAME: "forecast_url"})
     """(JSON ``forecast_url``) The center's full forecast for the zone."""
+    center_url: str
+    attribution: str
+    """The credit to show with the block: "Avalanche forecast by <center> via avalanche.org",
+    or "Avalanche forecast by Colorado Avalanche Information Center via
+    avalanche.state.co.us" for a CAIC area.
+    """
+
+
+# --- the plume view --------------------------------------------------------------
+
+
+@dataclass(frozen=True, kw_only=True)
+class AvalancheZoneProperties(Model):
+    """An avalanche zone Feature's ``properties``, exactly as the API sends them.
+
+    GeoJSON is passed through untouched (BEHAVIOR.md 3.0), so unlike
+    :class:`AvalancheForecast` the link keeps its wire name ``forecast_url``.
+    """
+
+    center_id: str
+    """The avalanche center's short id."""
+    center_name: str
+    zone_id: int
+    """avalanche.org's id for the forecast zone; for a CAIC forecast area, an id at or above
+    2^52 derived from CAIC's area id (stable for that grouping of CAIC's polygons).
+    """
+    zone_name: str
+    danger_level: int | None = None
+    """The North American Public Avalanche Danger Scale level, 1-5; present only when
+    ``status`` is ``rated``.
+    """
+    danger_label: str | None = None
+    """Display text: the scale's English name for ``danger_level`` (Low, Moderate,
+    Considerable, High, Extreme), derived from the level, never the center's own wording;
+    ``null`` exactly when ``danger_level`` is.
+    """
+    status: str
+    """``rated``: a current rating."""
+    valid_from: dt.datetime | None = None
+    """When the center's current product took effect (UTC), when stated."""
+    valid_until: dt.datetime | None = None
+    """When the center's current product expires (UTC), when stated."""
+    forecast_url: str
+    """The center's full forecast for the zone."""
     center_url: str
     attribution: str
     """The credit to show with the block: "Avalanche forecast by <center> via avalanche.org",
@@ -2717,8 +2755,8 @@ class SnowpackAspect(Model):
     ground's snowfall and the slope's own sun.
     """
 
-    facing: str = field(metadata={JSON_NAME: "aspect"})
-    """(JSON ``aspect``) The way the slope faces: ``north``, ``east``, ``south`` or ``west``."""
+    aspect: str
+    """The way the slope faces: ``north``, ``east``, ``south`` or ``west``."""
     slope_angle_deg: float
     """How steep the slope is, degrees from horizontal."""
     depth: SnowpackDepth
@@ -2904,7 +2942,7 @@ class AvalancheZoneFeature(Model):
     id: int
     """The zone's id, as ``properties.zone_id``."""
     geometry: AvalancheZoneGeometry
-    properties: AvalancheForecast
+    properties: AvalancheZoneProperties
 
 
 @dataclass(frozen=True, kw_only=True)

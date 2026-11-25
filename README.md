@@ -33,7 +33,7 @@ with Client() as client:  # no key: anonymous calls use the Free tier
 print(forecast.location.name)
 for hour in forecast.series.timeseries[:24]:
     temp = hour.ensemble.temperature
-    print(f"{hour.valid_at:%a %H:%M} UTC  {temp.p10} to {temp.p90} °F (p10-p90)")
+    print(f"{hour.valid_time:%a %H:%M} UTC  {temp.p10} to {temp.p90} °F (p10-p90)")
 
 snow = forecast.probabilities[0]
 chance = "not available" if snow.value is None else f"{snow.value:.0%}"
@@ -104,11 +104,14 @@ request's units before sending; response values are never converted. More in
 
 ## Names that differ from the API's JSON
 
-A few JSON fields would read twice in Python (`forecast.forecast`,
-`current.current`, `probability.probability`), so the SDK names them
-differently: one table for every Ourea SDK (ensemble-weather-spec
-BEHAVIOR.md 3.0). The decoder maps them, and `to_dict()` writes the JSON names
-back. Every other field has its JSON name.
+A JSON field that repeats a word of the type holding it would read twice in
+Python (`forecast.forecast`, `current.current`, `probability.probability`),
+so the SDK names it differently. There is one table for every Ourea SDK
+(ensemble-weather-spec BEHAVIOR.md 3.0). The decoder maps the names, and
+`to_dict()` writes the JSON names back. Every other field keeps its JSON
+name, and the GeoJSON routes (`alert_outlines`, `avalanche_zones`) are
+passed through untouched: an avalanche zone's `properties.forecast_url`
+stays `forecast_url`.
 
 | Type | JSON field | SDK attribute |
 |---|---|---|
@@ -125,14 +128,9 @@ back. Every other field has its JSON name.
 | `ProbabilityThresholds` | `daily_snow_probability` | `daily_snow` |
 | `WindowTotal` | `window_start_hours` | `start_hours` |
 | `WindowTotal` | `window_end_hours` | `end_hours` |
-| `TimeSeriesPoint` | `valid_time` | `valid_at` |
-| `TimeSeriesPoint` | `lead_time_hours` | `lead_hours` |
 | `MemberGroup` | `members` | `items` |
 | `MemberForecast` | `member_id` | `id` |
 | `MemberPlume` | `members` | `pool` |
-| `PrecipType` | `type` | `kind` |
-| `FreezingLevel` | `above_freezing_layer_aloft` | `warm_layer_aloft` |
-| `ModelRunInfo` | `models` | `contributors` |
 | `AlertsResponse` | `alerts` | `items` |
 | `AlertsResponse` | `alert_count` | `count` |
 | `LocationsResponse` | `locations` | `items` |
@@ -157,7 +155,6 @@ back. Every other field has its JSON name.
 | `AvalancheForecast` | `forecast_url` | `url` |
 | `SeasonTotal` | `total` | `amount` |
 | `SnowTrendDay` | `snow` | `amount` |
-| `SnowpackAspect` | `aspect` | `facing` |
 
 ## Every route
 
