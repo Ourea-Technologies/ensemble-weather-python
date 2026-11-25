@@ -1176,6 +1176,15 @@ CASES: list[dict] = [
         "responses": [ok("alert-outlines.json", **{"Content-Type": "application/geo+json"})],
         "expect": {"result": {"features[0].properties.event": "Winter Storm Warning"}},
     },
+    {
+        "name": "canonical/comma-lists-literal",
+        "description": "A comma list is sorted and de-duplicated, each item percent-encoded, and the commas between items sent literally (BEHAVIOR.md 3.1 rule 5); %2C would be another edge-cache entry.",
+        "client": {},
+        "call": fc({"sources": ["snotel", "asos", "snotel"], "exclude_sources": ["raws"], "include": ["skin_temperature", "mslp"]}),
+        "expect_request": {"method": "GET", "path": FC_PATH, "query_string": "exclude_sources=raws&include=mslp,skin_temperature&sources=asos,snotel"},
+        "responses": [ok("forecast-metric.json")],
+        "expect": {"result": {"location.slug": "mt-hood-meadows"}},
+    },
     # --- probabilities ---
     {
         "name": "prob/three-terms-imperial",

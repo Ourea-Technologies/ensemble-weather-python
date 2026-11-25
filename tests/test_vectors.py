@@ -37,7 +37,7 @@ from ensemble_weather._core import _reset_deprecation_warnings
 
 VECTORS = Path(__file__).resolve().parent.parent / "spec" / "vectors"
 CASES = sorted(p for p in VECTORS.rglob("*.json") if "bodies" not in p.relative_to(VECTORS).parts)
-EXPECTED_VECTOR_COUNT = 51
+EXPECTED_VECTOR_COUNT = 52
 
 
 def test_every_vector_is_collected() -> None:

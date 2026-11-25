@@ -157,10 +157,15 @@ on the location routes each non-canonical spelling costs a `301` round trip
 4. **Alphabetical order by parameter name.**
 5. **Encoding:** each value is percent-encoded with RFC 3986 rules
    (unreserved characters `A-Z a-z 0-9 - . _ ~` as they are, everything else
-   `%XX` in uppercase hex, space as `%20`, never `+`). There is one
-   exception: in `prob` and `totals`, `:` and `,` are sent as literal
-   characters. The language's standard query encoder usually encodes them,
-   so the SDK builds those two values itself.
+   `%XX` in uppercase hex, space as `%20`, never `+`). There are two
+   exceptions, both the server's canonical spelling (its "Canonical URLs":
+   `%2C` is served too, but is another edge-cache entry). In `prob` and
+   `totals`, `:` and `,` are sent as literal characters. In a comma list
+   (`sources`, `exclude_sources`, `elevations`, `diagnostics`, `include`,
+   `feels_like`, `network`, `capability`, `class`), each item is encoded
+   and the commas between items stay literal. The same holds for `near`
+   and `bbox` (section 3). The language's standard query encoder usually
+   encodes them, so the SDK builds those values itself.
 6. **Numbers:** the shortest decimal that round-trips, never an exponent.
    Coordinates are sent exactly as given (the SDK never rounds them).
    Thresholds follow section 4.

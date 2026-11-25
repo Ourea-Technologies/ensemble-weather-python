@@ -11,7 +11,7 @@ contract v1.
 ## [0.1.0] - 2026-11-24
 
 The first release on PyPI. Targets the v1 contract at ensemble-weather-spec
-1f97e6a (the server's public spec at 256cd770, byte for byte).
+b922bdd (the server's public spec at 256cd770, byte for byte).
 
 ### Added since the v1 contract of 2026-10-27
 
