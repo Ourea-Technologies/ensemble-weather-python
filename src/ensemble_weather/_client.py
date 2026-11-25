@@ -519,7 +519,7 @@ class Client:
             page = self.list_locations(
                 state, location_type=location_type, units=units, limit=limit, cursor=cursor
             )
-            yield from page.locations
+            yield from page.items
             if not page.next_cursor:
                 return
             cursor = page.next_cursor

@@ -104,7 +104,7 @@
     "results": [
       {
         "water_year": 2027,
-        "precipitation.total": 210.69,
+        "precipitation.amount": 210.69,
         "precipitation.percent_of_normal": 41,
         "snowfall": null,
         "station.network": "snotel"
@@ -113,7 +113,7 @@
         "retention_days": 5,
         "grids[0].source": "ourea",
         "grids[0].runs[0].days[0].kind": "none",
-        "grids[0].runs[0].days[0].snow": null
+        "grids[0].runs[0].days[0].amount": null
       },
       {
         "beta": true,

@@ -31,12 +31,12 @@ with Client() as client:  # no key: anonymous calls use the Free tier
     )
 
 print(forecast.location.name)
-for hour in forecast.forecast.timeseries[:24]:
+for hour in forecast.series.timeseries[:24]:
     temp = hour.ensemble.temperature
-    print(f"{hour.valid_time:%a %H:%M} UTC  {temp.p10} to {temp.p90} °F (p10-p90)")
+    print(f"{hour.valid_at:%a %H:%M} UTC  {temp.p10} to {temp.p90} °F (p10-p90)")
 
 snow = forecast.probabilities[0]
-chance = "not available" if snow.probability is None else f"{snow.probability:.0%}"
+chance = "not available" if snow.value is None else f"{snow.value:.0%}"
 print(f"Chance of at least 6 in of snow in the next 24 h: {chance} ({snow.members} members)")
 ```
 
@@ -79,7 +79,7 @@ terms = [
 ]
 forecast = client.forecast("or/mt-hood-meadows", prob=terms)
 for p in forecast.probabilities:  # in your order, each with its reference class
-    print(p.variable, p.op, p.threshold, p.window, p.aggregation, p.probability, p.members)
+    print(p.variable, p.op, p.threshold, p.window, p.aggregation, p.value, p.members)
 ```
 
 For a **storm total**, ask for the window total's distribution:
@@ -92,7 +92,7 @@ storm = forecast.window_totals[0].quantiles  # None (see null_reason) when not c
 Read **quantiles** directly; `median` is the p50, not "the forecast":
 
 ```python
-temp = forecast.forecast.timeseries[0].ensemble.temperature
+temp = forecast.series.timeseries[0].ensemble.temperature
 print(temp.p10, temp.median, temp.p90, temp.range(25, 75))
 ```
 
@@ -101,6 +101,63 @@ probability from them: the sum of hourly medians is not the median total.
 A threshold you give in another unit is converted exactly into the
 request's units before sending; response values are never converted. More in
 [Probabilities](https://docs.oureawx.com/concepts/probabilities).
+
+## Names that differ from the API's JSON
+
+A few JSON fields would read twice in Python (`forecast.forecast`,
+`current.current`, `probability.probability`), so the SDK names them
+differently: one table for every Ourea SDK (ensemble-weather-spec
+BEHAVIOR.md 3.0). The decoder maps them, and `to_dict()` writes the JSON names
+back. Every other field has its JSON name.
+
+| Type | JSON field | SDK attribute |
+|---|---|---|
+| `ForecastResponse` | `forecast` | `series` |
+| `ForecastResponse` | `elevation_forecasts` | `elevations` |
+| `CurrentResponse` | `current` | `now` |
+| `CurrentConditions` | `condition` | `code` |
+| `CurrentConditions` | `condition_text` | `text` |
+| `CurrentConditions` | `condition_icon` | `icon` |
+| `CurrentStation` | `station_id` | `id` |
+| `ProbabilityResult` | `probability` | `value` |
+| `ProbabilityThresholds` | `daily_precipitation_probability` | `daily_precipitation` |
+| `ProbabilityThresholds` | `daily_precipitation_occurrence_probability` | `daily_precipitation_occurrence` |
+| `ProbabilityThresholds` | `daily_snow_probability` | `daily_snow` |
+| `WindowTotal` | `window_start_hours` | `start_hours` |
+| `WindowTotal` | `window_end_hours` | `end_hours` |
+| `TimeSeriesPoint` | `valid_time` | `valid_at` |
+| `TimeSeriesPoint` | `lead_time_hours` | `lead_hours` |
+| `MemberGroup` | `members` | `items` |
+| `MemberForecast` | `member_id` | `id` |
+| `MemberPlume` | `members` | `pool` |
+| `PrecipType` | `type` | `kind` |
+| `FreezingLevel` | `above_freezing_layer_aloft` | `warm_layer_aloft` |
+| `ModelRunInfo` | `models` | `contributors` |
+| `AlertsResponse` | `alerts` | `items` |
+| `AlertsResponse` | `alert_count` | `count` |
+| `LocationsResponse` | `locations` | `items` |
+| `NearbyLocationsResponse` | `location` | `origin` |
+| `NearbyLocationsResponse` | `locations` | `items` |
+| `NearbyPointResponse` | `locations` | `items` |
+| `RunsResponse` | `runs` | `items` |
+| `ElevationForecast` | `elevation` | `height` |
+| `ElevationSummary` | `elevation` | `height` |
+| `SnowTrendResponseElevation` | `elevation` | `height` |
+| `PublicCatalogElevation` | `elevation_m` | `height_m` |
+| `PublicCatalogStation` | `source_station_id` | `source_id` |
+| `PublicCatalogStation` | `station_status` | `status` |
+| `PublicCatalogStation` | `station_url` | `url` |
+| `PublicCatalogNearbyStation` | `station_status` | `status` |
+| `CatalogTemplateSummary` | `template_variant` | `variant` |
+| `CatalogResolvedEntry` | `resolved_locale` | `locale` |
+| `SensorObservation` | `observation_time` | `observed_at` |
+| `PassHour` | `snow_level_above_pass` | `snow_level_margin` |
+| `PassStatusSegment` | `status` | `state` |
+| `PassStatusSegment` | `status_text` | `text` |
+| `AvalancheForecast` | `forecast_url` | `url` |
+| `SeasonTotal` | `total` | `amount` |
+| `SnowTrendDay` | `snow` | `amount` |
+| `SnowpackAspect` | `aspect` | `facing` |
 
 ## Every route
 

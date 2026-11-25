@@ -1,0 +1,18 @@
+{
+  "served": {
+    "initialized_at": "2026-11-25T00:00:00Z",
+    "models": [
+      {
+        "id": "aifs",
+        "cycle": "2026-11-24T18:00:00Z"
+      }
+    ]
+  },
+  "runs": [
+    {
+      "initialized_at": "2026-11-25T00:00:00Z"
+    }
+  ],
+  "count": 2,
+  "next_cursor": "2026-11-24T18:00:00Z"
+}

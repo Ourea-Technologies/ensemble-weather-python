@@ -127,10 +127,57 @@ not `ensemble_weather::forecast::ForecastForecast`.
   - R's `ew_` prefix;
   - .NET's `services.AddEnsembleWeather()`.
 - Response fields keep the wire's names (the spec's, in the language's
-  case), so every SDK and the API reference read alike. When a wire name
-  stutters in context (`ForecastResponse.forecast`, `CurrentResponse.current`,
-  `ProbabilityResult.probability`), the fix belongs in the API, not in one
-  SDK.
+  case), **except the stuttering ones in the table below** (Harrison,
+  2026-11-24: no aliases in the API; the SDKs rename them). Every SDK uses
+  the SDK name, and its decoder maps the wire name to it (and back, where
+  the SDK encodes). Each SDK's reference docs show the wire name next to the
+  SDK name, so the API reference still maps. The `names/*` vectors pin
+  every row. A field the table does not list keeps its wire name.
+
+| Schema (where the field sits) | Wire name | SDK name |
+|---|---|---|
+| `ForecastResponse` | `forecast` | `series` |
+| `ForecastResponse` | `elevation_forecasts` | `elevations` |
+| `CurrentResponse` | `current` | `now` |
+| `CurrentConditions` | `condition`, `condition_text`, `condition_icon` | `code`, `text`, `icon` |
+| `CurrentConditions.station` | `station_id` | `id` |
+| `ProbabilityResult` | `probability` | `value` |
+| `ProbabilityThresholds` | `daily_precipitation_probability`, `daily_precipitation_occurrence_probability`, `daily_snow_probability` | `daily_precipitation`, `daily_precipitation_occurrence`, `daily_snow` |
+| `WindowTotal` | `window_start_hours`, `window_end_hours` | `start_hours`, `end_hours` |
+| `TimeSeriesPoint` | `valid_time`, `lead_time_hours` | `valid_at`, `lead_hours` |
+| `TimeSeriesPoint.members[]` (a model's members) | `members` | `items` |
+| `MemberForecast` | `member_id` | `id` |
+| `MemberPlume` | `members` | `pool` |
+| `PrecipType` | `type` | `kind` |
+| `FreezingLevel` (`kind: height`) | `above_freezing_layer_aloft` | `warm_layer_aloft` |
+| `ModelRunInfo` | `models` | `contributors` |
+| `AlertsResponse` | `alerts`, `alert_count` | `items`, `count` |
+| `LocationsResponse` | `locations` | `items` |
+| `NearbyLocationsResponse` | `location`, `locations` | `origin`, `items` |
+| `NearbyPointResponse` | `locations` | `items` (one name for the rows of both nearby routes) |
+| `RunsResponse` | `runs` | `items` |
+| `ElevationForecast`, `ElevationSummary`, `SnowTrendResponse.elevation` | `elevation` | `height` |
+| `PublicCatalogElevation` | `elevation_m` | `height_m` |
+| `PublicCatalogStation`, `PublicCatalogStationDetail` | `source_station_id`, `station_status`, `station_url` | `source_id`, `status`, `url` |
+| `PublicCatalogNearbyStation` | `station_status` | `status` |
+| `CatalogTemplateSummary` | `template_variant` | `variant` |
+| `CatalogResolvedEntry` | `resolved_locale` | `locale` |
+| `SensorObservation` | `observation_time` | `observed_at` |
+| `PassHour` | `snow_level_above_pass` | `snow_level_margin` |
+| `PassStatusSegment` | `status`, `status_text` | `state`, `text` |
+| `AvalancheForecast` | `forecast_url` | `url` |
+| `SeasonTotal` | `total` | `amount` |
+| `SnowTrendDay` | `snow` | `amount` |
+| `SnowpackAspect` | `aspect` | `facing` |
+| `ErrorResponse` | `error` | `code` (on the SDK's error, as already) |
+
+  Not renamed, because the field does not repeat its holder's word:
+  `ProbabilityResult.window_*_hours` (a probability is not a window),
+  `CurrentStation.observation_time`, and `elevation` on `ForecastLocation`,
+  `ExploreItem`, `PassForecast` and the others. The rule judges a field
+  against the type that holds it, so these keep their wire names. A schema
+  added later is checked with the same rule, and its renames join this
+  table before any SDK ships it.
 - An SDK-owned name, such as a module, a type that is not a schema, or a
   method, never stutters. Rename it before its first release.
 
@@ -390,7 +437,7 @@ Keys:
 | `call` / `calls` | `{"operation": <operationId>, "args": {...}}`. The args use this document's semantic names, and each SDK's runner maps them to its own API: **that mapping is the only per-language code.** A `threshold` is `{"value", "unit"}` with unit one of `mm in degC degF K m ft m/s mph`; `near` is `{"lat", "lon"}`; `bbox` is `{"west", "south", "east", "north"}`; `classes` is `getAlertOutlines`' `class` list; a `window` is `{"hours": N}` or `{"start_hours": A, "end_hours": B}`; `"location": "or/slug"` is the combined form; `"iterate": true` on a list operation means "use the lazy iterator and collect everything". A call may carry `"with_api_key"`: make it with that key instead (a per-request override, or a second client sharing the first one's cache). |
 | `expect_request(s)` | `method`; `path` (exact, as sent, still percent-encoded); `query` (decoded values, compared per parameter); `query_string` (the raw query string, **exact**: this pins the canonical form, section 3.1); `query_absent`; `headers` (exact); `headers_absent`; `headers_match` (regex); `url_prefix`. |
 | `responses` | Consumed in order: `status`, `headers`, and `body_file` (relative to `vectors/`) or `body` (raw text). The runner injects a fake clock, so no vector sleeps. |
-| `expect.result` / `expect.results` | Path → value over the semantic model (dot and `[i]` paths). `null` means absent. `{"unknown": "<raw>"}` means "the unknown-enum case, keeping this raw string". `rate_limit.*` reads the rate-limit state and `revalidated` the 304 flag. |
+| `expect.result` / `expect.results` | Path → value over the semantic model (dot and `[i]` paths), **in the SDK names of section 3.0** (`series.timeseries[0]`, `probabilities[0].value`). A string expected at a timestamp field (`valid_at`, `observed_at`, `initialized_at`) matches when it is the same instant. `null` means absent. `{"unknown": "<raw>"}` means "the unknown-enum case, keeping this raw string". `rate_limit.*` reads the rate-limit state and `revalidated` the 304 flag. |
 | `expect.error` | `category` (section 8, snake_case), `code`, `status`, `retry_after`, `string_excludes` (a substring that must not appear in the error's message or string form). |
 | `expect.requests` | Exact number of HTTP requests made. |
 | `expect.delays_s` | The retry delays chosen, with jitter seeded to its upper bound (1.0). |

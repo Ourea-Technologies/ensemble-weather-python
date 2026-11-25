@@ -204,7 +204,7 @@ def test_unknown_enum_keeps_raw_value() -> None:
 def test_wind_direction_is_left_circular() -> None:
     body = json_body("forecast-metric.json")
     forecast = types.ForecastResponse.from_dict(body)
-    wind = forecast.forecast.timeseries[0].ensemble.wind_direction
+    wind = forecast.series.timeseries[0].ensemble.wind_direction
     assert isinstance(wind, types.CircularStats)
     assert wind.sector_50.from_ == 355.0  # clockwise across north: from > to
     assert wind.sector_50.to == 15.0
@@ -227,5 +227,49 @@ def test_hourly_dataframe() -> None:
     frame = forecast.to_dataframe()
     assert len(frame) == 3
     assert frame["temperature.p50"].tolist() == [-2.0, -1.0, 0.0]
-    assert frame.index.name == "valid_time"
-    assert forecast.forecast.daily_dataframe().empty
+    assert frame.index.name == "valid_at"
+    assert forecast.series.daily_dataframe().empty
+
+
+def test_renamed_fields_decode_and_encode_their_wire_names() -> None:
+    # BEHAVIOR.md 3.0: the SDK name reads the wire name, and to_dict writes it back.
+    data = json_body("forecast-metric.json")
+    forecast = types.ForecastResponse.from_dict(data)
+    assert (
+        forecast.series.timeseries[0].lead_hours
+        == data["forecast"]["timeseries"][0]["lead_time_hours"]
+    )
+    encoded = forecast.to_dict()
+    assert "forecast" in encoded
+    assert "series" not in encoded
+    assert "lead_time_hours" in encoded["forecast"]["timeseries"][0]
+    assert types.ForecastResponse.from_dict(encoded) == forecast
+
+
+def test_every_rename_in_the_table_is_applied() -> None:
+    # The BEHAVIOR.md 3.0 table, read from the pinned spec: each row's SDK
+    # attribute exists and reads its wire name.
+    behaviour = (SPEC.parents[2] / "BEHAVIOR.md").read_text(encoding="utf-8")
+    table = behaviour.split("| Schema (where the field sits) | Wire name | SDK name |")[1]
+    rows = []
+    for line in table.splitlines()[2:]:
+        if not line.startswith("|"):
+            break
+        rows.append(line)
+    assert len(rows) > 30
+    by_json = {
+        (cls.__name__, f.json): f.attr
+        for cls in vars(types).values()
+        if isinstance(cls, type) and dataclasses.is_dataclass(cls)
+        for f in _fields(cls)
+    }
+    renamed = {(c, w): s for (c, w), s in by_json.items() if s != w and not s.endswith("_")}
+    wire_names = {w for (_, w) in renamed}
+    for row in rows:
+        wires = [w.strip(" `") for w in row.split("|")[2].split(",")]
+        sdks = [s.strip(" `") for s in row.split("|")[3].split("(")[0].split(",")]
+        if wires == ["error"]:
+            continue  # ErrorResponse is the exceptions' ``code``
+        for wire, sdk in zip(wires, sdks, strict=True):
+            assert wire in wire_names, f"{wire} is not renamed in any model"
+            assert any(s == sdk for (_, w), s in renamed.items() if w == wire), (wire, sdk)

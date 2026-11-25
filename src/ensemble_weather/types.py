@@ -413,7 +413,8 @@ class ElevationSummary(Model):
 
     name: str
     display_name: str | None = None
-    elevation: float
+    height: float = field(metadata={JSON_NAME: "elevation"})
+    """(JSON ``elevation``)"""
     default: bool | None = None
 
 
@@ -458,7 +459,8 @@ class LocationsResponse(Response):
 
     state: str
     count: int
-    locations: list[LocationSummary]
+    items: list[LocationSummary] = field(metadata={JSON_NAME: "locations"})
+    """(JSON ``locations``)"""
     next_cursor: str | None = None
 
 
@@ -466,10 +468,12 @@ class LocationsResponse(Response):
 class NearbyLocationsResponse(Response):
     """Locations near a named location."""
 
-    location: LocationSummary
+    origin: LocationSummary = field(metadata={JSON_NAME: "location"})
+    """(JSON ``location``)"""
     radius_km: float
     count: int
-    locations: list[NearbyLocation]
+    items: list[NearbyLocation] = field(metadata={JSON_NAME: "locations"})
+    """(JSON ``locations``)"""
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -480,7 +484,8 @@ class NearbyPointResponse(Response):
     lon: float
     radius_km: float
     count: int
-    locations: list[NearbyLocation]
+    items: list[NearbyLocation] = field(metadata={JSON_NAME: "locations"})
+    """(JSON ``locations``)"""
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -571,7 +576,8 @@ class ModelRunInfo(Model):
 
     initialized_at: dt.datetime
     total_members: int
-    models: list[ModelEntry]
+    contributors: list[ModelEntry] = field(metadata={JSON_NAME: "models"})
+    """(JSON ``models``)"""
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -633,7 +639,8 @@ class EnsembleStats(Model):
 class PrecipType(Model):
     """An hour's most likely precipitation type and its chances."""
 
-    type: PrecipitationType
+    kind: PrecipitationType = field(metadata={JSON_NAME: "type"})
+    """(JSON ``type``)"""
     snow_probability: float
     rain_probability: float
 
@@ -652,13 +659,16 @@ class FreezingLevel(Model):
     """Where the freezing level is.
 
     ``kind`` says which fields apply: ``height`` (with :attr:`height` and
-    :attr:`above_freezing_layer_aloft`), ``above_profile`` (with
+    :attr:`warm_layer_aloft`), ``above_profile`` (with
     :attr:`top`) or ``below_surface`` (neither).
     """
 
     kind: FreezingLevelKind
     height: float | None = None
-    above_freezing_layer_aloft: bool | None = None
+    warm_layer_aloft: bool | None = field(
+        default=None, metadata={JSON_NAME: "above_freezing_layer_aloft"}
+    )
+    """(JSON ``above_freezing_layer_aloft``)"""
     top: float | None = None
 
 
@@ -706,7 +716,8 @@ class ModelStats(Model):
 class MemberForecast(Model):
     """One ensemble member's values at an hour (``members=true``)."""
 
-    member_id: int
+    id: int = field(metadata={JSON_NAME: "member_id"})
+    """(JSON ``member_id``)"""
     temperature: float | None = None
     precipitation: float | None = None
     precipitation_hours: int | None = None
@@ -725,7 +736,8 @@ class MemberGroup(Model):
     """One model's members at an hour."""
 
     id: str
-    members: list[MemberForecast]
+    items: list[MemberForecast] = field(metadata={JSON_NAME: "members"})
+    """(JSON ``members``)"""
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -740,8 +752,10 @@ class MembersCumulative(Model):
 class TimeSeriesPoint(Model):
     """One forecast hour."""
 
-    valid_time: dt.datetime
-    lead_time_hours: int
+    valid_at: dt.datetime = field(metadata={JSON_NAME: "valid_time"})
+    """(JSON ``valid_time``)"""
+    lead_hours: int = field(metadata={JSON_NAME: "lead_time_hours"})
+    """(JSON ``lead_time_hours``)"""
     is_night: bool
     measured: bool | None = None
     """``True`` on an hour whose values are observed, not forecast."""
@@ -895,7 +909,7 @@ class ForecastData(Model):
     def to_dataframe(self) -> pd.DataFrame:
         """The hourly series as a :class:`pandas.DataFrame` (needs ``[pandas]``).
 
-        One row per hour, indexed by ``valid_time``; one column per served
+        One row per hour, indexed by ``valid_at``; one column per served
         statistic, named ``<variable>.<statistic>`` (``temperature.p10``).
         The values are exactly the server's; nothing is computed.
         """
@@ -916,7 +930,8 @@ class ElevationForecast(Model):
 
     name: str
     display_name: str | None = None
-    elevation: float
+    height: float = field(metadata={JSON_NAME: "elevation"})
+    """(JSON ``elevation``)"""
     lat: float
     lon: float
     hourly: list[TimeSeriesPoint] | None = None
@@ -934,9 +949,14 @@ class ProbabilityThresholds(Model):
 
     hourly_precipitation: float
     hourly_snowfall: float
-    daily_precipitation_probability: float
-    daily_precipitation_occurrence_probability: float
-    daily_snow_probability: float
+    daily_precipitation: float = field(metadata={JSON_NAME: "daily_precipitation_probability"})
+    """(JSON ``daily_precipitation_probability``)"""
+    daily_precipitation_occurrence: float = field(
+        metadata={JSON_NAME: "daily_precipitation_occurrence_probability"}
+    )
+    """(JSON ``daily_precipitation_occurrence_probability``)"""
+    daily_snow: float = field(metadata={JSON_NAME: "daily_snow_probability"})
+    """(JSON ``daily_snow_probability``)"""
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -954,10 +974,10 @@ class ProbabilityResult(Model):
         aggregation: How the window's hours were combined.
         from_: The window's first instant (JSON ``from``).
         to: The window's end (exclusive).
-        probability: The share of members meeting the term, 0..1, or ``None``
+        value: The share of members meeting the term, 0..1, or ``None``
             (see :attr:`null_reason`). ``None`` is not zero.
         members: The members that voted.
-        null_reason: Why :attr:`probability` is ``None``; ``None`` otherwise.
+        null_reason: Why :attr:`value` is ``None``; ``None`` otherwise.
         request: The :class:`~ensemble_weather.Chance` this answers, as the
             caller wrote it.
     """
@@ -971,7 +991,8 @@ class ProbabilityResult(Model):
     aggregation: Aggregation
     from_: dt.datetime | None = field(default=None, metadata={JSON_NAME: "from"})
     to: dt.datetime | None = None
-    probability: float | None = None
+    value: float | None = field(default=None, metadata={JSON_NAME: "probability"})
+    """(JSON ``probability``)"""
     members: int
     null_reason: NullReason | None = None
     request: Chance | None = field(default=None, compare=False, metadata={NOT_JSON: True})
@@ -990,8 +1011,8 @@ class WindowTotal(Model):
         term: The canonical term the SDK sent (``"precipitation:48h"``); the
             SDK matches each result to the caller's request by it.
         variable: ``precipitation`` or ``snowfall``.
-        window_start_hours: The window's first hour.
-        window_end_hours: The window's end hour.
+        start_hours: The window's first hour (JSON ``window_start_hours``).
+        end_hours: The window's end hour (JSON ``window_end_hours``).
         aggregation: ``total`` for precipitation and snowfall.
         from_: The window's first instant (JSON ``from``).
         to: The window's end (exclusive).
@@ -1003,8 +1024,10 @@ class WindowTotal(Model):
 
     term: str
     variable: TotalVariable
-    window_start_hours: int
-    window_end_hours: int
+    start_hours: int = field(metadata={JSON_NAME: "window_start_hours"})
+    """(JSON ``window_start_hours``)"""
+    end_hours: int = field(metadata={JSON_NAME: "window_end_hours"})
+    """(JSON ``window_end_hours``)"""
     aggregation: TotalAggregation
     from_: dt.datetime | None = field(default=None, metadata={JSON_NAME: "from"})
     to: dt.datetime | None = None
@@ -1018,7 +1041,7 @@ class WindowTotal(Model):
     @property
     def window(self) -> Window:
         """The window as a :class:`~ensemble_weather.Window`."""
-        return Window(self.window_start_hours, self.window_end_hours)
+        return Window(self.start_hours, self.end_hours)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -1071,7 +1094,8 @@ class PointInfo(Model):
 class CurrentStation(Model):
     """The station that anchored current conditions."""
 
-    station_id: str
+    id: str = field(metadata={JSON_NAME: "station_id"})
+    """(JSON ``station_id``)"""
     name: str
     observation_time: dt.datetime
     calm: bool | None = None
@@ -1085,9 +1109,12 @@ class CurrentConditions(Model):
     time: dt.datetime
     temperature: float
     feels_like: float | None = None
-    condition: str
-    condition_text: str
-    condition_icon: ConditionIcon
+    code: str = field(metadata={JSON_NAME: "condition"})
+    """(JSON ``condition``)"""
+    text: str = field(metadata={JSON_NAME: "condition_text"})
+    """(JSON ``condition_text``)"""
+    icon: ConditionIcon = field(metadata={JSON_NAME: "condition_icon"})
+    """(JSON ``condition_icon``)"""
     wind_speed: float
     wind_gust: float | None = None
     wind_direction: float
@@ -1120,8 +1147,12 @@ class ForecastResponse(Response):
     location: ForecastLocation
     model_run: ModelRunInfo
     units: UnitSystem
-    forecast: ForecastData
-    elevation_forecasts: list[ElevationForecast] | None = None
+    series: ForecastData = field(metadata={JSON_NAME: "forecast"})
+    """(JSON ``forecast``)"""
+    elevations: list[ElevationForecast] | None = field(
+        default=None, metadata={JSON_NAME: "elevation_forecasts"}
+    )
+    """(JSON ``elevation_forecasts``)"""
     nowcast_applied: bool
     nowcast_unavailable: list[NowcastLayer] | None = None
     members_view: MembersView | None = None
@@ -1136,7 +1167,7 @@ class ForecastResponse(Response):
 
     def to_dataframe(self) -> pd.DataFrame:
         """The hourly series as a DataFrame; see :meth:`ForecastData.to_dataframe`."""
-        return self.forecast.to_dataframe()
+        return self.series.to_dataframe()
 
 
 # --- current and alerts -------------------------------------------------------
@@ -1175,7 +1206,8 @@ class SensorObservation(Model):
     station_id: str
     name: str
     source: str
-    observation_time: dt.datetime
+    observed_at: dt.datetime = field(metadata={JSON_NAME: "observation_time"})
+    """(JSON ``observation_time``)"""
     distance_km: float | None = None
     """The station's distance from the location."""
     elevation_diff: float | None = None
@@ -1212,7 +1244,8 @@ class CurrentResponse(Response):
     alerts_as_of: dt.datetime
     sensor_count: int
     sensors: list[SensorObservation]
-    current: CurrentConditions | None = None
+    now: CurrentConditions | None = field(default=None, metadata={JSON_NAME: "current"})
+    """(JSON ``current``)"""
     as_of: dt.datetime
     model_run_initialized_at: dt.datetime | None = None
     nowcast_hours: list[TimeSeriesPoint] | None = None
@@ -1229,9 +1262,11 @@ class AlertsResponse(Response):
     """Active alerts for a location."""
 
     location: LocationRef
-    alert_count: int
+    count: int = field(metadata={JSON_NAME: "alert_count"})
+    """(JSON ``alert_count``)"""
     as_of: dt.datetime
-    alerts: list[ActiveAlert]
+    items: list[ActiveAlert] = field(metadata={JSON_NAME: "alerts"})
+    """(JSON ``alerts``)"""
     attribution: ResponseAttribution
 
 
@@ -1261,7 +1296,8 @@ class RunsResponse(Response):
     """
 
     served: ServedRun | None = None
-    runs: list[RunEntry]
+    items: list[RunEntry] = field(metadata={JSON_NAME: "runs"})
+    """(JSON ``runs``)"""
     count: int
     next_cursor: str | None = None
 
@@ -1302,7 +1338,8 @@ class PublicCatalogElevation(Model):
 
     label: str
     display_name: str | None = None
-    elevation_m: float
+    height_m: float = field(metadata={JSON_NAME: "elevation_m"})
+    """(JSON ``elevation_m``)"""
     lat_override: float | None = None
     lon_override: float | None = None
     is_default: bool
@@ -1338,7 +1375,8 @@ class PublicCatalogNearbyStation(Model):
     slug: str
     name: str
     network: StationNetwork
-    station_status: StationStatus
+    status: StationStatus = field(metadata={JSON_NAME: "station_status"})
+    """(JSON ``station_status``)"""
     distance_km: float | None = None
     elevation_diff_m: float | None = None
     is_primary: bool
@@ -1359,7 +1397,8 @@ class CatalogTemplateSummary(Model):
 
     id: str
     location_type: LocationType | None = None
-    template_variant: TemplateVariant | None = None
+    variant: TemplateVariant | None = field(default=None, metadata={JSON_NAME: "template_variant"})
+    """(JSON ``template_variant``)"""
     spec: list[CmsTemplateSection]
 
 
@@ -1373,7 +1412,8 @@ class CatalogResolvedEntry(Model):
     body: dict[str, Any]
     slot: str
     display_order: int
-    resolved_locale: str
+    locale: str = field(metadata={JSON_NAME: "resolved_locale"})
+    """(JSON ``resolved_locale``)"""
     updated_at: dt.datetime
 
 
@@ -1397,17 +1437,20 @@ class PublicCatalogStation(LocationRef):
     country: str | None = None
     aliases: list[str] | None = None
     network: StationNetwork | None = None
-    source_station_id: str | None = None
+    source_id: str | None = field(default=None, metadata={JSON_NAME: "source_station_id"})
+    """(JSON ``source_station_id``)"""
     elevation_msl_m: float | None = None
     sensor_height_agl_m: float | None = None
     sensor_capabilities: list[str] | None = None
-    station_status: StationStatus | None = None
+    status: StationStatus | None = field(default=None, metadata={JSON_NAME: "station_status"})
+    """(JSON ``station_status``)"""
     last_report_at: dt.datetime | None = None
     last_report_summary: Any = None
     install_date: dt.date | None = None
     decommission_date: dt.date | None = None
     update_frequency_minutes: int | None = None
-    station_url: str | None = None
+    url: str | None = field(default=None, metadata={JSON_NAME: "station_url"})
+    """(JSON ``station_url``)"""
     data_url: str | None = None
     description_short: str | None = None
     description_long: str | None = None
@@ -1653,8 +1696,8 @@ class AvalancheForecast(Model):
     """When the center's current product took effect (UTC), when stated."""
     valid_until: dt.datetime | None = None
     """When the center's current product expires (UTC), when stated."""
-    forecast_url: str
-    """The center's full forecast for the zone."""
+    url: str = field(metadata={JSON_NAME: "forecast_url"})
+    """(JSON ``forecast_url``) The center's full forecast for the zone."""
     center_url: str
     attribution: str
     """The credit to show with the block: "Avalanche forecast by <center> via avalanche.org",
@@ -1676,7 +1719,8 @@ class MemberPlume(Model):
     """One entry per model with members in the served window, in the order aifs, aigefs,
     gefs, ifs_ens, rrfs.
     """
-    members: PooledColumns | None = None
+    pool: PooledColumns | None = field(default=None, metadata={JSON_NAME: "members"})
+    """(JSON ``members``)"""
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -2096,9 +2140,13 @@ class PassHour(Model):
     """``ensemble.snowfall.mean`` (mm, in); 0 without snow."""
     snow_level: float | None = None
     """``ensemble.snow_level.mean`` (m, ft); omitted where not served."""
-    snow_level_above_pass: float | None = None
-    """``snow_level`` minus the pass's elevation (m, ft): above 0 the snow level is above the
-    pass (rain at the pass when wet), below 0 it is under it.
+    snow_level_margin: float | None = field(
+        default=None, metadata={JSON_NAME: "snow_level_above_pass"}
+    )
+    """(JSON ``snow_level_above_pass``) ``snow_level`` minus the pass's elevation (m, ft).
+
+    Above 0 the snow level is above the pass (rain at the pass when wet), below 0 it is
+    under it.
     """
     freezing_on_wet_road: bool
     """The hour is at or below freezing (temperature mean at or below 0 C, 32 F) and wet:
@@ -2188,11 +2236,11 @@ class PassStatusSegment(Model):
     """The direction the point controls, as the DOT names it."""
     location: str
     """The DOT's name for the point (its trailing field padding removed)."""
-    status: str
-    """The DOT's status code, verbatim."""
+    state: str = field(metadata={JSON_NAME: "status"})
+    """(JSON ``status``) The DOT's status code, verbatim."""
     level: PassStatusLevel
-    status_text: str
-    """The DOT's own description of the status, verbatim."""
+    text: str = field(metadata={JSON_NAME: "status_text"})
+    """(JSON ``status_text``) The DOT's own description of the status, verbatim."""
     updated_at: dt.datetime
     """When the DOT set this status."""
     lat: float
@@ -2396,8 +2444,8 @@ class SeasonResponse(Response):
 class SeasonTotal(Model):
     """A season-to-date total: the amount, its source, coverage and normal."""
 
-    total: float
-    """Sum over the covered days, in ``unit``."""
+    amount: float = field(metadata={JSON_NAME: "total"})
+    """(JSON ``total``) Sum over the covered days, in ``unit``."""
     unit: str
     source: str
     """``mrms_multisensor``: the gridded analysis at the location; ``station_gauge``: the
@@ -2479,8 +2527,8 @@ class SnowTrendResponseElevation(Model):
     """What that elevation is called, as ``ElevationSummary.display_name``; absent where it has
     no name.
     """
-    elevation: float
-    """Its elevation, in m (metric) or ft (imperial)."""
+    height: float = field(metadata={JSON_NAME: "elevation"})
+    """(JSON ``elevation``) Its elevation, in m (metric) or ft (imperial)."""
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -2514,8 +2562,8 @@ class SnowTrendDay(Model):
 
     date: dt.date
     """The ``dates`` entry this day is for."""
-    snow: float | None = None
-    """The day's snowfall in mm (metric) or inches (imperial), at the served amount
+    amount: float | None = field(default=None, metadata={JSON_NAME: "snow"})
+    """(JSON ``snow``) The day's snowfall in mm (metric) or inches (imperial), at the served amount
     precision.
     """
     partial: bool
@@ -2669,8 +2717,8 @@ class SnowpackAspect(Model):
     ground's snowfall and the slope's own sun.
     """
 
-    aspect: str
-    """The way the slope faces: today ``north``, ``east``, ``south`` or ``west``."""
+    facing: str = field(metadata={JSON_NAME: "aspect"})
+    """(JSON ``aspect``) The way the slope faces: ``north``, ``east``, ``south`` or ``west``."""
     slope_angle_deg: float
     """How steep the slope is, degrees from horizontal."""
     depth: SnowpackDepth

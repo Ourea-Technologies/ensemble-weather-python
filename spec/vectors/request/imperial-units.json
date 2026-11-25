@@ -27,7 +27,7 @@
   "expect": {
     "result": {
       "units": "imperial",
-      "forecast.timeseries[0].ensemble.temperature.p50": 28.4
+      "series.timeseries[0].ensemble.temperature.p50": 28.4
     }
   }
 }

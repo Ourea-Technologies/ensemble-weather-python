@@ -17,7 +17,7 @@ with Client() as client:
     forecast = client.forecast("or/mt-hood-meadows", prob=terms)
 
 for result in forecast.probabilities:
-    chance = "n/a" if result.probability is None else f"{result.probability:.0%}"
+    chance = "n/a" if result.value is None else f"{result.value:.0%}"
     print(
         f"P({result.variable} {result.op} {result.threshold} ({forecast.units} units), "
         f"{result.window_start_hours}-{result.window_end_hours} h, {result.aggregation}) "

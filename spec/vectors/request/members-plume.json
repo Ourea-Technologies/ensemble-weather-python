@@ -29,8 +29,8 @@
     "result": {
       "members_view": "full",
       "location.elevation": 1639.2,
-      "forecast.plume.headline.temperature[0]": 1.9,
-      "forecast.plume.bands.cumulative_snowfall.p90[0]": 13.41
+      "series.plume.headline.temperature[0]": 1.9,
+      "series.plume.bands.cumulative_snowfall.p90[0]": 13.41
     }
   }
 }

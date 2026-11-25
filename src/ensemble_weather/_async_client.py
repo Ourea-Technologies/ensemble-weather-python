@@ -522,7 +522,7 @@ class AsyncClient:
             page = await self.list_locations(
                 state, location_type=location_type, units=units, limit=limit, cursor=cursor
             )
-            for item in page.locations:
+            for item in page.items:
                 yield item
             if not page.next_cursor:
                 return

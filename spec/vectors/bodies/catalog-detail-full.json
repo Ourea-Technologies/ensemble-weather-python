@@ -1,0 +1,66 @@
+{
+  "slug": "mt-hood-meadows",
+  "state": "or",
+  "name": "Mt Hood Meadows",
+  "lat": 45.33172,
+  "lon": -121.66534,
+  "elevation_m": 1639.2,
+  "type": "ski_area",
+  "timezone": "America/Los_Angeles",
+  "county": "Hood River",
+  "country": "US",
+  "aliases": [],
+  "description_short": "Largest on Mt Hood; base 5367 / summit 7300 ft",
+  "is_featured": false,
+  "elevations": [
+    {
+      "label": "main_lodge",
+      "display_name": "Main Lodge",
+      "elevation_m": 1639.2,
+      "lat_override": 45.33172,
+      "lon_override": -121.66534,
+      "is_default": true
+    }
+  ],
+  "photos": [],
+  "webcams": [],
+  "nearby_stations": [
+    {
+      "slug": "snotel-651",
+      "name": "Mt Hood Test Site",
+      "network": "snotel",
+      "station_status": "active",
+      "distance_km": 4.1,
+      "elevation_diff_m": 0.6,
+      "is_primary": true
+    }
+  ],
+  "template": {
+    "id": "019f3ee2-74b7-76f1-821c-36d102532359",
+    "location_type": "ski_area",
+    "template_variant": "mountain",
+    "spec": [
+      {
+        "kind": "media",
+        "key": "hero",
+        "config": {
+          "source": "hero_photo"
+        }
+      }
+    ]
+  },
+  "content": [
+    {
+      "id": "019f3ee2-0000-7000-8000-000000000001",
+      "content_type_key": "seasonal",
+      "title": "Winter at Meadows",
+      "body": {
+        "text": "Lifts open mid-November."
+      },
+      "slot": "seasonal",
+      "display_order": 1,
+      "resolved_locale": "en",
+      "updated_at": "2026-11-20T18:00:00Z"
+    }
+  ]
+}

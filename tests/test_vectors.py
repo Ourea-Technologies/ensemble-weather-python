@@ -12,6 +12,7 @@ operation and arguments onto this SDK's methods.
 from __future__ import annotations
 
 import asyncio
+import datetime as dt
 import json
 import math
 import re
@@ -34,10 +35,11 @@ from ensemble_weather import (
     Window,
 )
 from ensemble_weather._core import _reset_deprecation_warnings
+from ensemble_weather._decode import parse_datetime
 
 VECTORS = Path(__file__).resolve().parent.parent / "spec" / "vectors"
 CASES = sorted(p for p in VECTORS.rglob("*.json") if "bodies" not in p.relative_to(VECTORS).parts)
-EXPECTED_VECTOR_COUNT = 52
+EXPECTED_VECTOR_COUNT = 58
 
 
 def test_every_vector_is_collected() -> None:
@@ -202,6 +204,9 @@ def check_value(path: str, actual: Any, expected: Any) -> None:
     elif isinstance(expected, (int, float)):
         assert isinstance(actual, (int, float)), f"{path}: {actual!r} is not a number"
         assert math.isclose(actual, expected, rel_tol=1e-12), f"{path}: {actual!r} != {expected!r}"
+    elif isinstance(actual, dt.datetime) and isinstance(expected, str):
+        # BEHAVIOR.md 13: a timestamp matches the expected string as an instant.
+        assert actual == parse_datetime(expected), f"{path}: expected {expected!r}, got {actual!r}"
     else:
         assert actual == expected, f"{path}: expected {expected!r}, got {actual!r}"
 

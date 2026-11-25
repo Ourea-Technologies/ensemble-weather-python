@@ -1,0 +1,38 @@
+{
+  "location": {
+    "slug": "mt-hood-meadows",
+    "state": "or",
+    "name": "Mt Hood Meadows",
+    "lat": 45.33172,
+    "lon": -121.66534,
+    "elevation_m": 1639.2,
+    "type": "ski_area",
+    "timezone": "America/Los_Angeles",
+    "county": "Hood River",
+    "description": "Largest on Mt Hood; base 5367 / summit 7300 ft",
+    "elevations": [
+      {
+        "name": "main_lodge",
+        "display_name": "Main Lodge",
+        "elevation": 1639.2,
+        "default": true
+      }
+    ]
+  },
+  "radius_km": 50.0,
+  "count": 3,
+  "locations": [
+    {
+      "slug": "umbrella-falls",
+      "state": "or",
+      "name": "Umbrella Falls",
+      "lat": 45.32893,
+      "lon": -121.6608,
+      "elevation_m": 1600.9,
+      "type": "waterfall",
+      "timezone": "America/Los_Angeles",
+      "county": "Hood River County",
+      "distance_km": 0.471
+    }
+  ]
+}

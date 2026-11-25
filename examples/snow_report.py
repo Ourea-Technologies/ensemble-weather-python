@@ -25,7 +25,7 @@ with Client(units="imperial") as client:
         normal = (
             "" if total.percent_of_normal is None else f", {total.percent_of_normal}% of normal"
         )
-        print(f"  precipitation {total.total} {total.unit}{normal}")
+        print(f"  precipitation {total.amount} {total.unit}{normal}")
 
     try:
         trend = client.snow_trend("or/mt-hood-meadows")
@@ -37,4 +37,4 @@ with Client(units="imperial") as client:
         print(f"\nSnow trend ({grid.source}), newest run {newest.initialized_at:%a %H:%MZ}:")
         for day in newest.days:
             if day is not None:
-                print(f"  {day.date}: {day.snow}")
+                print(f"  {day.date}: {day.amount}")

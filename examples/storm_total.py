@@ -14,7 +14,7 @@ with Client() as client:
     )
 
 for total in forecast.window_totals:
-    span = f"{total.window_start_hours}-{total.window_end_hours} h"
+    span = f"{total.start_hours}-{total.end_hours} h"
     if total.quantiles is None:
         print(f"{total.variable} {span}: no distribution ({total.null_reason})")
         continue

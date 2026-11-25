@@ -62,14 +62,14 @@
   ],
   "expect": {
     "result": {
-      "probabilities[0].probability": 0.42,
+      "probabilities[0].value": 0.42,
       "probabilities[0].variable": "snowfall",
       "probabilities[0].op": "ge",
       "probabilities[0].threshold": 6,
       "probabilities[0].window_end_hours": 24,
       "probabilities[0].members": 131,
-      "probabilities[1].probability": 0.97,
-      "probabilities[2].probability": null
+      "probabilities[1].value": 0.97,
+      "probabilities[2].value": null
     }
   }
 }

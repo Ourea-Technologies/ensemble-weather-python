@@ -9,7 +9,7 @@ ensemble; probabilities and window totals are asked for, never derived::
         forecast = client.forecast(
             "or/mt-hood-meadows", prob=[Chance.at_least("snowfall", 6, "in")]
         )
-        print(forecast.probabilities[0].probability)
+        print(forecast.probabilities[0].value)
 
 See https://docs.oureawx.com/python.
 """

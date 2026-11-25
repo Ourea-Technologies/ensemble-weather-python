@@ -23,6 +23,13 @@ SPEC = ROOT / "openapi" / "v1" / "openapi.yaml"
 BODY_SCHEMA = {
     "forecast-": "ForecastResponse",
     "current-": "CurrentResponse",
+    "alerts": "AlertsResponse",
+    "locations-page": "LocationsResponse",
+    "nearby-point": "NearbyPointResponse",
+    "nearby": "NearbyLocationsResponse",
+    "runs": "RunsResponse",
+    "catalog-detail-full": "PublicCatalogLocationDetail",
+    "catalog-station-detail": "PublicCatalogStationDetail",
     "search": "SearchLocationsResponse",
     "explore": "ExploreResponse",
     "composition": "CompositionResponse",

@@ -10,8 +10,8 @@ with Client() as client:
     metric = client.forecast("or/mt-hood-meadows")
     imperial = client.forecast("or/mt-hood-meadows", units="imperial")
 
-for m, i in zip(metric.forecast.timeseries, imperial.forecast.timeseries, strict=True):
+for m, i in zip(metric.series.timeseries, imperial.series.timeseries, strict=True):
     print(
-        f"{m.valid_time:%H:%M} UTC  median {m.ensemble.temperature.median} °C"
+        f"{m.valid_at:%H:%M} UTC  median {m.ensemble.temperature.median} °C"
         f" = {i.ensemble.temperature.median} °F"
     )

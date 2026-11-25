@@ -1,0 +1,36 @@
+{
+  "name": "names/current",
+  "description": "Current conditions decode to the SDK names: current -> now, condition/condition_text/condition_icon -> code/text/icon, station.station_id -> id, a sensor's observation_time -> observed_at, a pass hour's snow_level_above_pass -> snow_level_margin, a road segment's status/status_text -> state/text.",
+  "client": {},
+  "call": {
+    "operation": "getCurrentConditions",
+    "args": {
+      "location": "wa/snoqualmie-pass-i-90"
+    }
+  },
+  "expect_request": {
+    "method": "GET",
+    "path": "/api/v1/locations/wa/snoqualmie-pass-i-90/current"
+  },
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/current-pass.json"
+    }
+  ],
+  "expect": {
+    "result": {
+      "now.code": "cloudy",
+      "now.text": "Cloudy",
+      "now.icon": "night_cloudy",
+      "now.station.id": "Snoqualmie Pass Summit",
+      "sensors[0].observed_at": "2026-11-25T04:00:00Z",
+      "pass.hours[0].snow_level_margin": 78.0,
+      "pass.official_status.segments[0].state": "No restrictions",
+      "pass.official_status.segments[0].text": "No restrictions"
+    }
+  }
+}
