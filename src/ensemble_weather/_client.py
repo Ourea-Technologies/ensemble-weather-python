@@ -11,9 +11,12 @@ from ._core import (
     DEFAULT_MAX_RETRIES,
     DEFAULT_TIMEOUT,
     MAX_REDIRECTS,
+    BBox,
     Call,
     Core,
+    LatLon,
     LocationArg,
+    MembersArg,
     RawResponse,
     Retry,
     StrList,
@@ -29,13 +32,19 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Iterator, Sequence
     from types import TracebackType
 
+    from ._cache import Cache
     from ._core import Prepared
-    from .cache import Cache
-    from .enums import LocationType, StationStatus, TemplateVariant
-    from .models import (
+    from .enums import AlertClass, ExploreMetric, LocationType, StationStatus, TemplateVariant
+    from .probabilities import Chance, Total
+    from .types import (
+        AlertOutlineCollection,
         AlertsResponse,
         AttributionRegistry,
+        AvalancheZoneCollection,
+        CompositionResponse,
         CurrentResponse,
+        ExploreItem,
+        ExploreResponse,
         ForecastResponse,
         LocationsResponse,
         LocationSummary,
@@ -51,8 +60,11 @@ if TYPE_CHECKING:
         Response,
         RunsResponse,
         SearchLocationsResponse,
+        SeasonResponse,
+        SnowpackPlumeResponse,
+        SnowpackResponse,
+        SnowTrendResponse,
     )
-    from .probabilities import Chance, Total
 
 __all__ = ["Client"]
 
@@ -206,7 +218,7 @@ class Client:
         max_hours: int | None = None,
         include_past: bool | None = None,
         models: bool | None = None,
-        members: bool | None = None,
+        members: MembersArg | None = None,
         elevations: StrList | None = None,
         daily: bool | None = None,
         max_days: int | None = None,
@@ -234,7 +246,8 @@ class Client:
             max_hours: Hours of hourly series (6-360, default 24).
             include_past: Start the hourly series at the run's init.
             models: Per-model breakdowns (Pro).
-            members: Individual member values (Free: the plume view).
+            members: Individual member values: ``True``, or ``"plume"``
+                for the plume view (columns in ``forecast.plume``).
             elevations: ``"all"`` or names of the location's extra elevations.
             daily: Include the daily summaries (default true).
             max_days: The number of daily rows (default: the tier's horizon).
@@ -287,7 +300,7 @@ class Client:
         max_hours: int | None = None,
         include_past: bool | None = None,
         models: bool | None = None,
-        members: bool | None = None,
+        members: MembersArg | None = None,
         daily: bool | None = None,
         max_days: int | None = None,
         hourly: bool | None = None,
@@ -435,11 +448,40 @@ class Client:
         county: str | None = None,
         location_type: LocationType | str | None = None,
         limit: int | None = None,
+        sort: ExploreMetric | str | None = None,
+        order: str | None = None,
+        near: LatLon | None = None,
+        radius_km: float | None = None,
+        units: UnitsArg | None = None,
     ) -> SearchLocationsResponse:
-        """Search locations by name (``searchLocations``). Sent without the key."""
+        """Search locations by name (``searchLocations``). Sent without the key.
+
+        Args:
+            q: The query (at least 2 characters).
+            state: Only this state.
+            county: Only this county.
+            location_type: Only this location type.
+            limit: The number of hits (default 20).
+            sort: ``"relevance"`` (default) or an
+                :class:`~ensemble_weather.enums.ExploreMetric`; with a metric,
+                each hit carries ``explore``.
+            order: ``"desc"`` (default) or ``"asc"``, for a metric sort.
+            near: ``(lat, lon)``: only hits within ``radius_km`` of it.
+            radius_km: The radius around ``near`` (default 100).
+            units: The units of ``explore`` values (default: the client's).
+        """
         return self._run(
             self._core.search(
-                q, state=state, county=county, location_type=location_type, limit=limit
+                q,
+                state=state,
+                county=county,
+                location_type=location_type,
+                limit=limit,
+                sort=sort,
+                order=order,
+                near=near,
+                radius_km=radius_km,
+                units=units,
             )
         )
 
@@ -477,7 +519,7 @@ class Client:
             page = self.list_locations(
                 state, location_type=location_type, units=units, limit=limit, cursor=cursor
             )
-            yield from page.locations
+            yield from page.items
             if not page.next_cursor:
                 return
             cursor = page.next_cursor
@@ -599,6 +641,182 @@ class Client:
     ) -> PublicCatalogStationDetail:
         """One catalog station (``getCatalogStation``). Sent without the key."""
         return self._run(self._core.catalog_station(slug, include=include, locale=locale))
+
+    # -- explore, season, snow trend and snowpack -------------------------------------
+
+    def explore(
+        self,
+        metric: ExploreMetric | str,
+        *,
+        order: str | None = None,
+        location_type: LocationType | str | None = None,
+        state: str | None = None,
+        near: LatLon | None = None,
+        radius_km: float | None = None,
+        elevation_min: float | None = None,
+        elevation_max: float | None = None,
+        points: str | None = None,
+        limit: int | None = None,
+        cursor: str | None = None,
+        units: UnitsArg | None = None,
+    ) -> ExploreResponse:
+        """One page of places ranked by a metric (``explore``).
+
+        Args:
+            metric: What to rank by (:class:`~ensemble_weather.enums.ExploreMetric`),
+                for example ``"snow_5d"`` or ``"base_depth"``.
+            order: ``"desc"`` (default, the most first) or ``"asc"``.
+            location_type: Only places of this type.
+            state: Only places in this state (code or name).
+            near: ``(lat, lon)``: only places within ``radius_km`` of it.
+            radius_km: The radius around ``near`` (default 100, at most 1000).
+            elevation_min: The lowest point elevation, in the response's height unit.
+            elevation_max: The highest point elevation, in the response's height unit.
+            points: ``"primary"`` (default, each place's own point) or ``"all"``
+                (each named elevation too).
+            limit: Rows per page (1-100, default 25).
+            cursor: A previous page's ``next_cursor``; or use :meth:`iter_explore`.
+            units: This request's unit system (default: the client's).
+        """
+        return self._run(
+            self._core.explore(
+                metric,
+                order=order,
+                location_type=location_type,
+                state=state,
+                near=near,
+                radius_km=radius_km,
+                elevation_min=elevation_min,
+                elevation_max=elevation_max,
+                points=points,
+                limit=limit,
+                cursor=cursor,
+                units=units,
+            )
+        )
+
+    def iter_explore(
+        self,
+        metric: ExploreMetric | str,
+        *,
+        order: str | None = None,
+        location_type: LocationType | str | None = None,
+        state: str | None = None,
+        near: LatLon | None = None,
+        radius_km: float | None = None,
+        elevation_min: float | None = None,
+        elevation_max: float | None = None,
+        points: str | None = None,
+        limit: int | None = None,
+        units: UnitsArg | None = None,
+    ) -> Iterator[ExploreItem]:
+        """Every ranked place, following ``next_cursor`` lazily (see :meth:`explore`)."""
+        cursor: str | None = None
+        while True:
+            page = self.explore(
+                metric,
+                order=order,
+                location_type=location_type,
+                state=state,
+                near=near,
+                radius_km=radius_km,
+                elevation_min=elevation_min,
+                elevation_max=elevation_max,
+                points=points,
+                limit=limit,
+                cursor=cursor,
+                units=units,
+            )
+            yield from page.items
+            if not page.next_cursor:
+                return
+            cursor = page.next_cursor
+
+    def season(
+        self,
+        location: LocationArg,
+        slug: str | None = None,
+        *,
+        water_year: int | None = None,
+        include_daily: bool = False,
+        units: UnitsArg | None = None,
+    ) -> SeasonResponse:
+        """Observed season-to-date precipitation and snowfall (``getLocationSeason``).
+
+        Args:
+            location: ``"or/mt-hood-meadows"``, a state code with ``slug``, or
+                any object with ``state`` and ``slug``.
+            slug: The location slug, when ``location`` is just the state.
+            water_year: The water year (October to September) named by the
+                year it ends in; default: the current one.
+            include_daily: Also return the day-by-day record (``daily``).
+            units: This request's unit system (default: the client's).
+        """
+        return self._run(
+            self._core.season(
+                location, slug, water_year=water_year, include_daily=include_daily, units=units
+            )
+        )
+
+    def snow_trend(
+        self,
+        location: LocationArg,
+        slug: str | None = None,
+        *,
+        elevation: str | None = None,
+        units: UnitsArg | None = None,
+    ) -> SnowTrendResponse:
+        """Each recent run's daily snowfall, as a grid (``getLocationSnowTrend``). Plus or Pro.
+
+        Read down a column to see a storm firm up or fade as the runs come in.
+        With a Pro key the body also carries one grid per model. Anonymous and
+        Free callers get :class:`~ensemble_weather.PermissionDeniedError`
+        (``PLUS_REQUIRED``).
+
+        Args:
+            location: The location (see :meth:`forecast`).
+            slug: The location slug, when ``location`` is just the state.
+            elevation: One of the location's named elevations (default: its primary).
+            units: This request's unit system (default: the client's).
+        """
+        return self._run(self._core.snow_trend(location, slug, elevation=elevation, units=units))
+
+    def snowpack(
+        self, location: LocationArg, slug: str | None = None, *, units: UnitsArg | None = None
+    ) -> SnowpackResponse:
+        """The snowpack forecast of a location's spots (``getLocationSnowpack``, beta)."""
+        return self._run(self._core.snowpack(location, slug, units=units))
+
+    def snowpack_plume(
+        self, location: LocationArg, slug: str | None = None, *, units: UnitsArg | None = None
+    ) -> SnowpackPlumeResponse:
+        """The snow-depth plume of a location (``getLocationSnowpackPlume``, beta)."""
+        return self._run(self._core.snowpack_plume(location, slug, units=units))
+
+    # -- map layers and the blend's composition ----------------------------------------
+
+    def alert_outlines(
+        self,
+        *,
+        classes: Sequence[AlertClass | str] | None = None,
+        bbox: BBox | None = None,
+    ) -> AlertOutlineCollection:
+        """The active winter and wind alerts' outlines, as GeoJSON (``getAlertOutlines``).
+
+        Args:
+            classes: Only these classes (``"winter"``, ``"wind"``); default: every class.
+            bbox: ``(west, south, east, north)``: only alerts whose bounding box
+                touches it. Features are served whole, not clipped.
+        """
+        return self._run(self._core.alert_outlines(classes=classes, bbox=bbox))
+
+    def avalanche_zones(self) -> AvalancheZoneCollection:
+        """Every avalanche center's forecast zones with today's rating (``getAvalancheZones``)."""
+        return self._run(self._core.avalanche_zones())
+
+    def composition(self) -> CompositionResponse:
+        """The blend's served models and members (``getComposition``). Sent without the key."""
+        return self._run(self._core.composition())
 
     # -- runs and attribution ---------------------------------------------------------
 

@@ -1,0 +1,43 @@
+{
+  "name": "canonical/comma-lists-literal",
+  "description": "A comma list is sorted and de-duplicated, each item percent-encoded, and the commas between items sent literally (BEHAVIOR.md 3.1 rule 5); %2C would be another edge-cache entry.",
+  "client": {},
+  "call": {
+    "operation": "getLocationForecast",
+    "args": {
+      "state": "or",
+      "slug": "mt-hood-meadows",
+      "sources": [
+        "snotel",
+        "asos",
+        "snotel"
+      ],
+      "exclude_sources": [
+        "raws"
+      ],
+      "include": [
+        "skin_temperature",
+        "mslp"
+      ]
+    }
+  },
+  "expect_request": {
+    "method": "GET",
+    "path": "/api/v1/locations/or/mt-hood-meadows",
+    "query_string": "exclude_sources=raws&include=mslp,skin_temperature&sources=asos,snotel"
+  },
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/forecast-metric.json"
+    }
+  ],
+  "expect": {
+    "result": {
+      "location.slug": "mt-hood-meadows"
+    }
+  }
+}

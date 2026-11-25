@@ -68,10 +68,132 @@ One SDK method (or idiomatic equivalent) per OpenAPI operation, except
 | `listCatalogStations` / `getCatalogStation` | `/api/v1/catalog/stations[/{slug}]` | cursor paging |
 | `getAvailableRuns` | `GET /api/v1/runs` | |
 | `getAttribution` | `GET /api/v1/attribution` | |
+| `explore` | `GET /api/v1/explore` | places ranked by a metric; `metric` required; cursor paging |
+| `getComposition` | `GET /api/v1/composition` | the served models and members; open route |
+| `getLocationSeason` | `.../season` | observed season-to-date precipitation and snowfall |
+| `getLocationSnowTrend` | `.../snow-trend` | each recent run's daily snowfall; Plus or Pro (`403 PLUS_REQUIRED` otherwise) |
+| `getLocationSnowpack` / `getLocationSnowpackPlume` | `.../snowpack`, `.../snowpack/plume` | beta: the body carries `beta: true` |
+| `getAlertOutlines` | `GET /api/v1/alerts/outlines` | GeoJSON `FeatureCollection` (`application/geo+json`) |
+| `getAvalancheZones` | `GET /api/v1/avalanche/zones` | GeoJSON `FeatureCollection` (`application/geo+json`) |
+
+`.../` is a named location's route, `/api/v1/locations/{state}/{slug}`.
+The SDKs speak JSON only: `format` (`json` or `capnp`) is never exposed and
+never sent. The two GeoJSON routes are decoded like any other JSON body (the
+SDK still sends `Accept: application/json`; the server answers
+`application/geo+json` either way). Their models are the spec's
+(`AlertOutlineCollection`, `AvalancheZoneCollection`); a `geometry` is kept
+as its `type` and raw `coordinates` (nested arrays of numbers), never
+reprojected or simplified.
+
+`members` on the two forecast routes takes `true`, `false` or `"plume"`
+(the plume view: `forecast.plume` columns instead of per-hour members). An
+SDK accepts all three, in its idiom (for example a boolean or a string).
+
+`searchLocations` takes `sort` (`relevance`, the default, or an `explore`
+metric), `order`, `near`, `radius_km` and `units` besides `q`, `state`,
+`county`, `type` and `limit`; with a metric `sort`, each hit carries
+`explore`.
+
+Two values are built by the SDK from numbers and sent with **literal
+commas**, like the comma lists (section 3.1, rule 5): `near` (`lat,lon`, on
+`explore` and `searchLocations`) and `bbox` (`west,south,east,north`, on
+`getAlertOutlines`). The SDK takes them as numbers, never as a
+pre-formatted string, and prints each number by rule 6. `class` on
+`getAlertOutlines` is a comma list (sorted, de-duplicated); since `class` is
+a reserved word in many languages, the SDK may name the argument `classes`
+(the vectors do).
 
 A named location is the pair (state, slug). An SDK may accept `"or/mt-hood-meadows"`
 as one string (split on its one `/`), but it sends the two path segments
 percent-encoded.
+
+### 3.0 Names: no stutter
+
+No public name repeats a word of the namespace it is read in (Harrison,
+2026-11-24). The namespace is the documented path: the package or module
+a user imports from, the type that holds a member, or the client that holds
+a method. So it is `client.forecast(...)` or `client.get_point_forecast(...)`,
+not `client.forecasts.get_forecast()`; Go `ensembleweather.Client`, not
+`ensembleweather.EnsembleWeatherClient`; Rust `ensemble_weather::Forecast`,
+not `ensemble_weather::forecast::ForecastForecast`.
+
+- The method names in this section's table and in SDK-STANDARD.md stay
+  (the `getPoint*` names among them). They hold no namespace word in
+  context.
+- Where the language itself requires a word, its idiom wins:
+  - an exception's `Error` or `Exception` suffix (Python, Java, Kotlin,
+    .NET, Swift);
+  - Go's type-prefixed constants (`ConditionIconSnow`);
+  - R's `ew_` prefix;
+  - .NET's `services.AddEnsembleWeather()`.
+- Response fields keep the wire's names (the spec's, in the language's
+  case), **except the stuttering ones in the table below** (Harrison,
+  2026-11-24: no aliases in the API; the SDKs rename them). Every SDK uses
+  the SDK name, and its decoder maps the wire name to it (and back, where
+  the SDK encodes). Each SDK's reference docs show the wire name next to the
+  SDK name, so the API reference still maps. The `names/*` vectors pin
+  every row. A field the table does not list keeps its wire name.
+
+| Schema (where the field sits) | Wire name | SDK name |
+|---|---|---|
+| `ForecastResponse` | `forecast` | `series` |
+| `ForecastResponse` | `elevation_forecasts` | `elevations` |
+| `CurrentResponse` | `current` | `now` |
+| `CurrentConditions` | `condition`, `condition_text`, `condition_icon` | `code`, `text`, `icon` |
+| `CurrentConditions.station` | `station_id` | `id` |
+| `ProbabilityResult` | `probability` | `value` |
+| `ProbabilityThresholds` | `daily_precipitation_probability`, `daily_precipitation_occurrence_probability`, `daily_snow_probability` | `daily_precipitation`, `daily_precipitation_occurrence`, `daily_snow` |
+| `WindowTotal` | `window_start_hours`, `window_end_hours` | `start_hours`, `end_hours` |
+| `TimeSeriesPoint.members[]` (a model's members) | `members` | `items` |
+| `MemberForecast` | `member_id` | `id` |
+| `MemberPlume` | `members` | `pool` |
+| `AlertsResponse` | `alerts`, `alert_count` | `items`, `count` |
+| `LocationsResponse` | `locations` | `items` |
+| `NearbyLocationsResponse` | `location`, `locations` | `origin`, `items` |
+| `NearbyPointResponse` | `locations` | `items` (one name for the rows of both nearby routes) |
+| `RunsResponse` | `runs` | `items` |
+| `ElevationForecast`, `ElevationSummary`, `SnowTrendResponse.elevation` | `elevation` | `height` |
+| `PublicCatalogElevation` | `elevation_m` | `height_m` |
+| `PublicCatalogStation`, `PublicCatalogStationDetail` | `source_station_id`, `station_status`, `station_url` | `source_id`, `status`, `url` |
+| `PublicCatalogNearbyStation` | `station_status` | `status` |
+| `CatalogTemplateSummary` | `template_variant` | `variant` |
+| `CatalogResolvedEntry` | `resolved_locale` | `locale` |
+| `SensorObservation` | `observation_time` | `observed_at` |
+| `PassHour` | `snow_level_above_pass` | `snow_level_margin` |
+| `PassStatusSegment` | `status`, `status_text` | `state`, `text` |
+| `AvalancheForecast` | `forecast_url` | `url` |
+| `SeasonTotal` | `total` | `amount` |
+| `SnowTrendDay` | `snow` | `amount` |
+| `ErrorResponse` | `error` | `code` (on the SDK's error, as already) |
+
+  A field is renamed **only** when its name repeats a word of the type (or
+  namespace) that holds it; a rename for taste is not made (Harrison,
+  2026-11-24). So these keep their wire names:
+  - `TimeSeriesPoint.valid_time` and `lead_time_hours` (the type's "time"
+    is the series' word, not the field's subject);
+  - `PrecipType.type`, `FreezingLevel.above_freezing_layer_aloft`,
+    `ModelRunInfo.models` and `SnowpackAspect.aspect`;
+  - `ProbabilityResult.window_*_hours` and `CurrentStation.observation_time`;
+  - an hour's `condition*`;
+  - `elevation` on `ForecastLocation`, `ExploreItem` and `PassForecast`.
+
+  One row, `NearbyPointResponse.locations` → `items`, is kept on purpose for
+  consistency, so both nearby routes name their rows alike.
+
+  A schema added later is checked with the same rule, and its renames join
+  this table before any SDK ships it.
+
+- **GeoJSON is passed through untouched.** The bodies of
+  `getAlertOutlines` and `getAvalancheZones` (`application/geo+json`
+  FeatureCollections) keep every key exactly as the API sends it, so they go
+  straight to a map library. That means no rename from the table (an
+  avalanche zone's `properties.forecast_url` stays `forecast_url`, although
+  `ForecastResponse.avalanche.forecast_url` is `url`), no case conversion
+  (TS and the other camelCase SDKs keep `danger_level`, `sender_name`, ...),
+  and no reprojection or simplification of `geometry`. An SDK may type them,
+  but only with the wire keys.
+- An SDK-owned name, such as a module, a type that is not a schema, or a
+  method, never stutters. Rename it before its first release.
 
 ### 3.1 Canonical URLs: one request, one edge-cache entry
 
@@ -81,23 +203,30 @@ on the location routes each non-canonical spelling costs a `301` round trip
 (KAN-1313). So the SDK only ever sends the canonical URL:
 
 1. **State:** lowercase USPS code (`or`). The SDK lowercases a two-letter
-   code. It does not translate state names; it passes them through, and the
+   code, in a path and in a `state` query parameter (search, explore). It does not translate state names; it passes them through, and the
    server answers with a 301 (which the SDK follows, section 3.3).
 2. **No parameter at its default.** A parameter the caller did not set, or set
    to the route's default, is omitted. The defaults are the OpenAPI `default`
    of each parameter (for example `units=metric`, `max_hours=24`,
    `nowcast=true`, `format=json`, `feels_like=nws`, and on nearby `limit=3`,
-   `radius_km=50`). Booleans are `true`/`false`.
+   `radius_km=50`; on explore `order=desc`, `limit=25`, `points=primary`,
+   `radius_km=100`; on search `sort=relevance`, `order=desc`,
+   `radius_km=100`). Booleans are `true`/`false`.
 3. **Each parameter under its own name** (`units`, never the alias
    `unit_system`), at most once, and no parameter the route does not
    define. An unknown parameter is a `400` (KAN-1308), never ignored.
 4. **Alphabetical order by parameter name.**
 5. **Encoding:** each value is percent-encoded with RFC 3986 rules
    (unreserved characters `A-Z a-z 0-9 - . _ ~` as they are, everything else
-   `%XX` in uppercase hex, space as `%20`, never `+`). There is one
-   exception: in `prob` and `totals`, `:` and `,` are sent as literal
-   characters. The language's standard query encoder usually encodes them,
-   so the SDK builds those two values itself.
+   `%XX` in uppercase hex, space as `%20`, never `+`). There are two
+   exceptions, both the server's canonical spelling (its "Canonical URLs":
+   `%2C` is served too, but is another edge-cache entry). In `prob` and
+   `totals`, `:` and `,` are sent as literal characters. In a comma list
+   (`sources`, `exclude_sources`, `elevations`, `diagnostics`, `include`,
+   `feels_like`, `network`, `capability`, `class`), each item is encoded
+   and the commas between items stay literal. The same holds for `near`
+   and `bbox` (section 3). The language's standard query encoder usually
+   encodes them, so the SDK builds those values itself.
 6. **Numbers:** the shortest decimal that round-trips, never an exponent.
    Coordinates are sent exactly as given (the SDK never rounds them).
    Thresholds follow section 4.
@@ -110,7 +239,7 @@ need no credentials (`security: []` in the spec) are therefore sent **without
 entry:
 
 - keyless: `searchLocations`, `getCatalogLocation`, `getCatalogStation`,
-  `getAttribution`;
+  `getAttribution`, `getComposition`;
 - with the key: `listCatalogLocations`, `listCatalogStations` (anonymous
   list pages are capped and catalog walks are slowed per address, so a keyed
   client keeps its own budget there), and every other route.
@@ -299,7 +428,8 @@ operation per process through the language's warning channel (Python
 
 ## 12. Paging
 
-List operations return a page plus `next_cursor`. Each SDK offers the page call
+List operations (`getAllLocations`, `getLocations`, the two catalog lists,
+`getAvailableRuns` and `explore`) return a page plus `next_cursor`. Each SDK offers the page call
 and an idiomatic lazy iterator (generator, async iterator, `Iterator`,
 `AsyncSequence`, ...) that follows the cursor until it is null.
 
@@ -318,10 +448,10 @@ Keys:
 | Key | Meaning |
 |---|---|
 | `client` | Client config: `api_key`, `base_url`, `max_retries`, `cache` (bool), `send_key_on_open_routes` (bool), `env` (environment variables visible to it). Missing = the defaults in section 2. |
-| `call` / `calls` | `{"operation": <operationId>, "args": {...}}`. The args use this document's semantic names, and each SDK's runner maps them to its own API: **that mapping is the only per-language code.** A `threshold` is `{"value", "unit"}` with unit one of `mm in degC degF K m ft m/s mph`; a `window` is `{"hours": N}` or `{"start_hours": A, "end_hours": B}`; `"location": "or/slug"` is the combined form; `"iterate": true` on a list operation means "use the lazy iterator and collect everything". A call may carry `"with_api_key"`: make it with that key instead (a per-request override, or a second client sharing the first one's cache). |
+| `call` / `calls` | `{"operation": <operationId>, "args": {...}}`. The args use this document's semantic names, and each SDK's runner maps them to its own API: **that mapping is the only per-language code.** A `threshold` is `{"value", "unit"}` with unit one of `mm in degC degF K m ft m/s mph`; `near` is `{"lat", "lon"}`; `bbox` is `{"west", "south", "east", "north"}`; `classes` is `getAlertOutlines`' `class` list; a `window` is `{"hours": N}` or `{"start_hours": A, "end_hours": B}`; `"location": "or/slug"` is the combined form; `"iterate": true` on a list operation means "use the lazy iterator and collect everything". A call may carry `"with_api_key"`: make it with that key instead (a per-request override, or a second client sharing the first one's cache). |
 | `expect_request(s)` | `method`; `path` (exact, as sent, still percent-encoded); `query` (decoded values, compared per parameter); `query_string` (the raw query string, **exact**: this pins the canonical form, section 3.1); `query_absent`; `headers` (exact); `headers_absent`; `headers_match` (regex); `url_prefix`. |
 | `responses` | Consumed in order: `status`, `headers`, and `body_file` (relative to `vectors/`) or `body` (raw text). The runner injects a fake clock, so no vector sleeps. |
-| `expect.result` / `expect.results` | Path → value over the semantic model (dot and `[i]` paths). `null` means absent. `{"unknown": "<raw>"}` means "the unknown-enum case, keeping this raw string". `rate_limit.*` reads the rate-limit state and `revalidated` the 304 flag. |
+| `expect.result` / `expect.results` | Path → value over the semantic model (dot and `[i]` paths), **in the SDK names of section 3.0** (`series.timeseries[0]`, `probabilities[0].value`). A string expected at a timestamp field (`valid_time`, `observed_at`, `initialized_at`) matches when it is the same instant. `null` means absent. `{"unknown": "<raw>"}` means "the unknown-enum case, keeping this raw string". `rate_limit.*` reads the rate-limit state and `revalidated` the 304 flag. |
 | `expect.error` | `category` (section 8, snake_case), `code`, `status`, `retry_after`, `string_excludes` (a substring that must not appear in the error's message or string form). |
 | `expect.requests` | Exact number of HTTP requests made. |
 | `expect.delays_s` | The retry delays chosen, with jitter seeded to its upper bound (1.0). |

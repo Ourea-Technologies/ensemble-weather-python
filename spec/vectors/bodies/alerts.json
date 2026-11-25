@@ -1,0 +1,34 @@
+{
+  "location": {
+    "slug": "mt-hood-meadows",
+    "state": "or",
+    "name": "Mt Hood Meadows",
+    "lat": 45.33172,
+    "lon": -121.66534,
+    "elevation_m": 1639.2,
+    "type": "ski_area",
+    "timezone": "America/Los_Angeles"
+  },
+  "alerts": [
+    {
+      "id": "urn:oid:2.49.0.1.840.0.0000000000000000000000000000000000000000.003.1",
+      "event": "Winter Storm Warning",
+      "severity": "moderate",
+      "urgency": "expected",
+      "certainty": "likely",
+      "headline": "Winter Storm Warning issued November 24 by NWS Portland OR",
+      "onset": "2026-11-25T04:00:00Z",
+      "expires": "2026-11-25T12:00:00Z",
+      "ends": "2026-11-26T12:00:00Z"
+    }
+  ],
+  "alert_count": 1,
+  "as_of": "2026-11-25T06:43:09Z",
+  "attribution": {
+    "sources": [
+      "alerts"
+    ],
+    "credit": "NOAA/NWS data (public domain), modified by Ourea",
+    "url": "/api/v1/attribution"
+  }
+}

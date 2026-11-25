@@ -27,12 +27,9 @@ from typing import TYPE_CHECKING, Any, Generic, Protocol, TypeVar
 
 import httpx
 
+from ._cache import Cache, CacheEntry, MemoryCache
 from ._decode import DecodeError, decode_model
-from ._query import Query, encode_component
-from ._version import __version__
-from .cache import Cache, CacheEntry, MemoryCache
-from .enums import LocationType, StationStatus, TemplateVariant, UnitSystem
-from .errors import (
+from ._errors import (
     APIConnectionError,
     APIError,
     OureaDeprecationWarning,
@@ -43,10 +40,25 @@ from .errors import (
     UsageError,
     error_class,
 )
-from .models import (
+from ._query import Query, encode_component, format_number
+from ._version import __version__
+from .enums import (
+    AlertClass,
+    ExploreMetric,
+    LocationType,
+    StationStatus,
+    TemplateVariant,
+    UnitSystem,
+)
+from .probabilities import Chance, Total, prob_query, totals_query
+from .types import (
+    AlertOutlineCollection,
     AlertsResponse,
     AttributionRegistry,
+    AvalancheZoneCollection,
+    CompositionResponse,
     CurrentResponse,
+    ExploreResponse,
     ForecastResponse,
     LocationsResponse,
     NearbyLocationsResponse,
@@ -61,8 +73,11 @@ from .models import (
     ResponseMeta,
     RunsResponse,
     SearchLocationsResponse,
+    SeasonResponse,
+    SnowpackPlumeResponse,
+    SnowpackResponse,
+    SnowTrendResponse,
 )
-from .probabilities import Chance, Total, prob_query, totals_query
 
 if TYPE_CHECKING:
     import datetime as dt
@@ -104,6 +119,12 @@ class HasStateSlug(Protocol):
 LocationArg = str | HasStateSlug
 UnitsArg = UnitSystem | str
 StrList = Sequence[str] | str
+MembersArg = bool | str
+"""``True``, ``False`` or ``"plume"`` (the plume view)."""
+LatLon = tuple[float, float]
+"""``(lat, lon)`` in degrees."""
+BBox = tuple[float, float, float, float]
+"""``(west, south, east, north)`` in degrees, as RFC 7946's ``bbox``."""
 
 
 def user_agent(product: str | None = None) -> str:
@@ -540,7 +561,7 @@ class Core:
         max_hours: int | None,
         include_past: bool | None,
         models: bool | None,
-        members: bool | None,
+        members: MembersArg | None,
         daily: bool | None,
         max_days: int | None,
         hourly: bool | None,
@@ -559,7 +580,7 @@ class Core:
         query.add("max_hours", max_hours, 24)
         query.add("include_past", include_past, default=False)
         query.add("models", models, default=False)
-        query.add("members", members, default=False)
+        query.add("members", _members(members), default=False)
         query.add("daily", daily, default=True)
         query.add("max_days", max_days)
         query.add("hourly", hourly, default=True)
@@ -712,6 +733,11 @@ class Core:
         county: str | None,
         location_type: LocationType | str | None,
         limit: int | None,
+        sort: ExploreMetric | str | None = None,
+        order: str | None = None,
+        near: LatLon | None = None,
+        radius_km: float | None = None,
+        units: UnitsArg | None = None,
     ) -> Call[SearchLocationsResponse]:
         """``searchLocations`` (an open route: sent without the key)."""
         if len(q.strip()) < 2:
@@ -722,6 +748,11 @@ class Core:
         query.add("county", county)
         query.add("type", location_type)
         query.add("limit", limit, 20)
+        query.add("sort", sort, "relevance")
+        query.add("order", _order(order), "desc")
+        query.add_raw("near", _near(near))
+        query.add("radius_km", radius_km, 100)
+        query.add("units", self._units_for(units), UnitSystem.METRIC)
         return Call(
             "searchLocations",
             "/api/v1/search/locations",
@@ -839,6 +870,113 @@ class Core:
         query.add("cursor", cursor)
         return Call("getAvailableRuns", "/api/v1/runs", query.render(), RunsResponse)
 
+    def explore(
+        self,
+        metric: ExploreMetric | str,
+        *,
+        order: str | None,
+        location_type: LocationType | str | None,
+        state: str | None,
+        near: LatLon | None,
+        radius_km: float | None,
+        elevation_min: float | None,
+        elevation_max: float | None,
+        points: str | None,
+        limit: int | None,
+        cursor: str | None,
+        units: UnitsArg | None,
+    ) -> Call[ExploreResponse]:
+        """``explore``: places ranked by a metric (keeps the key)."""
+        query = Query()
+        query.add("metric", _nonempty("metric", str(metric)))
+        query.add("order", _order(order), "desc")
+        query.add("type", location_type)
+        query.add("state", None if state is None else _state(state))
+        query.add_raw("near", _near(near))
+        query.add("radius_km", radius_km, 100)
+        query.add("elevation_min", elevation_min)
+        query.add("elevation_max", elevation_max)
+        if points is not None and points not in {"primary", "all"}:
+            raise UsageError(f"points must be 'primary' or 'all', not {points!r}")
+        query.add("points", points, "primary")
+        query.add("limit", limit, 25)
+        query.add("cursor", cursor)
+        query.add("units", self._units_for(units), UnitSystem.METRIC)
+        return Call("explore", "/api/v1/explore", query.render(), ExploreResponse)
+
+    def composition(self) -> Call[CompositionResponse]:
+        """``getComposition`` (an open route)."""
+        return Call(
+            "getComposition", "/api/v1/composition", "", CompositionResponse, open_route=True
+        )
+
+    def season(
+        self,
+        location: LocationArg,
+        slug: str | None,
+        *,
+        water_year: int | None,
+        include_daily: bool,
+        units: UnitsArg | None,
+    ) -> Call[SeasonResponse]:
+        """``getLocationSeason``."""
+        query = Query()
+        query.add("water_year", water_year)
+        if include_daily:
+            query.add_list("include", ["daily"])
+        query.add("units", self._units_for(units), UnitSystem.METRIC)
+        path = _location_path(location, slug) + "/season"
+        return Call("getLocationSeason", path, query.render(), SeasonResponse)
+
+    def snow_trend(
+        self,
+        location: LocationArg,
+        slug: str | None,
+        *,
+        elevation: str | None,
+        units: UnitsArg | None,
+    ) -> Call[SnowTrendResponse]:
+        """``getLocationSnowTrend``."""
+        query = Query()
+        query.add("elevation", elevation)
+        query.add("units", self._units_for(units), UnitSystem.METRIC)
+        path = _location_path(location, slug) + "/snow-trend"
+        return Call("getLocationSnowTrend", path, query.render(), SnowTrendResponse)
+
+    def snowpack(
+        self, location: LocationArg, slug: str | None, *, units: UnitsArg | None
+    ) -> Call[SnowpackResponse]:
+        """``getLocationSnowpack`` (beta)."""
+        query = Query()
+        query.add("units", self._units_for(units), UnitSystem.METRIC)
+        path = _location_path(location, slug) + "/snowpack"
+        return Call("getLocationSnowpack", path, query.render(), SnowpackResponse)
+
+    def snowpack_plume(
+        self, location: LocationArg, slug: str | None, *, units: UnitsArg | None
+    ) -> Call[SnowpackPlumeResponse]:
+        """``getLocationSnowpackPlume`` (beta)."""
+        query = Query()
+        query.add("units", self._units_for(units), UnitSystem.METRIC)
+        path = _location_path(location, slug) + "/snowpack/plume"
+        return Call("getLocationSnowpackPlume", path, query.render(), SnowpackPlumeResponse)
+
+    def alert_outlines(
+        self, *, classes: Sequence[AlertClass | str] | None, bbox: BBox | None
+    ) -> Call[AlertOutlineCollection]:
+        """``getAlertOutlines`` (GeoJSON)."""
+        query = Query()
+        if classes is not None:
+            query.add_list("class", [str(c) for c in classes])
+        query.add_raw("bbox", _bbox(bbox))
+        return Call(
+            "getAlertOutlines", "/api/v1/alerts/outlines", query.render(), AlertOutlineCollection
+        )
+
+    def avalanche_zones(self) -> Call[AvalancheZoneCollection]:
+        """``getAvalancheZones`` (GeoJSON)."""
+        return Call("getAvalancheZones", "/api/v1/avalanche/zones", "", AvalancheZoneCollection)
+
     def attribution(self) -> Call[AttributionRegistry]:
         """``getAttribution`` (an open route)."""
         return Call(
@@ -911,6 +1049,53 @@ def _coordinates(lat: float, lon: float) -> Query:
     return query
 
 
+def _members(value: MembersArg | None) -> bool | str | None:
+    if value is None or isinstance(value, bool):
+        return value
+    if value != "plume":
+        raise UsageError(f"members takes True, False or 'plume', not {value!r}")
+    return value
+
+
+def _order(value: str | None) -> str | None:
+    if value is not None and value not in {"asc", "desc"}:
+        raise UsageError(f"order must be 'asc' or 'desc', not {value!r}")
+    return value
+
+
+def _degrees(name: str, value: float, bound: float) -> str:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise UsageError(f"{name} must be a number, got {value!r}")
+    if not -bound <= value <= bound:
+        raise UsageError(f"{name} must be within +/-{bound}, got {value!r}")
+    return format_number(value)
+
+
+def _near(near: LatLon | None) -> str:
+    """``lat,lon`` with a literal comma (BEHAVIOR 3), or ``""`` when unset."""
+    if near is None:
+        return ""
+    lat, lon = near
+    return _degrees("near lat", lat, 90) + "," + _degrees("near lon", lon, 180)
+
+
+def _bbox(bbox: BBox | None) -> str:
+    """``west,south,east,north`` with literal commas, or ``""`` when unset."""
+    if bbox is None:
+        return ""
+    west, south, east, north = bbox
+    if west > east or south > north:
+        raise UsageError("a bbox is (west, south, east, north), west <= east and south <= north")
+    return ",".join(
+        (
+            _degrees("west", west, 180),
+            _degrees("south", south, 90),
+            _degrees("east", east, 180),
+            _degrees("north", north, 90),
+        )
+    )
+
+
 def _max_age(headers: httpx.Headers) -> float | None:
     directives = _cache_control(headers)
     if "no-cache" in directives:
@@ -923,10 +1108,13 @@ def _max_age(headers: httpx.Headers) -> float | None:
 
 __all__ = [
     "MAX_BODY_BYTES",
+    "BBox",
     "BodyBuffer",
     "Call",
     "Core",
+    "LatLon",
     "LocationArg",
+    "MembersArg",
     "OureaDeprecationWarning",
     "OureaError",
     "Prepared",

@@ -12,6 +12,7 @@ operation and arguments onto this SDK's methods.
 from __future__ import annotations
 
 import asyncio
+import datetime as dt
 import json
 import math
 import re
@@ -34,10 +35,11 @@ from ensemble_weather import (
     Window,
 )
 from ensemble_weather._core import _reset_deprecation_warnings
+from ensemble_weather._decode import parse_datetime
 
 VECTORS = Path(__file__).resolve().parent.parent / "spec" / "vectors"
 CASES = sorted(p for p in VECTORS.rglob("*.json") if "bodies" not in p.relative_to(VECTORS).parts)
-EXPECTED_VECTOR_COUNT = 43
+EXPECTED_VECTOR_COUNT = 58
 
 
 def test_every_vector_is_collected() -> None:
@@ -116,12 +118,21 @@ _METHODS = {
     "getCatalogStation": "catalog_station",
     "getAvailableRuns": "runs",
     "getAttribution": "attribution",
+    "explore": "explore",
+    "getComposition": "composition",
+    "getLocationSeason": "season",
+    "getLocationSnowTrend": "snow_trend",
+    "getLocationSnowpack": "snowpack",
+    "getLocationSnowpackPlume": "snowpack_plume",
+    "getAlertOutlines": "alert_outlines",
+    "getAvalancheZones": "avalanche_zones",
 }
 
 _ITERATORS = {
     "list_locations": "iter_locations",
     "list_catalog_locations": "iter_catalog_locations",
     "list_catalog_stations": "iter_catalog_stations",
+    "explore": "iter_explore",
 }
 
 _POSITIONAL = ("location", "state", "slug", "lat", "lon", "q")
@@ -136,11 +147,20 @@ def plan(call: dict[str, Any]) -> Plan:
     if args.pop("iterate", False):
         result.method = _ITERATORS[method]
         result.iterate = True
-    for name in _POSITIONAL:
+    positional = ("metric",) if method in {"explore", "iter_explore"} else _POSITIONAL
+    for name in positional:
         if name in args:
             result.args.append(args.pop(name))
     if "prob" in args:
         result.kwargs["prob"] = [_chance(t) for t in args.pop("prob")]
+    if "near" in args:
+        near = args.pop("near")
+        result.kwargs["near"] = (near["lat"], near["lon"])
+    if "bbox" in args:
+        box = args.pop("bbox")
+        result.kwargs["bbox"] = (box["west"], box["south"], box["east"], box["north"])
+    if result.method == "season" and "include" in args:
+        result.kwargs["include_daily"] = "daily" in args.pop("include")
     if "totals" in args:
         result.kwargs["totals"] = [
             Total(t["variable"], _window(t.get("window"))) for t in args.pop("totals")
@@ -154,7 +174,7 @@ def plan(call: dict[str, Any]) -> Plan:
 
 
 _TOKEN = re.compile(r"([^.\[\]]+)|\[(\d+)\]")
-_ATTRIBUTES = {"from": "from_"}
+_ATTRIBUTES = {"from": "from_", "pass": "pass_", "class": "class_"}
 
 
 def resolve(result: Any, path: str) -> Any:
@@ -184,6 +204,9 @@ def check_value(path: str, actual: Any, expected: Any) -> None:
     elif isinstance(expected, (int, float)):
         assert isinstance(actual, (int, float)), f"{path}: {actual!r} is not a number"
         assert math.isclose(actual, expected, rel_tol=1e-12), f"{path}: {actual!r} != {expected!r}"
+    elif isinstance(actual, dt.datetime) and isinstance(expected, str):
+        # BEHAVIOR.md 13: a timestamp matches the expected string as an instant.
+        assert actual == parse_datetime(expected), f"{path}: expected {expected!r}, got {actual!r}"
     else:
         assert actual == expected, f"{path}: expected {expected!r}, got {actual!r}"
 

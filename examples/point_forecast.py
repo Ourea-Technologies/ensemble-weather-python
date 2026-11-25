@@ -18,6 +18,6 @@ with Client() as client:
 point = forecast.point
 if point is not None:
     print(f"Forecast at {point.lat}, {point.lon}, {point.elevation} m ({point.elevation_source})")
-for hour in forecast.forecast.timeseries:
+for hour in forecast.series.timeseries:
     wind = hour.ensemble.wind_speed
     print(f"{hour.valid_time:%a %H:%M} UTC  median wind {wind.median} m/s, p90 {wind.p90} m/s")

@@ -1,0 +1,45 @@
+{
+  "name": "search/sorted-near",
+  "description": "Search takes sort, order, near, radius_km and units; near is one value 'lat,lon' with a literal comma; defaults (sort=relevance, order=desc, radius_km=100) are omitted. A metric sort gives each hit an `explore` value.",
+  "client": {
+    "api_key": "ow_pro"
+  },
+  "call": {
+    "operation": "searchLocations",
+    "args": {
+      "q": "hood",
+      "sort": "snow_5d",
+      "order": "desc",
+      "near": {
+        "lat": 45.33,
+        "lon": -121.66
+      },
+      "radius_km": 100
+    }
+  },
+  "expect_request": {
+    "method": "GET",
+    "path": "/api/v1/search/locations",
+    "query_string": "near=45.33,-121.66&q=hood&sort=snow_5d",
+    "headers_absent": [
+      "X-API-Key"
+    ]
+  },
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/search-sorted.json"
+    }
+  ],
+  "expect": {
+    "result": {
+      "items[0].slug": "mt-hood-meadows",
+      "items[0].explore.metric": "snow_5d",
+      "items[0].explore.value": 53.58,
+      "items[0].explore.unit": "mm"
+    }
+  }
+}

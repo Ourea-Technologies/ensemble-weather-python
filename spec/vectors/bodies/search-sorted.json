@@ -1,0 +1,45 @@
+{
+  "items": [
+    {
+      "key": "or-mt-hood-meadows",
+      "slug": "mt-hood-meadows",
+      "state": "or",
+      "name": "Mt Hood Meadows",
+      "lat": 45.33172,
+      "lon": -121.66534,
+      "elevation_m": 1639.2,
+      "type": "ski_area",
+      "timezone": "America/Los_Angeles",
+      "county": "Hood River",
+      "explore": {
+        "metric": "snow_5d",
+        "value": 53.58,
+        "unit": "mm",
+        "as_of": "2026-11-25T04:11:09Z",
+        "initialized_at": "2026-11-25T00:00:00Z",
+        "source": "ourea"
+      }
+    },
+    {
+      "key": "or-hoodoo-ski-area",
+      "slug": "hoodoo-ski-area",
+      "state": "or",
+      "name": "Hoodoo Ski Area",
+      "lat": 44.40928,
+      "lon": -121.87164,
+      "elevation_m": 1427.3,
+      "type": "ski_area",
+      "timezone": "America/Los_Angeles",
+      "county": "Linn",
+      "explore": {
+        "metric": "snow_5d",
+        "value": 0.95,
+        "unit": "mm",
+        "as_of": "2026-11-25T04:11:08Z",
+        "initialized_at": "2026-11-25T00:00:00Z",
+        "source": "ourea"
+      }
+    }
+  ],
+  "count": 20
+}

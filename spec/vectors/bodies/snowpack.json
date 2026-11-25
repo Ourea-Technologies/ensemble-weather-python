@@ -1,0 +1,122 @@
+{
+  "beta": true,
+  "location": {
+    "slug": "mt-hood-meadows",
+    "state": "or",
+    "name": "Mt Hood Meadows",
+    "lat": 45.33172,
+    "lon": -121.66534,
+    "elevation_m": 1639.2,
+    "type": "ski_area",
+    "timezone": "America/Los_Angeles"
+  },
+  "units": "metric",
+  "model_run": {
+    "initialized_at": "2026-11-25T00:00:00Z",
+    "generated_at": "2026-11-25T04:06:14Z",
+    "model": {
+      "name": "SNOWPACK",
+      "by": "WSL Institute for Snow and Avalanche Research SLF",
+      "license": "LGPL-3.0"
+    }
+  },
+  "stale": false,
+  "spots": [
+    {
+      "name": null,
+      "elevation": 1639.2,
+      "elevation_m": 1639.2,
+      "initialized_at": "2026-11-25T00:00:00Z",
+      "depth": {
+        "start_time": "2026-11-25T02:00:00Z",
+        "interval_hours": 1,
+        "basis": "open_loop",
+        "p10": [
+          3.5
+        ],
+        "p50": [
+          18.5
+        ],
+        "p90": [
+          51.5
+        ]
+      },
+      "depth_change_24h": 2.1,
+      "swe": [
+        33.6
+      ],
+      "steps": [
+        {
+          "valid_time": "2026-11-25T02:00:00Z",
+          "surface": "settled",
+          "new_snow_24h": 4.8,
+          "new_snow_density_kg_m3": 122.0
+        }
+      ],
+      "layers": [
+        {
+          "form": "faceted_grains",
+          "thickness": 4.4,
+          "depth": 15.6,
+          "formed": "2026-11-16"
+        }
+      ],
+      "aspects": [
+        {
+          "aspect": "north",
+          "slope_angle_deg": 38.0,
+          "depth": {
+            "start_time": "2026-11-25T02:00:00Z",
+            "interval_hours": 1,
+            "basis": "open_loop",
+            "p10": [
+              4.9
+            ],
+            "p50": [
+              19.9
+            ],
+            "p90": [
+              52.9
+            ]
+          },
+          "depth_change_24h": 2.5,
+          "steps": [
+            {
+              "valid_time": "2026-11-25T02:00:00Z",
+              "surface": "settled",
+              "new_snow_24h": 4.6,
+              "new_snow_density_kg_m3": 119.0
+            }
+          ],
+          "layers": [
+            {
+              "form": "faceted_grains",
+              "thickness": 11.1,
+              "depth": 10.3,
+              "formed": "2026-11-17"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "definitions": {
+    "surface": {
+      "crust": "A refrozen surface: wet snow that has frozen hard.",
+      "ice_crust": "An ice layer at the surface, from freezing rain.",
+      "none": "No snow on the ground.",
+      "powder": "New, dry, low-density snow that wind has not worked.",
+      "settled": "Dry snow that is no longer new: settled or packed.",
+      "wet": "Snow holding liquid water at the surface.",
+      "wind_affected": "New snow that wind has packed or moved."
+    },
+    "layer_form": {
+      "buried_surface_hoar": "Feathery frost that grew on the surface and was then buried.",
+      "depth_hoar": "Large cup-shaped grains near the ground, from a long cold spell.",
+      "faceted_grains": "Angular, sugary grains grown in a cold, shallow snowpack.",
+      "ice_layer": "A layer of solid ice.",
+      "melt_freeze_crust": "A layer that melted or was rained on and refroze.",
+      "rounding_facets": "Faceted grains that are rounding off as the snowpack warms."
+    }
+  }
+}

@@ -1,0 +1,131 @@
+{
+  "name": "request/location-subroutes",
+  "description": "The location's season, snow trend, snowpack and snowpack plume are subpaths of the location; season's include is a comma list; water_year and elevation are sent as given.",
+  "client": {
+    "api_key": "ow_pro"
+  },
+  "calls": [
+    {
+      "operation": "getLocationSeason",
+      "args": {
+        "location": "or/mt-hood-meadows",
+        "water_year": 2027,
+        "include": [
+          "daily"
+        ]
+      }
+    },
+    {
+      "operation": "getLocationSnowTrend",
+      "args": {
+        "location": "or/mt-hood-meadows",
+        "elevation": "main_lodge",
+        "units": "imperial"
+      }
+    },
+    {
+      "operation": "getLocationSnowpack",
+      "args": {
+        "location": "or/mt-hood-meadows"
+      }
+    },
+    {
+      "operation": "getLocationSnowpackPlume",
+      "args": {
+        "location": "or/mt-hood-meadows"
+      }
+    }
+  ],
+  "expect_requests": [
+    {
+      "method": "GET",
+      "path": "/api/v1/locations/or/mt-hood-meadows/season",
+      "query_string": "include=daily&water_year=2027",
+      "headers": {
+        "X-API-Key": "ow_pro"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/locations/or/mt-hood-meadows/snow-trend",
+      "query_string": "elevation=main_lodge&units=imperial",
+      "headers": {
+        "X-API-Key": "ow_pro"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/locations/or/mt-hood-meadows/snowpack",
+      "query_string": "",
+      "headers": {
+        "X-API-Key": "ow_pro"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/locations/or/mt-hood-meadows/snowpack/plume",
+      "query_string": "",
+      "headers": {
+        "X-API-Key": "ow_pro"
+      }
+    }
+  ],
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/season.json"
+    },
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/snow-trend.json"
+    },
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/snowpack.json"
+    },
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/snowpack-plume.json"
+    }
+  ],
+  "expect": {
+    "results": [
+      {
+        "water_year": 2027,
+        "precipitation.amount": 210.69,
+        "precipitation.percent_of_normal": 41,
+        "snowfall": null,
+        "station.network": "snotel"
+      },
+      {
+        "retention_days": 5,
+        "grids[0].source": "ourea",
+        "grids[0].runs[0].days[0].kind": "none",
+        "grids[0].runs[0].days[0].amount": null
+      },
+      {
+        "beta": true,
+        "model_run.model.name": "SNOWPACK",
+        "spots[0].depth.p50[0]": 18.5
+      },
+      {
+        "beta": true,
+        "depth.interval_hours": 3,
+        "models[0].id": "aifs"
+      }
+    ],
+    "requests": 4
+  }
+}

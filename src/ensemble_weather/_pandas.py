@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
     import pandas as pd
 
-    from .models import DailyForecast, TimeSeriesPoint
+    from .types import DailyForecast, TimeSeriesPoint
 
 _STATS = ("mean", "p10", "p25", "p50", "p75", "p90", "min", "max", "probability")
 

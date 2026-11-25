@@ -1,0 +1,51 @@
+{
+  "name": "names/forecast",
+  "description": "A forecast body decodes to the SDK names: forecast -> series, elevation_forecasts -> elevations, members[].members -> items and member_id -> id, probability -> value, window_*_hours -> *_hours on a window total, the thresholds' daily_*_probability -> daily_*, current.condition* -> code/text/icon, avalanche.forecast_url -> url, and an elevation's elevation -> height. Fields that do not repeat their type's word keep the wire name (lead_time_hours, precipitation_type.type, above_freezing_layer_aloft, model_run.models).",
+  "client": {},
+  "call": {
+    "operation": "getLocationForecast",
+    "args": {
+      "state": "or",
+      "slug": "mt-hood-meadows",
+      "elevations": "all",
+      "members": true
+    }
+  },
+  "expect_request": {
+    "method": "GET",
+    "path": "/api/v1/locations/or/mt-hood-meadows",
+    "query_string": "elevations=all&members=true"
+  },
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/forecast-full.json"
+    }
+  ],
+  "expect": {
+    "result": {
+      "series.timeseries[0].lead_time_hours": 6,
+      "series.timeseries[0].precipitation_type.type": "snow",
+      "series.timeseries[0].freezing_level.above_freezing_layer_aloft": false,
+      "model_run.models[0].id": "aifs",
+      "series.timeseries[0].members[0].id": "aifs",
+      "series.timeseries[0].members[0].items[0].id": 0,
+      "elevations[0].name": "hrm_lodge",
+      "elevations[0].height": 1394.0,
+      "location.elevations[0].height": 1639.2,
+      "probabilities[0].value": null,
+      "window_totals[0].start_hours": 0,
+      "window_totals[0].end_hours": 24,
+      "thresholds.daily_precipitation": 2.5,
+      "thresholds.daily_precipitation_occurrence": 1.0,
+      "thresholds.daily_snow": 2.5,
+      "current.code": "cloudy",
+      "current.text": "Cloudy",
+      "current.icon": "night_cloudy",
+      "avalanche.url": "https://nwac.us/forecasts/avalanche/mt-hood"
+    }
+  }
+}

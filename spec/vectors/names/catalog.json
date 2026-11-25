@@ -1,0 +1,66 @@
+{
+  "name": "names/catalog",
+  "description": "Catalog names: an elevation's elevation_m -> height_m, template.template_variant -> variant, a content entry's resolved_locale -> locale, a station's source_station_id/station_status/station_url -> source_id/status/url (also a nearby station's station_status).",
+  "client": {},
+  "calls": [
+    {
+      "operation": "getCatalogLocation",
+      "args": {
+        "slug": "mt-hood-meadows",
+        "include": [
+          "content",
+          "template"
+        ]
+      }
+    },
+    {
+      "operation": "getCatalogStation",
+      "args": {
+        "slug": "snotel-651"
+      }
+    }
+  ],
+  "expect_requests": [
+    {
+      "method": "GET",
+      "path": "/api/v1/catalog/locations/mt-hood-meadows",
+      "query_string": "include=content,template"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/catalog/stations/snotel-651"
+    }
+  ],
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/catalog-detail-full.json"
+    },
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/catalog-station-detail.json"
+    }
+  ],
+  "expect": {
+    "results": [
+      {
+        "elevations[0].height_m": 1639.2,
+        "template.variant": "mountain",
+        "content[0].locale": "en",
+        "nearby_stations[0].status": "active"
+      },
+      {
+        "source_id": "651:OR:SNTL",
+        "status": "active",
+        "url": "https://wcc.sc.egov.usda.gov/nwcc/site?sitenum=651"
+      }
+    ],
+    "requests": 2
+  }
+}

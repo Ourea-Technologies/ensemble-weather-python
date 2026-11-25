@@ -7,7 +7,8 @@
     "lon": -121.6649,
     "elevation_m": 1661.0,
     "type": "ski_area",
-    "timezone": "America/Los_Angeles"
+    "timezone": "America/Los_Angeles",
+    "elevation": 1661.0
   },
   "model_run": {
     "initialized_at": "2026-11-15T00:00:00Z",
@@ -30,6 +31,7 @@
         "valid_time": "2026-11-15T00:00:00Z",
         "lead_time_hours": 0,
         "is_night": true,
+        "measured": false,
         "condition": "snow",
         "condition_text": "Snow",
         "condition_icon": "night_snow",
@@ -103,6 +105,7 @@
         "valid_time": "2026-11-15T01:00:00Z",
         "lead_time_hours": 1,
         "is_night": true,
+        "measured": false,
         "condition": "snow",
         "condition_text": "Snow",
         "condition_icon": "night_snow",
@@ -176,6 +179,7 @@
         "valid_time": "2026-11-15T02:00:00Z",
         "lead_time_hours": 2,
         "is_night": true,
+        "measured": false,
         "condition": "snow",
         "condition_text": "Snow",
         "condition_icon": "night_snow",
@@ -276,6 +280,7 @@
         "max": 88.0
       },
       "members": 131,
+      "method": "members",
       "null_reason": null
     },
     {
@@ -288,6 +293,7 @@
       "aggregation": "total",
       "quantiles": null,
       "members": 0,
+      "method": null,
       "null_reason": "window_not_covered"
     }
   ]

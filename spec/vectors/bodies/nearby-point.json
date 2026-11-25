@@ -1,0 +1,20 @@
+{
+  "lat": 45.33,
+  "lon": -121.66,
+  "radius_km": 50.0,
+  "count": 3,
+  "locations": [
+    {
+      "slug": "umbrella-falls",
+      "state": "or",
+      "name": "Umbrella Falls",
+      "lat": 45.32893,
+      "lon": -121.6608,
+      "elevation_m": 1600.9,
+      "type": "waterfall",
+      "timezone": "America/Los_Angeles",
+      "county": "Hood River County",
+      "distance_km": 0.134
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "name": "request/members-plume",
+  "description": "members takes true, false or \"plume\"; \"plume\" is sent as members=plume, and the plume view comes back in forecast.plume (columns, not hourly rows). members_view still names the member variables the tier carries (full for Pro).",
+  "client": {},
+  "call": {
+    "operation": "getLocationForecast",
+    "args": {
+      "state": "or",
+      "slug": "mt-hood-meadows",
+      "members": "plume",
+      "max_hours": 12
+    }
+  },
+  "expect_request": {
+    "method": "GET",
+    "path": "/api/v1/locations/or/mt-hood-meadows",
+    "query_string": "max_hours=12&members=plume"
+  },
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/forecast-plume.json"
+    }
+  ],
+  "expect": {
+    "result": {
+      "members_view": "full",
+      "location.elevation": 1639.2,
+      "series.plume.headline.temperature[0]": 1.9,
+      "series.plume.bands.cumulative_snowfall.p90[0]": 13.41
+    }
+  }
+}

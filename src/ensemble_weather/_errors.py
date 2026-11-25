@@ -19,7 +19,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, ClassVar
 
 if TYPE_CHECKING:
-    from .models import NearestLocation, RateLimit
+    from .types import NearestLocation, RateLimit
 
 __all__ = [
     "APIConnectionError",
@@ -205,6 +205,7 @@ _BY_CODE: dict[str, type[APIError]] = {
     "INVALID_API_KEY": AuthenticationError,
     "UNAUTHORIZED": AuthenticationError,
     "PRO_REQUIRED": PermissionDeniedError,
+    "PLUS_REQUIRED": PermissionDeniedError,
     "LOCATION_NOT_FOUND": NotFoundError,
     "NOT_FOUND": NotFoundError,
     "BAD_REQUEST": InvalidRequestError,

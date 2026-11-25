@@ -1,0 +1,35 @@
+{
+  "name": "names/forecast-pool",
+  "description": "The plume's pooled members (wire plume.members) are plume.pool.",
+  "client": {},
+  "call": {
+    "operation": "getLocationForecast",
+    "args": {
+      "state": "or",
+      "slug": "mt-hood-meadows",
+      "members": "plume",
+      "max_hours": 6,
+      "daily": false
+    }
+  },
+  "expect_request": {
+    "method": "GET",
+    "path": "/api/v1/locations/or/mt-hood-meadows",
+    "query_string": "daily=false&max_hours=6&members=plume"
+  },
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/forecast-pool.json"
+    }
+  ],
+  "expect": {
+    "result": {
+      "members_view": "pool",
+      "series.plume.pool.temperature[0][0]": 5.4
+    }
+  }
+}

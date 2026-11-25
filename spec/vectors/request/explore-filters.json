@@ -1,0 +1,37 @@
+{
+  "name": "request/explore-filters",
+  "description": "explore's other filters: type, elevation bounds, points=all, order=asc, a cursor and a limit, in alphabetical order.",
+  "client": {},
+  "call": {
+    "operation": "explore",
+    "args": {
+      "metric": "base_depth",
+      "order": "asc",
+      "type": "ski_area",
+      "elevation_min": 1500,
+      "elevation_max": 2500.5,
+      "points": "all",
+      "limit": 10,
+      "cursor": "abc"
+    }
+  },
+  "expect_request": {
+    "method": "GET",
+    "path": "/api/v1/explore",
+    "query_string": "cursor=abc&elevation_max=2500.5&elevation_min=1500&limit=10&metric=base_depth&order=asc&points=all&type=ski_area"
+  },
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/explore.json"
+    }
+  ],
+  "expect": {
+    "result": {
+      "count": 3
+    }
+  }
+}

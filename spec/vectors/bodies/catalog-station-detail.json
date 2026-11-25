@@ -1,0 +1,17 @@
+{
+  "slug": "snotel-651",
+  "state": "or",
+  "name": "Mt Hood Test Site",
+  "lat": 45.32,
+  "lon": -121.71,
+  "elevation_m": 1639.8,
+  "type": "observation_station",
+  "timezone": "America/Los_Angeles",
+  "network": "snotel",
+  "source_station_id": "651:OR:SNTL",
+  "station_status": "active",
+  "station_url": "https://wcc.sc.egov.usda.gov/nwcc/site?sitenum=651",
+  "photos": [],
+  "webcams": [],
+  "indexable": true
+}

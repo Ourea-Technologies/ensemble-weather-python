@@ -1,0 +1,1286 @@
+{
+  "location": {
+    "slug": "mt-hood-meadows",
+    "state": "or",
+    "name": "Mt Hood Meadows",
+    "lat": 45.33172,
+    "lon": -121.66534,
+    "elevation_m": 1639.2,
+    "type": "ski_area",
+    "timezone": "America/Los_Angeles",
+    "elevation": 1639.2,
+    "elevations": [
+      {
+        "name": "main_lodge",
+        "display_name": "Main Lodge",
+        "elevation": 1639.2,
+        "default": true
+      }
+    ]
+  },
+  "model_run": {
+    "initialized_at": "2026-11-25T00:00:00Z",
+    "total_members": 164,
+    "models": [
+      {
+        "id": "aifs",
+        "cycle": "2026-11-24T18:00:00Z",
+        "members": 51
+      }
+    ]
+  },
+  "units": "metric",
+  "forecast": {
+    "max_hours": 6,
+    "interval_hours": 1,
+    "timeseries": [
+      {
+        "valid_time": "2026-11-25T06:00:00Z",
+        "lead_time_hours": 6,
+        "is_night": true,
+        "condition": "cloudy",
+        "condition_text": "Cloudy",
+        "condition_icon": "night_cloudy",
+        "measured": false,
+        "gust_notable": false,
+        "freezing_level": {
+          "kind": "height",
+          "height": 2053.0,
+          "above_freezing_layer_aloft": false
+        },
+        "ensemble": {
+          "temperature": {
+            "mean": 2.3,
+            "min": -1.5,
+            "p10": 0.5,
+            "p25": 1.4,
+            "p50": 2.3,
+            "p75": 3.2,
+            "p90": 4.1,
+            "max": 6.1
+          },
+          "feels_like": {
+            "mean": 0.3,
+            "min": -8.7,
+            "p10": -2.1,
+            "p25": -0.9,
+            "p50": 0.4,
+            "p75": 1.9,
+            "p90": 2.6,
+            "max": 4.1
+          },
+          "dewpoint": {
+            "mean": -0.8,
+            "min": -4.6,
+            "p10": -2.6,
+            "p25": -1.7,
+            "p50": -0.7,
+            "p75": 0.2,
+            "p90": 1.0,
+            "max": 3.1
+          },
+          "precipitation": {
+            "mean": 0.0,
+            "min": 0.0,
+            "p10": 0.0,
+            "p25": 0.0,
+            "p50": 0.0,
+            "p75": 0.0,
+            "p90": 0.0,
+            "max": 0.0,
+            "probability": 0.0
+          },
+          "wind_speed": {
+            "mean": 2.1,
+            "min": 0.0,
+            "p10": 0.0,
+            "p25": 0.7,
+            "p50": 2.0,
+            "p75": 3.4,
+            "p90": 4.6,
+            "max": 11.4
+          },
+          "wind_gust": {
+            "mean": 3.9,
+            "min": 0.0,
+            "p10": 0.0,
+            "p25": 1.4,
+            "p50": 3.6,
+            "p75": 6.1,
+            "p90": 7.9,
+            "max": 18.3
+          },
+          "wind_direction": {
+            "mean": 172.0,
+            "stddev": 45.0,
+            "sector_50": {
+              "from": 142.0,
+              "to": 219.0
+            },
+            "sector_90": {
+              "from": 122.0,
+              "to": 251.0
+            }
+          },
+          "snow_level": {
+            "mean": 1436.0,
+            "min": 1403.0,
+            "p10": 1403.0,
+            "p25": 1403.0,
+            "p50": 1446.0,
+            "p75": 1481.0,
+            "p90": 1525.0,
+            "max": 1695.0
+          },
+          "snow_level_wet_bulb": {
+            "mean": 1710.0,
+            "min": 1678.0,
+            "p10": 1678.0,
+            "p25": 1678.0,
+            "p50": 1721.0,
+            "p75": 1756.0,
+            "p90": 1800.0,
+            "max": 1970.0
+          },
+          "snowfall": {
+            "mean": 0.0,
+            "min": 0.0,
+            "p10": 0.0,
+            "p25": 0.0,
+            "p50": 0.0,
+            "p75": 0.0,
+            "p90": 0.0,
+            "max": 0.0,
+            "probability": 0.0
+          },
+          "cloud_cover": {
+            "mean": 97.0,
+            "min": 32.0,
+            "p10": 94.0,
+            "p25": 99.0,
+            "p50": 100.0,
+            "p75": 100.0,
+            "p90": 100.0,
+            "max": 100.0
+          },
+          "cape": {
+            "mean": 0.0,
+            "min": 0.0,
+            "p10": 0.0,
+            "p25": 0.0,
+            "p50": 0.0,
+            "p75": 0.0,
+            "p90": 0.0,
+            "max": 0.0
+          },
+          "relative_humidity": {
+            "mean": 81.0,
+            "min": 64.0,
+            "p10": 70.0,
+            "p25": 75.0,
+            "p50": 80.0,
+            "p75": 86.0,
+            "p90": 91.0,
+            "max": 100.0
+          }
+        },
+        "provenance": {
+          "ngr": [
+            "temperature"
+          ],
+          "fallback": [
+            "wind_speed"
+          ],
+          "floor_clamped": [
+            "wind_speed"
+          ],
+          "distribution_parameters": [
+            "temperature"
+          ]
+        },
+        "model_means": [
+          {
+            "id": "aifs",
+            "temperature": {
+              "mean": 2.2,
+              "min": 0.3,
+              "p10": 1.0,
+              "p25": 1.7,
+              "p50": 2.3,
+              "p75": 2.8,
+              "p90": 3.3,
+              "max": 3.6
+            },
+            "dewpoint": {
+              "mean": -0.7,
+              "min": -2.2,
+              "p10": -1.6,
+              "p25": -1.1,
+              "p50": -0.8,
+              "p75": -0.2,
+              "p90": 0.1,
+              "max": 0.7
+            },
+            "precipitation": {
+              "mean": 0.32,
+              "min": 0.0,
+              "p10": 0.07,
+              "p25": 0.12,
+              "p50": 0.25,
+              "p75": 0.44,
+              "p90": 0.71,
+              "max": 0.88
+            },
+            "wind_speed": {
+              "mean": 2.1,
+              "min": 0.9,
+              "p10": 1.6,
+              "p25": 1.8,
+              "p50": 2.0,
+              "p75": 2.4,
+              "p90": 2.8,
+              "max": 3.1
+            },
+            "wind_direction": {
+              "mean": 148.0,
+              "stddev": 21.0,
+              "sector_50": {
+                "from": 138.0,
+                "to": 159.0
+              },
+              "sector_90": {
+                "from": 121.0,
+                "to": 191.0
+              }
+            },
+            "snow_level": {
+              "mean": 1448.0,
+              "min": 1138.0,
+              "p10": 1346.0,
+              "p25": 1399.0,
+              "p50": 1452.0,
+              "p75": 1515.0,
+              "p90": 1550.0,
+              "max": 1618.0
+            },
+            "snow_level_wet_bulb": {
+              "mean": 1722.0,
+              "min": 1413.0,
+              "p10": 1621.0,
+              "p25": 1674.0,
+              "p50": 1726.0,
+              "p75": 1790.0,
+              "p90": 1825.0,
+              "max": 1893.0
+            },
+            "slr": {
+              "mean": 9.2,
+              "min": 8.5,
+              "p10": 8.7,
+              "p25": 9.0,
+              "p50": 9.3,
+              "p75": 9.4,
+              "p90": 9.6,
+              "max": 9.9
+            }
+          }
+        ],
+        "members": [
+          {
+            "id": "aifs",
+            "members": [
+              {
+                "member_id": 0,
+                "temperature": 1.4,
+                "precipitation": 0.0,
+                "precipitation_hours": 6,
+                "wind_speed": 1.8,
+                "wind_direction": 146.0,
+                "snow_level": 1416.0,
+                "snow_level_wet_bulb": 1691.0,
+                "slr": 9.3,
+                "snowfall": 0.0,
+                "cumulative_precipitation": 0.0,
+                "cumulative_snowfall": 0.0
+              }
+            ]
+          }
+        ],
+        "members_cumulative": {
+          "precipitation": {
+            "mean": 0.0,
+            "min": 0.0,
+            "p10": 0.0,
+            "p25": 0.0,
+            "p50": 0.0,
+            "p75": 0.0,
+            "p90": 0.0,
+            "max": 0.0
+          },
+          "snowfall": {
+            "mean": 0.0,
+            "min": 0.0,
+            "p10": 0.0,
+            "p25": 0.0,
+            "p50": 0.0,
+            "p75": 0.0,
+            "p90": 0.0,
+            "max": 0.0
+          }
+        },
+        "members_spread": {
+          "temperature": {
+            "mean": 2.0,
+            "min": -2.4,
+            "p10": 0.0,
+            "p25": 0.9,
+            "p50": 2.0,
+            "p75": 3.1,
+            "p90": 4.1,
+            "max": 6.4
+          },
+          "snow_level": {
+            "mean": 1480.0,
+            "min": 1178.0,
+            "p10": 1369.0,
+            "p25": 1421.0,
+            "p50": 1467.0,
+            "p75": 1544.0,
+            "p90": 1617.0,
+            "max": 1695.0
+          },
+          "snow_level_wet_bulb": {
+            "mean": 1755.0,
+            "min": 1452.0,
+            "p10": 1644.0,
+            "p25": 1696.0,
+            "p50": 1742.0,
+            "p75": 1819.0,
+            "p90": 1892.0,
+            "max": 1970.0
+          },
+          "wind_speed": {
+            "mean": 2.0,
+            "min": 0.6,
+            "p10": 1.5,
+            "p25": 1.7,
+            "p50": 2.0,
+            "p75": 2.3,
+            "p90": 2.5,
+            "max": 4.4
+          }
+        },
+        "cumulative_precipitation": 0.0,
+        "cumulative_snowfall": 0.0,
+        "precipitation_type": {
+          "type": "snow",
+          "snow_probability": 0.62,
+          "rain_probability": 0.38
+        }
+      }
+    ],
+    "daily": [
+      {
+        "date": "2026-11-24",
+        "covered_from": "2026-11-24T12:00:00Z",
+        "measured_precipitation": {
+          "amount": 5.296600207686424,
+          "through": "2026-11-25T00:00:00Z"
+        },
+        "condition": "snow",
+        "condition_text": "Snow",
+        "condition_icon": "snow",
+        "precipitation_type": "snow",
+        "high": {
+          "mean": 3.3,
+          "p10": 2.8,
+          "p25": 2.8,
+          "p50": 2.8,
+          "p75": 3.5,
+          "p90": 4.3,
+          "min": 2.8,
+          "max": 6.4
+        },
+        "low": {
+          "mean": -0.5,
+          "p10": -2.1,
+          "p25": -1.1,
+          "p50": 0.0,
+          "p75": 0.4,
+          "p90": 0.4,
+          "min": -4.6,
+          "max": 0.4
+        },
+        "feels_like_high": {
+          "mean": 1.5,
+          "p10": -1.0,
+          "p25": 0.5,
+          "p50": 1.6,
+          "p75": 2.6,
+          "p90": 3.6,
+          "min": -5.3,
+          "max": 5.4
+        },
+        "feels_like_low": {
+          "mean": -1.8,
+          "p10": -4.4,
+          "p25": -3.1,
+          "p50": -1.6,
+          "p75": -0.3,
+          "p90": 0.5,
+          "min": -9.8,
+          "max": 2.6
+        },
+        "total_precipitation": {
+          "mean": 5.8,
+          "p10": 2.25,
+          "p25": 3.5,
+          "p50": 4.83,
+          "p75": 6.79,
+          "p90": 10.11,
+          "min": 1.21,
+          "max": 24.06
+        },
+        "total_snowfall": {
+          "mean": 49.73,
+          "p10": 19.17,
+          "p25": 29.77,
+          "p50": 40.98,
+          "p75": 57.95,
+          "p90": 87.36,
+          "min": 10.35,
+          "max": 213.54
+        },
+        "snow_character": "wet",
+        "slr": 9.1,
+        "precipitation_probability": 0.878,
+        "precipitation_occurrence_probability": 1.0,
+        "snow_probability": 1.0,
+        "snow_level_mean": 1344.0,
+        "snow_level": {
+          "mean": 1344.0,
+          "p10": 1313.0,
+          "p25": 1314.0,
+          "p50": 1363.0,
+          "p75": 1399.0,
+          "p90": 1432.0,
+          "min": 1313.0,
+          "max": 1594.0
+        },
+        "snow_level_range": {
+          "low": 1267.0,
+          "high": 1476.0,
+          "mean": 1344.0
+        },
+        "snow_level_wet_bulb": {
+          "mean": 1619.0,
+          "p10": 1588.0,
+          "p25": 1589.0,
+          "p50": 1637.0,
+          "p75": 1674.0,
+          "p90": 1707.0,
+          "min": 1588.0,
+          "max": 1869.0
+        },
+        "snow_level_wet_bulb_range": {
+          "low": 1542.0,
+          "high": 1750.0,
+          "mean": 1619.0
+        },
+        "total_precipitation_if_wet": {
+          "mean": 5.83,
+          "p10": 2.25,
+          "p25": 3.5,
+          "p50": 4.83,
+          "p75": 6.79,
+          "p90": 10.11,
+          "min": 1.21,
+          "max": 24.06
+        },
+        "total_snowfall_if_wet": {
+          "mean": 50.07,
+          "p10": 19.17,
+          "p25": 29.77,
+          "p50": 40.98,
+          "p75": 57.95,
+          "p90": 87.36,
+          "min": 10.35,
+          "max": 213.54
+        },
+        "precipitation_display": {
+          "kind": "snow",
+          "chance": 1.0,
+          "amount": 49.73,
+          "snow_amount": 49.73
+        },
+        "cloud_cover_mean": 98.0,
+        "wind": {
+          "status": "light",
+          "peak_speed": 5.4,
+          "peak_speed_p90": 8.8,
+          "is_gust": true,
+          "sustained_speed": 3.2
+        },
+        "storm_orientation": "mixed",
+        "storm_orientation_description": "Mixed storm: snow density shifted back and forth through the storm. No clear layering pattern.",
+        "astro": {
+          "sunrise": "2026-11-24T15:15:57Z",
+          "sunset": "2026-11-25T00:30:25Z",
+          "moon_phase": "full_moon",
+          "moon_illumination": 1.0,
+          "astronomical_season": "autumn"
+        },
+        "temperature_climatology": {
+          "mean": -1.3,
+          "std": 4.4
+        }
+      }
+    ],
+    "snow_outlook": {
+      "next_24h": 3.06,
+      "next_48h": 3.06,
+      "next_72h": 3.06,
+      "next_7d": 302.23,
+      "overnight_4pm_9am": 3.06,
+      "quantiles": {
+        "next_24h": {
+          "mean": 3.21,
+          "p10": 0.0,
+          "p25": 0.0,
+          "p50": 0.0,
+          "p75": 0.04,
+          "p90": 11.81,
+          "min": 0.0,
+          "max": 61.05
+        },
+        "next_48h": {
+          "mean": 6.3,
+          "p10": 0.0,
+          "p25": 0.0,
+          "p50": 0.0,
+          "p75": 2.21,
+          "p90": 18.25,
+          "min": 0.0,
+          "max": 121.46
+        },
+        "next_72h": {
+          "mean": 37.24,
+          "p10": 0.0,
+          "p25": 0.0,
+          "p50": 5.57,
+          "p75": 34.63,
+          "p90": 133.61,
+          "min": 0.0,
+          "max": 416.79
+        },
+        "next_7d": {
+          "mean": 168.92,
+          "p10": 13.71,
+          "p25": 49.68,
+          "p50": 120.55,
+          "p75": 241.73,
+          "p90": 404.58,
+          "min": 0.0,
+          "max": 672.42
+        }
+      }
+    },
+    "precipitation_outlook": {
+      "next_24h": 2.03,
+      "next_48h": 38.81,
+      "next_72h": 50.57,
+      "next_7d": 87.42,
+      "quantiles": {
+        "next_24h": {
+          "mean": 2.33,
+          "p10": 0.0,
+          "p25": 0.0,
+          "p50": 0.0,
+          "p75": 2.13,
+          "p90": 7.86,
+          "min": 0.0,
+          "max": 28.68
+        },
+        "next_48h": {
+          "mean": 38.67,
+          "p10": 17.23,
+          "p25": 26.4,
+          "p50": 36.39,
+          "p75": 48.29,
+          "p90": 62.79,
+          "min": 3.15,
+          "max": 111.05
+        },
+        "next_72h": {
+          "mean": 50.06,
+          "p10": 20.35,
+          "p25": 32.24,
+          "p50": 49.71,
+          "p75": 64.41,
+          "p90": 79.83,
+          "min": 3.15,
+          "max": 152.24
+        },
+        "next_7d": {
+          "mean": 84.76,
+          "p10": 43.98,
+          "p25": 62.36,
+          "p50": 80.8,
+          "p75": 102.74,
+          "p90": 130.65,
+          "min": 19.28,
+          "max": 190.56
+        }
+      }
+    }
+  },
+  "elevation_forecasts": [
+    {
+      "name": "hrm_lodge",
+      "display_name": "Hood River Meadows Base Lodge",
+      "elevation": 1394.0,
+      "lat": 45.32632,
+      "lon": -121.64155,
+      "hourly": [
+        {
+          "valid_time": "2026-11-25T06:00:00Z",
+          "lead_time_hours": 6,
+          "is_night": true,
+          "condition": "cloudy",
+          "condition_text": "Cloudy",
+          "condition_icon": "night_cloudy",
+          "measured": false,
+          "gust_notable": false,
+          "inversion": {
+            "kind": "surface_shallow",
+            "depth": 73.0,
+            "strength": 2.9
+          },
+          "freezing_level": {
+            "kind": "height",
+            "height": 2103.0,
+            "above_freezing_layer_aloft": false
+          },
+          "ensemble": {
+            "temperature": {
+              "mean": 1.3,
+              "min": -3.9,
+              "p10": -1.1,
+              "p25": 0.0,
+              "p50": 1.3,
+              "p75": 2.5,
+              "p90": 3.6,
+              "max": 6.4
+            },
+            "feels_like": {
+              "mean": -0.8,
+              "min": -11.2,
+              "p10": -3.7,
+              "p25": -2.2,
+              "p50": -0.7,
+              "p75": 0.8,
+              "p90": 2.2,
+              "max": 4.7
+            },
+            "dewpoint": {
+              "mean": -0.5,
+              "min": -4.1,
+              "p10": -2.4,
+              "p25": -1.5,
+              "p50": -0.4,
+              "p75": 0.5,
+              "p90": 1.3,
+              "max": 3.6
+            },
+            "precipitation": {
+              "mean": 0.0,
+              "min": 0.0,
+              "p10": 0.0,
+              "p25": 0.0,
+              "p50": 0.0,
+              "p75": 0.0,
+              "p90": 0.0,
+              "max": 0.0,
+              "probability": 0.0
+            },
+            "wind_speed": {
+              "mean": 2.0,
+              "min": 0.0,
+              "p10": 0.0,
+              "p25": 0.7,
+              "p50": 2.0,
+              "p75": 3.3,
+              "p90": 4.4,
+              "max": 10.9
+            },
+            "wind_gust": {
+              "mean": 3.7,
+              "min": 0.0,
+              "p10": 0.0,
+              "p25": 1.4,
+              "p50": 3.6,
+              "p75": 5.9,
+              "p90": 7.6,
+              "max": 17.6
+            },
+            "wind_direction": {
+              "mean": 176.0,
+              "stddev": 39.0,
+              "sector_50": {
+                "from": 150.0,
+                "to": 210.0
+              },
+              "sector_90": {
+                "from": 129.0,
+                "to": 241.0
+              }
+            },
+            "snow_level": {
+              "mean": 1426.0,
+              "min": 1123.0,
+              "p10": 1326.0,
+              "p25": 1389.0,
+              "p50": 1437.0,
+              "p75": 1474.0,
+              "p90": 1515.0,
+              "max": 1691.0
+            },
+            "snow_level_wet_bulb": {
+              "mean": 1700.0,
+              "min": 1398.0,
+              "p10": 1601.0,
+              "p25": 1664.0,
+              "p50": 1711.0,
+              "p75": 1749.0,
+              "p90": 1790.0,
+              "max": 1966.0
+            },
+            "snowfall": {
+              "mean": 0.0,
+              "min": 0.0,
+              "p10": 0.0,
+              "p25": 0.0,
+              "p50": 0.0,
+              "p75": 0.0,
+              "p90": 0.0,
+              "max": 0.0,
+              "probability": 0.0
+            },
+            "cloud_cover": {
+              "mean": 97.0,
+              "min": 28.0,
+              "p10": 93.0,
+              "p25": 98.0,
+              "p50": 100.0,
+              "p75": 100.0,
+              "p90": 100.0,
+              "max": 100.0
+            },
+            "cape": {
+              "mean": 0.0,
+              "min": 0.0,
+              "p10": 0.0,
+              "p25": 0.0,
+              "p50": 0.0,
+              "p75": 0.0,
+              "p90": 0.0,
+              "max": 0.0
+            },
+            "relative_humidity": {
+              "mean": 88.0,
+              "min": 65.0,
+              "p10": 76.0,
+              "p25": 82.0,
+              "p50": 88.0,
+              "p75": 96.0,
+              "p90": 100.0,
+              "max": 100.0
+            }
+          },
+          "provenance": {
+            "ngr": [
+              "temperature"
+            ],
+            "fallback": [
+              "wind_speed"
+            ],
+            "floor_clamped": [
+              "wind_speed"
+            ],
+            "distribution_parameters": [
+              "temperature"
+            ]
+          },
+          "members": [
+            {
+              "id": "aifs",
+              "members": [
+                {
+                  "member_id": 0,
+                  "temperature": 2.3,
+                  "precipitation": 0.0,
+                  "precipitation_hours": 6,
+                  "wind_speed": 1.9,
+                  "wind_direction": 153.0,
+                  "snow_level": 1401.0,
+                  "snow_level_wet_bulb": 1676.0,
+                  "slr": 8.4,
+                  "snowfall": 0.0,
+                  "cumulative_precipitation": 0.0,
+                  "cumulative_snowfall": 0.0
+                }
+              ]
+            }
+          ],
+          "members_cumulative": {
+            "precipitation": {
+              "mean": 0.0,
+              "min": 0.0,
+              "p10": 0.0,
+              "p25": 0.0,
+              "p50": 0.0,
+              "p75": 0.0,
+              "p90": 0.0,
+              "max": 0.0
+            },
+            "snowfall": {
+              "mean": 0.0,
+              "min": 0.0,
+              "p10": 0.0,
+              "p25": 0.0,
+              "p50": 0.0,
+              "p75": 0.0,
+              "p90": 0.0,
+              "max": 0.0
+            }
+          },
+          "members_spread": {
+            "temperature": {
+              "mean": 2.5,
+              "min": -2.5,
+              "p10": 0.1,
+              "p25": 1.3,
+              "p50": 2.5,
+              "p75": 3.7,
+              "p90": 4.8,
+              "max": 7.5
+            },
+            "snow_level": {
+              "mean": 1465.0,
+              "min": 1123.0,
+              "p10": 1352.0,
+              "p25": 1405.0,
+              "p50": 1454.0,
+              "p75": 1535.0,
+              "p90": 1607.0,
+              "max": 1691.0
+            },
+            "snow_level_wet_bulb": {
+              "mean": 1740.0,
+              "min": 1398.0,
+              "p10": 1627.0,
+              "p25": 1680.0,
+              "p50": 1728.0,
+              "p75": 1810.0,
+              "p90": 1882.0,
+              "max": 1966.0
+            },
+            "wind_speed": {
+              "mean": 2.0,
+              "min": 0.6,
+              "p10": 1.5,
+              "p25": 1.6,
+              "p50": 2.0,
+              "p75": 2.2,
+              "p90": 2.5,
+              "max": 4.3
+            }
+          },
+          "cumulative_precipitation": 0.0,
+          "cumulative_snowfall": 0.0
+        }
+      ],
+      "daily": [
+        {
+          "date": "2026-11-24",
+          "covered_from": "2026-11-24T12:00:00Z",
+          "measured_precipitation": {
+            "amount": 5.4630157286301255,
+            "through": "2026-11-25T00:00:00Z"
+          },
+          "condition": "snow",
+          "condition_text": "Snow",
+          "condition_icon": "snow",
+          "precipitation_type": "snow",
+          "high": {
+            "mean": 2.9,
+            "p10": 1.5,
+            "p25": 1.5,
+            "p50": 2.5,
+            "p75": 3.6,
+            "p90": 4.7,
+            "min": 1.5,
+            "max": 7.4
+          },
+          "low": {
+            "mean": -0.7,
+            "p10": -2.1,
+            "p25": -1.1,
+            "p50": 0.0,
+            "p75": 0.0,
+            "p90": 0.0,
+            "min": -4.7,
+            "max": 0.0
+          },
+          "feels_like_high": {
+            "mean": 1.8,
+            "p10": -0.9,
+            "p25": 0.6,
+            "p50": 2.0,
+            "p75": 3.3,
+            "p90": 4.0,
+            "min": -4.9,
+            "max": 6.7
+          },
+          "feels_like_low": {
+            "mean": -1.7,
+            "p10": -4.4,
+            "p25": -3.2,
+            "p50": -1.5,
+            "p75": -0.2,
+            "p90": 1.0,
+            "min": -11.2,
+            "max": 3.9
+          },
+          "total_precipitation": {
+            "mean": 5.83,
+            "p10": 2.35,
+            "p25": 3.6,
+            "p50": 4.9,
+            "p75": 6.77,
+            "p90": 10.01,
+            "min": 1.27,
+            "max": 23.64
+          },
+          "total_snowfall": {
+            "mean": 34.67,
+            "p10": 15.24,
+            "p25": 23.08,
+            "p50": 30.04,
+            "p75": 39.24,
+            "p90": 56.63,
+            "min": 8.27,
+            "max": 133.34
+          },
+          "snow_character": "wet",
+          "slr": 8.2,
+          "precipitation_probability": 0.887,
+          "precipitation_occurrence_probability": 1.0,
+          "snow_probability": 1.0,
+          "snow_level_mean": 1322.0,
+          "snow_level": {
+            "mean": 1322.0,
+            "p10": 1204.0,
+            "p25": 1274.0,
+            "p50": 1345.0,
+            "p75": 1381.0,
+            "p90": 1411.0,
+            "min": 1147.0,
+            "max": 1582.0
+          },
+          "snow_level_range": {
+            "low": 1252.0,
+            "high": 1391.0,
+            "mean": 1322.0
+          },
+          "snow_level_wet_bulb": {
+            "mean": 1596.0,
+            "p10": 1479.0,
+            "p25": 1548.0,
+            "p50": 1619.0,
+            "p75": 1656.0,
+            "p90": 1686.0,
+            "min": 1421.0,
+            "max": 1857.0
+          },
+          "snow_level_wet_bulb_range": {
+            "low": 1526.0,
+            "high": 1665.0,
+            "mean": 1596.0
+          },
+          "total_precipitation_if_wet": {
+            "mean": 5.86,
+            "p10": 2.35,
+            "p25": 3.6,
+            "p50": 4.9,
+            "p75": 6.77,
+            "p90": 10.01,
+            "min": 1.27,
+            "max": 23.64
+          },
+          "total_snowfall_if_wet": {
+            "mean": 34.79,
+            "p10": 15.24,
+            "p25": 23.08,
+            "p50": 30.04,
+            "p75": 39.24,
+            "p90": 56.63,
+            "min": 8.27,
+            "max": 133.34
+          },
+          "precipitation_display": {
+            "kind": "snow",
+            "chance": 1.0,
+            "amount": 34.67,
+            "snow_amount": 34.67
+          },
+          "cloud_cover_mean": 98.0,
+          "wind": {
+            "status": "light",
+            "peak_speed": 5.3,
+            "peak_speed_p90": 8.7,
+            "is_gust": true,
+            "sustained_speed": 3.1
+          },
+          "storm_orientation": "mixed",
+          "storm_orientation_description": "Mixed storm: snow density shifted back and forth through the storm. No clear layering pattern.",
+          "astro": {
+            "sunrise": "2026-11-24T15:16:32Z",
+            "sunset": "2026-11-25T00:29:38Z",
+            "moon_phase": "full_moon",
+            "moon_illumination": 1.0,
+            "astronomical_season": "autumn"
+          },
+          "temperature_climatology": {
+            "mean": -0.2,
+            "std": 4.7
+          }
+        }
+      ],
+      "snow_outlook": {
+        "next_24h": 0.0,
+        "next_48h": 0.0,
+        "next_72h": 0.0,
+        "next_7d": 131.3,
+        "overnight_4pm_9am": 0.0,
+        "quantiles": {
+          "next_24h": {
+            "mean": 0.1,
+            "p10": 0.0,
+            "p25": 0.0,
+            "p50": 0.0,
+            "p75": 0.0,
+            "p90": 0.0,
+            "min": 0.0,
+            "max": 9.1
+          },
+          "next_48h": {
+            "mean": 0.1,
+            "p10": 0.0,
+            "p25": 0.0,
+            "p50": 0.0,
+            "p75": 0.0,
+            "p90": 0.0,
+            "min": 0.0,
+            "max": 9.1
+          },
+          "next_72h": {
+            "mean": 17.92,
+            "p10": 0.0,
+            "p25": 0.0,
+            "p50": 0.0,
+            "p75": 15.06,
+            "p90": 55.29,
+            "min": 0.0,
+            "max": 290.66
+          },
+          "next_7d": {
+            "mean": 72.34,
+            "p10": 0.0,
+            "p25": 0.44,
+            "p50": 20.22,
+            "p75": 97.45,
+            "p90": 213.24,
+            "min": 0.0,
+            "max": 597.55
+          }
+        }
+      },
+      "precipitation_outlook": {
+        "next_24h": 1.85,
+        "next_48h": 35.59,
+        "next_72h": 46.92,
+        "next_7d": 81.18,
+        "quantiles": {
+          "next_24h": {
+            "mean": 2.15,
+            "p10": 0.0,
+            "p25": 0.0,
+            "p50": 0.0,
+            "p75": 1.91,
+            "p90": 7.06,
+            "min": 0.0,
+            "max": 26.06
+          },
+          "next_48h": {
+            "mean": 35.4,
+            "p10": 15.18,
+            "p25": 23.63,
+            "p50": 33.04,
+            "p75": 45.3,
+            "p90": 59.19,
+            "min": 2.46,
+            "max": 109.69
+          },
+          "next_72h": {
+            "mean": 46.36,
+            "p10": 17.56,
+            "p25": 29.01,
+            "p50": 46.36,
+            "p75": 59.63,
+            "p90": 75.83,
+            "min": 2.46,
+            "max": 151.53
+          },
+          "next_7d": {
+            "mean": 78.51,
+            "p10": 38.89,
+            "p25": 56.89,
+            "p50": 74.2,
+            "p75": 96.53,
+            "p90": 123.24,
+            "min": 16.19,
+            "max": 178.22
+          }
+        }
+      },
+      "snow_on_ground": {
+        "beta": true,
+        "depth": 13.0,
+        "basis": "open_loop",
+        "surface": "wet",
+        "valid_time": "2026-11-25T06:00:00Z",
+        "generated_at": "2026-11-25T04:06:14Z"
+      },
+      "nearest_sensors": [
+        {
+          "station_id": "Mt Hood Meadows",
+          "name": "Mt Hood Meadows",
+          "source": "ski_resort",
+          "distance_km": 2.07,
+          "elevation_diff": 308.1,
+          "effective_distance_km": 5.15,
+          "observation_time": "2026-11-25T06:25:00Z"
+        }
+      ]
+    }
+  ],
+  "nearest_sensors": [
+    {
+      "station_id": "Mt Hood Meadows",
+      "name": "Mt Hood Meadows",
+      "source": "ski_resort",
+      "distance_km": 0.44,
+      "elevation_diff": 62.9,
+      "effective_distance_km": 1.07,
+      "observation_time": "2026-11-25T06:25:00Z"
+    }
+  ],
+  "nowcast_applied": true,
+  "members_view": "full",
+  "current": {
+    "time": "2026-11-25T07:00:00Z",
+    "temperature": 2.6,
+    "feels_like": 0.7,
+    "condition": "cloudy",
+    "condition_text": "Cloudy",
+    "condition_icon": "night_cloudy",
+    "wind_speed": 2.1,
+    "wind_gust": 3.8,
+    "wind_direction": 166.0,
+    "relative_humidity": 81.0,
+    "dewpoint": -0.5,
+    "precipitation_probability": 0.047,
+    "measured": false,
+    "cloud_cover": 93.0,
+    "source": "nowcast",
+    "station": {
+      "station_id": "Mt Hood Meadows",
+      "name": "Mt Hood Meadows",
+      "observation_time": "2026-11-25T06:25:00Z",
+      "calm": false
+    }
+  },
+  "avalanche": {
+    "center_id": "NWAC",
+    "center_name": "Northwest Avalanche Center",
+    "zone_id": 3032,
+    "zone_name": "Mt Hood",
+    "danger_level": null,
+    "danger_label": null,
+    "status": "no_rating",
+    "valid_from": "2026-11-24T02:00:00Z",
+    "valid_until": "2026-11-26T02:00:00Z",
+    "forecast_url": "https://nwac.us/forecasts/avalanche/mt-hood",
+    "center_url": "https://www.nwac.us/",
+    "attribution": "Avalanche forecast by Northwest Avalanche Center via avalanche.org"
+  },
+  "snow_on_ground": {
+    "beta": true,
+    "depth": 18.9,
+    "basis": "open_loop",
+    "surface": "settled",
+    "valid_time": "2026-11-25T06:00:00Z",
+    "generated_at": "2026-11-25T04:06:14Z"
+  },
+  "attribution": {
+    "sources": [
+      "aifs"
+    ],
+    "credit": "Contains modified ECMWF data: based on data and products of the European Centre for Medium-Range Weather Forecasts (ECMWF), CC BY 4.0; NOAA/NWS data (public domain), modified by Ourea; Contains modified Copernicus Climate Change Service information 2026; PRISM Group, Oregon State University, https://prism.oregonstate.edu; USDA NRCS National Water and Climate Center (SNOTEL); Avalanche forecasts by the avalanche centers via avalanche.org; Ski-area weather stations, courtesy of the resorts",
+    "url": "/api/v1/attribution"
+  },
+  "applied": {
+    "max_hours": 6,
+    "max_days": 1,
+    "clamped": []
+  },
+  "probabilities": [
+    {
+      "term": "snowfall:ge:25.40:24h",
+      "variable": "snowfall",
+      "op": "ge",
+      "threshold": 25.4,
+      "window_start_hours": 0,
+      "window_end_hours": 24,
+      "aggregation": "total",
+      "from": "2026-11-25T06:00:00Z",
+      "to": "2026-11-26T06:00:00Z",
+      "probability": null,
+      "members": 0,
+      "null_reason": "window_not_covered"
+    }
+  ],
+  "window_totals": [
+    {
+      "term": "snowfall:24h",
+      "variable": "snowfall",
+      "window_start_hours": 0,
+      "window_end_hours": 24,
+      "aggregation": "total",
+      "from": "2026-11-25T06:00:00Z",
+      "to": "2026-11-26T06:00:00Z",
+      "quantiles": null,
+      "members": 0,
+      "method": null,
+      "null_reason": "window_not_covered"
+    }
+  ],
+  "thresholds": {
+    "hourly_precipitation": 0.25,
+    "hourly_snowfall": 0.25,
+    "daily_precipitation_probability": 2.5,
+    "daily_precipitation_occurrence_probability": 1.0,
+    "daily_snow_probability": 2.5
+  }
+}

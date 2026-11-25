@@ -1,0 +1,34 @@
+{
+  "name": "request/current-pass",
+  "description": "A mountain pass's current conditions carry `summary` and `pass`; a pass chance is a probability with its threshold and members, never a bare number.",
+  "client": {},
+  "call": {
+    "operation": "getCurrentConditions",
+    "args": {
+      "location": "wa/snoqualmie-pass-i-90"
+    }
+  },
+  "expect_request": {
+    "method": "GET",
+    "path": "/api/v1/locations/wa/snoqualmie-pass-i-90/current",
+    "query_string": ""
+  },
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/current-pass.json"
+    }
+  ],
+  "expect": {
+    "result": {
+      "now.measured": false,
+      "pass.chances.window_hours": 24,
+      "pass.chances.p_snow_ge_1in.threshold": 25.4,
+      "pass.chances.p_snow_ge_1in.members": 164,
+      "summary.short": "The next 7 days bring 5 cm (up to 14 cm) of snow, most on Monday."
+    }
+  }
+}

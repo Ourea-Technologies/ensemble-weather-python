@@ -9,7 +9,7 @@ with Client() as client:
 
     if hits.items:  # any hit can be passed straight to forecast()
         forecast = client.forecast(hits.items[0])
-        print(f"{forecast.location.name}: {len(forecast.forecast.timeseries)} hours")
+        print(f"{forecast.location.name}: {len(forecast.series.timeseries)} hours")
 
     # The lazy iterator follows next_cursor until the last page.
     for entry in client.iter_catalog_locations(limit=20):

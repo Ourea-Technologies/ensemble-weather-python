@@ -24,10 +24,11 @@ nav:
   - Overview: index.md
   - Probabilities: probabilities.md
   - Errors, retries and caching: errors.md
+  - Names that differ from the JSON: names.md
   - API reference:
       - Clients: reference/clients.md
       - Probabilities: reference/probabilities.md
-      - Models: reference/models.md
+      - Types: reference/types.md
       - Enumerations: reference/enums.md
       - Errors: reference/errors.md
       - Cache: reference/cache.md

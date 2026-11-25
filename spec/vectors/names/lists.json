@@ -1,0 +1,124 @@
+{
+  "name": "names/lists",
+  "description": "The list responses' rows are `items` and their counts `count`: alerts (alerts, alert_count), locations (locations), nearby (location -> origin, locations -> items, also at a point) and runs (runs).",
+  "client": {},
+  "calls": [
+    {
+      "operation": "getLocationAlerts",
+      "args": {
+        "location": "or/mt-hood-meadows"
+      }
+    },
+    {
+      "operation": "getLocations",
+      "args": {
+        "state": "or",
+        "limit": 2
+      }
+    },
+    {
+      "operation": "getNearbyLocations",
+      "args": {
+        "location": "or/mt-hood-meadows"
+      }
+    },
+    {
+      "operation": "getNearbyByCoordinates",
+      "args": {
+        "lat": 45.33,
+        "lon": -121.66
+      }
+    },
+    {
+      "operation": "getAvailableRuns",
+      "args": {
+        "limit": 2
+      }
+    }
+  ],
+  "expect_requests": [
+    {
+      "method": "GET",
+      "path": "/api/v1/locations/or/mt-hood-meadows/alerts"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/locations/or",
+      "query_string": "limit=2"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/locations/or/mt-hood-meadows/nearby"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/nearby",
+      "query_string": "lat=45.33&lon=-121.66"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/runs",
+      "query_string": "limit=2"
+    }
+  ],
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/alerts.json"
+    },
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/locations-page.json"
+    },
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/nearby.json"
+    },
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/nearby-point.json"
+    },
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/runs.json"
+    }
+  ],
+  "expect": {
+    "results": [
+      {
+        "count": 1,
+        "items[0].event": "Winter Storm Warning"
+      },
+      {
+        "items[0].slug": "10-or"
+      },
+      {
+        "origin.slug": "mt-hood-meadows",
+        "items[0].slug": "umbrella-falls",
+        "origin.elevations[0].height": 1639.2
+      },
+      {
+        "items[0].slug": "umbrella-falls"
+      },
+      {
+        "items[0].initialized_at": "2026-11-25T00:00:00Z"
+      }
+    ],
+    "requests": 5
+  }
+}

@@ -19,8 +19,8 @@ from typing import TYPE_CHECKING
 from urllib.parse import quote
 
 from ._decode import format_datetime
+from ._errors import UsageError
 from .enums import OpenEnum
-from .errors import UsageError
 
 if TYPE_CHECKING:
     from collections.abc import Sequence

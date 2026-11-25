@@ -31,12 +31,12 @@ with Client() as client:  # no key: anonymous calls use the Free tier
     )
 
 print(forecast.location.name)
-for hour in forecast.forecast.timeseries[:24]:
+for hour in forecast.series.timeseries[:24]:
     temp = hour.ensemble.temperature
     print(f"{hour.valid_time:%a %H:%M} UTC  {temp.p10} to {temp.p90} °F (p10-p90)")
 
 snow = forecast.probabilities[0]
-chance = "not available" if snow.probability is None else f"{snow.probability:.0%}"
+chance = "not available" if snow.value is None else f"{snow.value:.0%}"
 print(f"Chance of at least 6 in of snow in the next 24 h: {chance} ({snow.members} members)")
 ```
 
@@ -79,7 +79,7 @@ terms = [
 ]
 forecast = client.forecast("or/mt-hood-meadows", prob=terms)
 for p in forecast.probabilities:  # in your order, each with its reference class
-    print(p.variable, p.op, p.threshold, p.window, p.aggregation, p.probability, p.members)
+    print(p.variable, p.op, p.threshold, p.window, p.aggregation, p.value, p.members)
 ```
 
 For a **storm total**, ask for the window total's distribution:
@@ -92,7 +92,7 @@ storm = forecast.window_totals[0].quantiles  # None (see null_reason) when not c
 Read **quantiles** directly; `median` is the p50, not "the forecast":
 
 ```python
-temp = forecast.forecast.timeseries[0].ensemble.temperature
+temp = forecast.series.timeseries[0].ensemble.temperature
 print(temp.p10, temp.median, temp.p90, temp.range(25, 75))
 ```
 
@@ -101,6 +101,81 @@ probability from them: the sum of hourly medians is not the median total.
 A threshold you give in another unit is converted exactly into the
 request's units before sending; response values are never converted. More in
 [Probabilities](https://docs.oureawx.com/concepts/probabilities).
+
+## Names that differ from the API's JSON
+
+A JSON field that repeats a word of the type holding it would read twice in
+Python (`forecast.forecast`, `current.current`, `probability.probability`),
+so the SDK names it differently. There is one table for every Ourea SDK
+(ensemble-weather-spec BEHAVIOR.md 3.0). The decoder maps the names, and
+`to_dict()` writes the JSON names back. Every other field keeps its JSON
+name, and the GeoJSON routes (`alert_outlines`, `avalanche_zones`) are
+passed through untouched: an avalanche zone's `properties.forecast_url`
+stays `forecast_url`.
+
+| Type | JSON field | SDK attribute |
+|---|---|---|
+| `ForecastResponse` | `forecast` | `series` |
+| `ForecastResponse` | `elevation_forecasts` | `elevations` |
+| `CurrentResponse` | `current` | `now` |
+| `CurrentConditions` | `condition` | `code` |
+| `CurrentConditions` | `condition_text` | `text` |
+| `CurrentConditions` | `condition_icon` | `icon` |
+| `CurrentStation` | `station_id` | `id` |
+| `ProbabilityResult` | `probability` | `value` |
+| `ProbabilityThresholds` | `daily_precipitation_probability` | `daily_precipitation` |
+| `ProbabilityThresholds` | `daily_precipitation_occurrence_probability` | `daily_precipitation_occurrence` |
+| `ProbabilityThresholds` | `daily_snow_probability` | `daily_snow` |
+| `WindowTotal` | `window_start_hours` | `start_hours` |
+| `WindowTotal` | `window_end_hours` | `end_hours` |
+| `MemberGroup` | `members` | `items` |
+| `MemberForecast` | `member_id` | `id` |
+| `MemberPlume` | `members` | `pool` |
+| `AlertsResponse` | `alerts` | `items` |
+| `AlertsResponse` | `alert_count` | `count` |
+| `LocationsResponse` | `locations` | `items` |
+| `NearbyLocationsResponse` | `location` | `origin` |
+| `NearbyLocationsResponse` | `locations` | `items` |
+| `NearbyPointResponse` | `locations` | `items` |
+| `RunsResponse` | `runs` | `items` |
+| `ElevationForecast` | `elevation` | `height` |
+| `ElevationSummary` | `elevation` | `height` |
+| `SnowTrendResponseElevation` | `elevation` | `height` |
+| `PublicCatalogElevation` | `elevation_m` | `height_m` |
+| `PublicCatalogStation` | `source_station_id` | `source_id` |
+| `PublicCatalogStation` | `station_status` | `status` |
+| `PublicCatalogStation` | `station_url` | `url` |
+| `PublicCatalogNearbyStation` | `station_status` | `status` |
+| `CatalogTemplateSummary` | `template_variant` | `variant` |
+| `CatalogResolvedEntry` | `resolved_locale` | `locale` |
+| `SensorObservation` | `observation_time` | `observed_at` |
+| `PassHour` | `snow_level_above_pass` | `snow_level_margin` |
+| `PassStatusSegment` | `status` | `state` |
+| `PassStatusSegment` | `status_text` | `text` |
+| `AvalancheForecast` | `forecast_url` | `url` |
+| `SeasonTotal` | `total` | `amount` |
+| `SnowTrendDay` | `snow` | `amount` |
+
+## Every route
+
+| Method (`Client` and `AsyncClient`) | Route | Access |
+|---|---|---|
+| `forecast`, `get_point_forecast` | a named location's forecast; one at coordinates | anonymous; Pro |
+| `current`, `get_point_current` | current conditions (a mountain pass also gets `pass_`) | anonymous; Pro |
+| `alerts`, `get_point_alerts` | active alerts | anonymous; Pro |
+| `nearby`, `get_point_nearby` | nearby locations | anonymous |
+| `search` | search by name, optionally `sort` by a metric and `near` a point | anonymous |
+| `explore`, `iter_explore` | places ranked by a metric (`snow_5d`, `base_depth`, `season_precip`, ...) | anonymous |
+| `season` | observed season-to-date precipitation and snowfall | anonymous |
+| `snow_trend` | each recent run's daily snowfall, run by run | Plus or Pro |
+| `snowpack`, `snowpack_plume` | the modelled snowpack and its snow-depth plume (beta) | anonymous |
+| `alert_outlines`, `avalanche_zones` | GeoJSON for maps: alert outlines, avalanche zones and ratings | anonymous |
+| `list_locations`, `iter_locations` | every location, paged | anonymous |
+| `list_catalog_locations`, `catalog_location`, `list_catalog_stations`, `catalog_station` | the catalog | anonymous |
+| `runs`, `composition`, `attribution` | served runs, the blend's models and members, data credits | anonymous |
+
+`members="plume"` on a forecast returns the plume view: columns in
+`forecast.plume`, ready to draw.
 
 ## More examples
 
@@ -115,6 +190,7 @@ request's units before sending; response values are never converted. More in
 | [`error_handling.py`](examples/error_handling.py) | catching an out-of-coverage error, the keyless alternative to `PRO_REQUIRED`; reading rate-limit state |
 | [`units.py`](examples/units.py) | the same forecast in metric and imperial |
 | [`async_forecast.py`](examples/async_forecast.py) | `AsyncClient` with `asyncio.gather` |
+| [`snow_report.py`](examples/snow_report.py) | `explore` rankings, a season to date, and the run-by-run snow trend |
 
 ## Errors, retries and rate limits
 

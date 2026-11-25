@@ -1,0 +1,79 @@
+{
+  "name": "names/season-and-snow",
+  "description": "Season, snow trend and snowpack names: a season total's total -> amount, the snow trend's elevation.elevation -> height and a day's snow -> amount; a snowpack aspect's aspect keeps its wire name.",
+  "client": {
+    "api_key": "ow_pro"
+  },
+  "calls": [
+    {
+      "operation": "getLocationSeason",
+      "args": {
+        "location": "or/mt-hood-meadows"
+      }
+    },
+    {
+      "operation": "getLocationSnowTrend",
+      "args": {
+        "location": "or/mt-hood-meadows"
+      }
+    },
+    {
+      "operation": "getLocationSnowpack",
+      "args": {
+        "location": "or/mt-hood-meadows"
+      }
+    }
+  ],
+  "expect_requests": [
+    {
+      "method": "GET",
+      "path": "/api/v1/locations/or/mt-hood-meadows/season"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/locations/or/mt-hood-meadows/snow-trend"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/locations/or/mt-hood-meadows/snowpack"
+    }
+  ],
+  "responses": [
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/season.json"
+    },
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/snow-trend.json"
+    },
+    {
+      "status": 200,
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body_file": "bodies/snowpack.json"
+    }
+  ],
+  "expect": {
+    "results": [
+      {
+        "precipitation.amount": 210.69
+      },
+      {
+        "elevation.height": 1639.2,
+        "grids[0].runs[0].days[0].amount": null
+      },
+      {
+        "spots[0].aspects[0].aspect": "north"
+      }
+    ],
+    "requests": 3
+  }
+}

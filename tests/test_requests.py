@@ -256,3 +256,80 @@ def test_every_route_builds_its_path(
         request = recorder.requests[-1]
         assert request.url.raw_path.split(b"?")[0].decode() == path
         assert request.url.query.decode() == query
+
+
+def test_new_routes_build_their_paths(
+    recorder: Recorder, make_client: Callable[..., Client]
+) -> None:
+    client = make_client()
+    calls: list[tuple[Callable[[], object], str, str]] = [
+        (
+            lambda: client.explore("snow_5d", state="WA", limit=25, order="desc"),
+            "/api/v1/explore",
+            "metric=snow_5d&state=wa",
+        ),
+        (
+            lambda: client.explore("season_snow", near=(47.5, -121.0), points="all"),
+            "/api/v1/explore",
+            "metric=season_snow&near=47.5,-121&points=all",
+        ),
+        (
+            lambda: client.season("or/x", water_year=2027, include_daily=True),
+            "/api/v1/locations/or/x/season",
+            "include=daily&water_year=2027",
+        ),
+        (
+            lambda: client.snow_trend("or", "x", elevation="summit"),
+            "/api/v1/locations/or/x/snow-trend",
+            "elevation=summit",
+        ),
+        (lambda: client.snowpack("or/x"), "/api/v1/locations/or/x/snowpack", ""),
+        (
+            lambda: client.snowpack_plume("or/x", units="imperial"),
+            "/api/v1/locations/or/x/snowpack/plume",
+            "units=imperial",
+        ),
+        (
+            lambda: client.alert_outlines(classes=["winter", "wind"], bbox=(-125, 41, -116, 49)),
+            "/api/v1/alerts/outlines",
+            "bbox=-125,41,-116,49&class=wind,winter",
+        ),
+        (client.avalanche_zones, "/api/v1/avalanche/zones", ""),
+        (client.composition, "/api/v1/composition", ""),
+        (
+            lambda: client.search("hood", sort="relevance", near=(45.3, -121.7), radius_km=20),
+            "/api/v1/search/locations",
+            "near=45.3,-121.7&q=hood&radius_km=20",
+        ),
+        (
+            lambda: client.forecast("or/x", members="plume"),
+            "/api/v1/locations/or/x",
+            "members=plume",
+        ),
+    ]
+    for call, path, query in calls:
+        recorder.add(404, name="error-not-found.json")
+        with pytest.raises(Exception):  # noqa: B017, PT011 - only the request matters here
+            call()
+        request = recorder.requests[-1]
+        assert request.url.raw_path.split(b"?")[0].decode() == path
+        assert request.url.query.decode() == query
+
+
+@pytest.mark.parametrize(
+    "call",
+    [
+        lambda c: c.forecast("or/x", members="full"),
+        lambda c: c.explore("snow_5d", order="up"),
+        lambda c: c.explore("snow_5d", points="some"),
+        lambda c: c.explore("snow_5d", near=(91, 0)),
+        lambda c: c.search("hood", near=(0, 181)),
+        lambda c: c.alert_outlines(bbox=(-116, 41, -125, 49)),
+        lambda c: c.alert_outlines(bbox=(-125, 49, -116, 41)),
+    ],
+)
+def test_new_route_arguments_are_checked(
+    call: Callable[[Client], object], make_client: Callable[..., Client]
+) -> None:
+    with pytest.raises(UsageError):
+        call(make_client())

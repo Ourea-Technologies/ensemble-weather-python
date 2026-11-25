@@ -79,14 +79,14 @@
   ],
   "expect": {
     "result": {
-      "probabilities[0].probability": 0.11,
+      "probabilities[0].value": 0.11,
       "probabilities[0].window_start_hours": 12,
-      "probabilities[1].probability": 0.8,
+      "probabilities[1].value": 0.8,
       "probabilities[1].threshold": 1524,
-      "probabilities[2].probability": 0.05,
-      "probabilities[3].probability": 0.3,
-      "probabilities[4].probability": 0.7,
-      "probabilities[5].probability": 0.8
+      "probabilities[2].value": 0.05,
+      "probabilities[3].value": 0.3,
+      "probabilities[4].value": 0.7,
+      "probabilities[5].value": 0.8
     }
   }
 }

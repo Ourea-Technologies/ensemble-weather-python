@@ -1,0 +1,369 @@
+{
+  "location": {
+    "slug": "mt-hood-meadows",
+    "state": "or",
+    "name": "Mt Hood Meadows",
+    "lat": 45.33172,
+    "lon": -121.66534,
+    "elevation_m": 1639.2,
+    "type": "ski_area",
+    "timezone": "America/Los_Angeles",
+    "elevation": 1639.2,
+    "elevations": [
+      {
+        "name": "main_lodge",
+        "display_name": "Main Lodge",
+        "elevation": 1639.2,
+        "default": true
+      }
+    ]
+  },
+  "model_run": {
+    "initialized_at": "2026-11-25T00:00:00Z",
+    "total_members": 164,
+    "models": [
+      {
+        "id": "aifs",
+        "cycle": "2026-11-25T00:00:00Z",
+        "members": 51
+      }
+    ]
+  },
+  "units": "metric",
+  "forecast": {
+    "max_hours": 6,
+    "interval_hours": 1,
+    "plume": {
+      "headline": {
+        "valid_time": [
+          "2026-11-25T06:00:00Z"
+        ],
+        "temperature": [
+          2.3
+        ],
+        "snow_level": [
+          1378.0
+        ],
+        "snow_level_wet_bulb": [
+          1653.0
+        ],
+        "cumulative_precipitation": [
+          0.0
+        ],
+        "cumulative_snowfall": [
+          0.0
+        ],
+        "cumulative_snowfall_10to1": [
+          0.0
+        ],
+        "wind_speed": [
+          2.1
+        ],
+        "snowfall_6h": [
+          null
+        ]
+      },
+      "bands": {
+        "valid_time": [
+          "2026-11-25T06:00:00Z"
+        ],
+        "cumulative_precipitation": {
+          "mean": [
+            0.0
+          ],
+          "min": [
+            0.0
+          ],
+          "p10": [
+            0.0
+          ],
+          "p25": [
+            0.0
+          ],
+          "p75": [
+            0.0
+          ],
+          "p90": [
+            0.0
+          ],
+          "max": [
+            0.0
+          ]
+        },
+        "cumulative_snowfall": {
+          "mean": [
+            0.0
+          ],
+          "min": [
+            0.0
+          ],
+          "p10": [
+            0.0
+          ],
+          "p25": [
+            0.0
+          ],
+          "p75": [
+            0.0
+          ],
+          "p90": [
+            0.0
+          ],
+          "max": [
+            0.0
+          ]
+        },
+        "cumulative_snowfall_10to1": {
+          "mean": [
+            0.0
+          ],
+          "min": [
+            0.0
+          ],
+          "p10": [
+            0.0
+          ],
+          "p25": [
+            0.0
+          ],
+          "p75": [
+            0.0
+          ],
+          "p90": [
+            0.0
+          ],
+          "max": [
+            0.0
+          ]
+        },
+        "temperature": {
+          "mean": [
+            1.9
+          ],
+          "min": [
+            -2.5
+          ],
+          "p10": [
+            -0.1
+          ],
+          "p25": [
+            0.8
+          ],
+          "p75": [
+            3.0
+          ],
+          "p90": [
+            4.0
+          ],
+          "max": [
+            6.4
+          ]
+        },
+        "snow_level": {
+          "mean": [
+            1439.0
+          ],
+          "min": [
+            1024.0
+          ],
+          "p10": [
+            1255.0
+          ],
+          "p25": [
+            1371.0
+          ],
+          "p75": [
+            1520.0
+          ],
+          "p90": [
+            1613.0
+          ],
+          "max": [
+            1695.0
+          ]
+        },
+        "snow_level_wet_bulb": {
+          "mean": [
+            1714.0
+          ],
+          "min": [
+            1299.0
+          ],
+          "p10": [
+            1530.0
+          ],
+          "p25": [
+            1646.0
+          ],
+          "p75": [
+            1795.0
+          ],
+          "p90": [
+            1888.0
+          ],
+          "max": [
+            1970.0
+          ]
+        },
+        "precipitation_6h": {
+          "mean": [
+            null
+          ],
+          "min": [
+            null
+          ],
+          "p10": [
+            null
+          ],
+          "p25": [
+            null
+          ],
+          "p75": [
+            null
+          ],
+          "p90": [
+            null
+          ],
+          "max": [
+            null
+          ]
+        },
+        "snowfall_6h": {
+          "mean": [
+            null
+          ],
+          "min": [
+            null
+          ],
+          "p10": [
+            null
+          ],
+          "p25": [
+            null
+          ],
+          "p75": [
+            null
+          ],
+          "p90": [
+            null
+          ],
+          "max": [
+            null
+          ]
+        },
+        "slr": {
+          "mean": [
+            null
+          ],
+          "min": [
+            null
+          ],
+          "p10": [
+            null
+          ],
+          "p25": [
+            null
+          ],
+          "p75": [
+            null
+          ],
+          "p90": [
+            null
+          ],
+          "max": [
+            null
+          ]
+        }
+      },
+      "models": [],
+      "members": {
+        "valid_time": [
+          "2026-11-25T06:00:00Z"
+        ],
+        "temperature": [
+          [
+            5.4
+          ]
+        ],
+        "precipitation": [
+          [
+            0.0
+          ]
+        ],
+        "precipitation_hours": [
+          [
+            6
+          ]
+        ],
+        "cumulative_precipitation": [
+          [
+            0.0
+          ]
+        ],
+        "snow_level": [
+          [
+            1566.0
+          ]
+        ],
+        "snow_level_wet_bulb": [
+          [
+            1840.0
+          ]
+        ],
+        "snowfall": [
+          [
+            0.0
+          ]
+        ],
+        "cumulative_snowfall": [
+          [
+            0.0
+          ]
+        ],
+        "slr": [
+          [
+            7.8
+          ]
+        ],
+        "cumulative_precipitation_band_members": [
+          0
+        ],
+        "cumulative_snowfall_band_members": [
+          0
+        ],
+        "cumulative_snowfall_10to1_band_members": [
+          0
+        ]
+      }
+    }
+  },
+  "nowcast_applied": true,
+  "members_view": "pool",
+  "snow_on_ground": {
+    "beta": true,
+    "depth": 18.9,
+    "basis": "open_loop",
+    "surface": "settled",
+    "valid_time": "2026-11-25T06:00:00Z",
+    "generated_at": "2026-11-25T04:06:14Z"
+  },
+  "attribution": {
+    "sources": [
+      "aifs"
+    ],
+    "credit": "Contains modified ECMWF data: based on data and products of the European Centre for Medium-Range Weather Forecasts (ECMWF), CC BY 4.0; NOAA/NWS data (public domain), modified by Ourea; USDA NRCS National Water and Climate Center (SNOTEL); Avalanche forecasts by the avalanche centers via avalanche.org; Ski-area weather stations, courtesy of the resorts",
+    "url": "/api/v1/attribution"
+  },
+  "applied": {
+    "max_hours": 6,
+    "max_days": null,
+    "clamped": []
+  },
+  "thresholds": {
+    "hourly_precipitation": 0.25,
+    "hourly_snowfall": 0.25,
+    "daily_precipitation_probability": 2.5,
+    "daily_precipitation_occurrence_probability": 1.0,
+    "daily_snow_probability": 2.5
+  }
+}

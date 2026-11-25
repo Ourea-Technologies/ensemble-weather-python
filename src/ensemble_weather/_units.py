@@ -8,8 +8,8 @@ from __future__ import annotations
 
 import math
 
+from ._errors import UsageError
 from .enums import Unit, UnitSystem, Variable
-from .errors import UsageError
 
 _DEPTH, _TEMPERATURE, _HEIGHT, _SPEED = "depth", "temperature", "height", "speed"
 
